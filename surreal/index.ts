@@ -20,8 +20,8 @@ type SurrealDataType =
 	| 'multiline'
 	| 'multipolygon'
 	| 'collection'
-	| 'record'
-	| 'future';
+	| 'future'
+	| `record(${string})`;
 
 interface ITableField {
 	field: string;
@@ -35,9 +35,11 @@ interface ISurrealTableInfoResponse {
 export class Table {
 	public constructor(public readonly name: string) {}
 
-	public async records(): Promise<unknown[]> {
+	public async records(limit: number = 25): Promise<unknown[]> {
 		const query = await Surreal.Instance.query(
-			`SELECT * FROM ${this.name} LIMIT 25`,
+			`SELECT * FROM ${this.name} LIMIT ${
+				limit > 0 && limit <= 100 ? limit.toString() : '25'
+			}; SELECT count(id) FROM ${this.name}`,
 		);
 
 		if (query) return query[0].result as unknown[];
@@ -48,7 +50,13 @@ export class Table {
 	public async fields(): Promise<ITableField[]> {
 		const query = await Surreal.Instance.query(`INFO FOR TABLE ${this.name}`);
 
-		const fields: ITableField[] = [];
+		// Predefine the id field as it's global
+		const fields: ITableField[] = [
+			{
+				field: 'id',
+				type: 'string',
+			},
+		];
 
 		if (query) {
 			for (const [key, value] of Object.entries(
@@ -56,7 +64,7 @@ export class Table {
 			)) {
 				fields.push({
 					field: key,
-					type: value.split(' ').splice(-1)[0] as SurrealDataType,
+					type: value.split('TYPE ').pop()?.split(' ')[0] as SurrealDataType,
 				});
 			}
 

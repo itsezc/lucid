@@ -42,6 +42,7 @@ export default function Dashboard() {
 	useEffect(() => {
 		if (selectedTable) {
 			selectedTable.records().then((records) => setTableRecords(records));
+			selectedTable.fields().then((fields) => console.log({ fields }));
 		}
 	}, [selectedTable]);
 
@@ -95,14 +96,34 @@ export default function Dashboard() {
 					</ul>
 
 					<div>
-						<table>
-							<thead>
-								{tableRecords.flatMap(Object.keys).map((row) => (
-									<tr key={row}>
-										<td>{row}</td>
+						<table className='t:10 border:collapse'>
+							<tbody>
+								<tr>
+									{tableRecords
+										? tableRecords
+												?.flatMap(Object.keys)
+												.map((row, rowIndex) => (
+													<th
+														className='bg:#222632 p:4|8 t:left'
+														// rome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+														key={rowIndex}
+													>
+														{row}
+													</th>
+												))
+										: null}
+								</tr>
+								{tableRecords?.map((row, rowIndex) => (
+									// rome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+									<tr key={rowIndex}>
+										{Object.values(row).map((cell) => (
+											<td className='b:1|solid|#222632 p:4|8 t:left'>
+												{cell as string}
+											</td>
+										))}
 									</tr>
 								))}
-							</thead>
+							</tbody>
 						</table>
 					</div>
 				</div>
