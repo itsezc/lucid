@@ -4,11 +4,16 @@ import '@master/normal.css';
 import Master from '@master/css';
 
 import 'remixicon/fonts/remixicon.css';
+import '../styles/global.css';
 
-import Surreal from 'surrealdb.js';
+import { TerminalContextProvider } from 'react-terminal';
 
 const master = new Master();
 
 export default function App({ Component, pageProps }: AppProps) {
-	return <Component {...pageProps} />;
+	return (
+		<TerminalContextProvider>
+			<Component {...pageProps} />
+		</TerminalContextProvider>
+	);
 }

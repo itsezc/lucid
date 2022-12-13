@@ -1,6 +1,6 @@
 export const Navbar = () => {
 	return (
-		<div className='f:12 p:16 w:180 br:1|solid|#2e343f'>
+		<div className='f:11 f:semibold p:16 w:180 br:1|solid|#2e343f'>
 			<ul className='flex:col {flex;ai:center;gap:8;my:12;cursor:pointer}>*'>
 				<li>
 					<i className='ri-home-line' />
