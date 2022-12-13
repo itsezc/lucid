@@ -50,15 +50,23 @@ export default function Dashboard() {
 						</div>
 					</div>
 
-					<div className='flex px:16 '>
-						<Link
-							href='https://surrealdb.com/docs/?ref=surreal-editor'
-							target='_blank'
-						>
-							<div className='f:12 bg:#232632 h:28 w:28 box-shadow:0.3|1|black flex ai:center jc:center r:8'>
-								<i className='ri-information-line' />
+					<div className='flex flex:1 px:16 jc:space-between ai:center'>
+						<div>
+							<Link
+								href='https://surrealdb.com/docs/?ref=surreal-editor'
+								target='_blank'
+							>
+								<div className='f:12 bg:#232632 h:28 w:28 box-shadow:0.3|1|black flex ai:center jc:center r:8'>
+									<i className='ri-information-line' />
+								</div>
+							</Link>
+						</div>
+
+						<div>
+							<div className='f:12 bg:#232632 h:28 w:28 box-shadow:0.3|1|1|black flex ai:center jc:center r:8'>
+								<i className='ri-search-line' />
 							</div>
-						</Link>
+						</div>
 					</div>
 				</div>
 				<div className='flex flex:1'>
@@ -152,7 +160,7 @@ export default function Dashboard() {
 						</table>
 					</div>
 				</div>
-				<Terminal />
+				{/* <Terminal /> */}
 			</div>
 		</div>
 	);

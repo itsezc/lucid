@@ -9,10 +9,10 @@ export const Navbar = () => {
 			</ul>
 			<div className='d:block h:1 bg:#2e343f my:16' />
 			<ul className='flex:col {flex;ai:center;gap:8;my:12;cursor:pointer}>*'>
-				<li>
+				{/* <li>
 					<i className='ri-database-2-line' />
 					SQL Query
-				</li>
+				</li> */}
 				<li>
 					<i className="ri-grid-line" /> Tables
 				</li>
