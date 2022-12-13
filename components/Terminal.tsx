@@ -1,11 +1,16 @@
 import { ReactTerminal } from 'react-terminal';
-import Surreal from 'surrealdb.js';
+import { useSurreal } from '../surreal/hooks';
 
 export const Terminal = () => {
+	const { use, db } = useSurreal();
+
 	const commands = {
 		whoami: 'jackharper',
 		cd: (directory: string) => `changed path to ${directory}`,
-		use: (ns: string, db: string) => Surreal.Instance.use(ns, db),
+		use: (ns: string) => {
+			use(ns, db || '');
+			return `Switched to ${ns} and db: ${db}`;
+		},
 	};
 
 	return (

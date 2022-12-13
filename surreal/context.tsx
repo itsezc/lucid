@@ -1,5 +1,17 @@
-import React, { FC, PropsWithChildren, useEffect, useState } from 'react';
-import Surreal from 'surrealdb.js';
+import React, {
+	FC,
+	PropsWithChildren,
+	useEffect,
+	useState,
+	useCallback,
+} from 'react';
+import Surreal, { Result } from 'surrealdb.js';
+import { Table } from '.';
+
+interface IDBInfo {
+	sc: object;
+	tb: object;
+}
 
 interface ISurrealContext {
 	url?: string;
@@ -7,11 +19,22 @@ interface ISurrealContext {
 	pass?: string;
 	ns?: string;
 	db?: string;
+
+	tables: string[];
+	selectedTable?: Table;
+	setSelectedTable?: React.Dispatch<React.SetStateAction<Table | undefined>>;
+	query: (query: string) => Promise<Result<unknown>[]>;
+	use: (ns: string, db: string) => Promise<void>;
 }
 
-interface ISurrealProviderProps extends ISurrealContext {}
+interface ISurrealProviderProps
+	extends Pick<ISurrealContext, 'url' | 'user' | 'pass' | 'ns' | 'db'> {}
 
-export const SurrealContext = React.createContext<ISurrealContext>({});
+export const SurrealContext = React.createContext<ISurrealContext>({
+	tables: [],
+	query: async () => [],
+	use: async () => undefined,
+});
 
 export const SurrealProvider: FC<PropsWithChildren<ISurrealProviderProps>> = ({
 	children,
@@ -19,6 +42,9 @@ export const SurrealProvider: FC<PropsWithChildren<ISurrealProviderProps>> = ({
 }) => {
 	const [ns, setNS] = useState(props.ns);
 	const [db, setDB] = useState(props.db);
+
+	const [tables, setTables] = useState<string[]>([]);
+	const [selectedTable, setSelectedTable] = useState<Table>();
 
 	useEffect(() => {
 		const init = async () => {
@@ -36,14 +62,28 @@ export const SurrealProvider: FC<PropsWithChildren<ISurrealProviderProps>> = ({
 
 			if (ns && db) await Surreal.Instance.use(ns, db);
 
-			Surreal.Instance.query('INFO FOR DB;');
+			await query('INFO FOR DB;').then((data) => {
+				setTables(Object.keys((data[0].result as IDBInfo).tb));
+			});
 		};
 
 		init();
 	}, []);
 
+	const query = useCallback(async (query: string) => {
+		return await Surreal.Instance.query(query);
+	}, []);
+
+	const use = useCallback(async (ns: string, db: string) => {
+		await Surreal.Instance.use(ns, db);
+		setNS(ns);
+		setDB(db);
+	}, []);
+
 	return (
-		<SurrealContext.Provider value={{ ...props }}>
+		<SurrealContext.Provider
+			value={{ ...props, selectedTable, setSelectedTable, tables, use, query }}
+		>
 			{children}
 		</SurrealContext.Provider>
 	);

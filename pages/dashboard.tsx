@@ -7,6 +7,7 @@ import { Navbar } from '../components/Navbar';
 import Surreal from 'surrealdb.js';
 import { Table } from '../surreal';
 import { Terminal } from '../components/Terminal';
+import { useSurreal } from '../surreal/hooks';
 
 interface IDBInfo {
 	sc: object;
@@ -14,31 +15,9 @@ interface IDBInfo {
 }
 
 export default function Dashboard() {
-	const [ns, setNS] = useState('foretag');
-	const [db, setDB] = useState('workshop');
-
-	const [tables, setTables] = useState<string[]>([]);
-	const [selectedTable, setSelectedTable] = useState<Table>();
-
 	const [tableRecords, setTableRecords] = useState<unknown[]>([]);
 
-	useEffect(() => {
-		const init = async () => {
-			await Surreal.Instance.connect('http://localhost:8000/rpc');
-			await Surreal.Instance.signin({
-				user: 'root',
-				pass: 'root',
-			});
-
-			await Surreal.Instance.use(ns, db);
-
-			Surreal.Instance.query('INFO FOR DB;').then((data) => {
-				setTables(Object.keys((data[0].result as IDBInfo).tb));
-			});
-		};
-
-		init();
-	}, []);
+	const { ns, db, tables, selectedTable, setSelectedTable } = useSurreal();
 
 	useEffect(() => {
 		if (selectedTable) {
