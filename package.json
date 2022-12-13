@@ -1,0 +1,30 @@
+{
+	"name": "surreal-editor",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"db": "surreal start --user=root --pass=root file://.dev/database",
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint"
+	},
+	"dependencies": {
+		"@master/css": "^2.0.0-beta.84",
+		"@master/normal.css": "^2.0.0-beta.84",
+		"@master/style-element.react": "^1.1.10",
+		"next": "13.0.6",
+		"pluralize": "^8.0.0",
+		"react": "18.2.0",
+		"react-dom": "18.2.0",
+		"remixicon": "^2.5.0",
+		"surrealdb.js": "^0.5.0"
+	},
+	"devDependencies": {
+		"@types/node": "18.11.13",
+		"@types/react": "18.0.26",
+		"@types/react-dom": "18.0.9",
+		"rome": "^11",
+		"typescript": "4.9.4"
+	}
+}
