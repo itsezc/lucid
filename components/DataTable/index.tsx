@@ -12,7 +12,7 @@ export const DataTable = () => {
 		[],
 	);
 
-	const tableHeaders = Object.keys(tableRecords);
+	const tableHeaders = Object.keys(Object.assign({}, ...tableRecords));
 
 	const [sortField, setSortField] = useState<string>();
 	const [sortOrder, setSortOrder] = useState<'asc' | 'dsc'>('asc');
