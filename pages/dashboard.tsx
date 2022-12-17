@@ -1,47 +1,15 @@
-import { ChangeEvent, useEffect, useState, useMemo } from 'react';
-
 import Link from 'next/link';
 
 import { Navbar } from '../components/Navbar';
 
-import Surreal from 'surrealdb.js';
 import { Table } from '../surreal';
 import { Terminal } from '../components/Terminal';
 import { useSurreal } from '../surreal/hooks';
 
-import { DebounceInput } from 'react-debounce-input';
-
-interface IDBInfo {
-	sc: object;
-	tb: object;
-}
+import { DataTable } from '../components/DataTable';
 
 export default function Dashboard() {
-	const [tableRecords, setTableRecords] = useState<unknown[]>([]);
-	const tableHeaders = tableRecords?.flatMap(Object.keys);
-
-	const [selectedTableRecords, setSelectedTableRecords] = useState<string[]>(
-		[],
-	);
-
 	const { ns, db, tables, selectedTable, setSelectedTable } = useSurreal();
-
-	useEffect(() => {
-		if (selectedTable) {
-			selectedTable.records().then((records) => setTableRecords(records));
-			selectedTable.fields().then((fields) => console.log({ fields }));
-		}
-	}, [selectedTable, tableRecords]);
-
-	const tableValueChangeHandler = async (
-		event: ChangeEvent<HTMLInputElement>,
-		rows: string[],
-		valueIndex: number,
-	) => {
-		await Surreal.Instance.change(rows[0], {
-			[tableHeaders[valueIndex]]: event.currentTarget.value,
-		});
-	};
 
 	return (
 		<div className='bg:#171a21 h:100vh max-h:100vh flex:col'>
@@ -101,7 +69,9 @@ export default function Dashboard() {
 									selectedTable?.name === table ? 'bg:#2f3341' : 'bg:#1B1F28'
 								}`}
 								key={table}
-								onClick={() => setSelectedTable(new Table(table))}
+								onClick={() =>
+									setSelectedTable ? setSelectedTable(new Table(table)) : null
+								}
 							>
 								<i
 									className={`ri-grid-line ${
@@ -140,54 +110,7 @@ export default function Dashboard() {
 								</li>
 							</ul>
 						</div>
-						<table className='t:10 border:collapse'>
-							<tbody>
-								<tr>
-									<th className='bg:#222632 p:5|8'>
-										<input type='checkbox' />
-									</th>
-									{tableHeaders
-										? tableHeaders.map((row, rowIndex) => (
-												<th
-													className='bg:#222632 p:5|8 t:left'
-													// rome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-													key={rowIndex}
-												>
-													{row}
-												</th>
-										  ))
-										: null}
-								</tr>
-								{tableRecords?.map((row, rowIndex) => (
-									// rome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-									<tr key={rowIndex}>
-										<td className='b:1|solid|#222632 p:5|8 t:center'>
-											<input type='checkbox' />
-										</td>
-										{Object.values(row).map((cell, cellIndex) => (
-											<td
-												className='b:1|solid|#222632 t:left bg:#ff00a0:hover'
-												key={cell}
-											>
-												<DebounceInput
-													value={cell as string}
-													debounceTimeout={300}
-													onChange={async (event) => {
-														await Surreal.Instance.change(
-															(Object.values(row) as string[])[0],
-															{
-																[tableHeaders[cellIndex]]: event.target.value,
-															},
-														);
-													}}
-													className='w:full p:5|8 outline:none'
-												/>
-											</td>
-										))}
-									</tr>
-								))}
-							</tbody>
-						</table>
+						<DataTable />
 					</div>
 				</div>
 				{/* <Terminal /> */}
