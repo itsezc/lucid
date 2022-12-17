@@ -17,9 +17,10 @@ export const DataTable = () => {
 	const [sortField, setSortField] = useState<string>();
 	const [sortOrder, setSortOrder] = useState<'asc' | 'dsc'>('asc');
 
-	const handleSorting = (field: string, sortOrder: 'asc' | 'dsc') => {
+	const handleSorting = (sortOrder: 'asc' | 'dsc') => {
 		if (sortField) {
 			const sorted = [...tableRecords].sort((a, b) => {
+				console.log({ a, b, sortField, sortField2: a[sortField] });
 				if (a[sortField] === null) return 1;
 				if (b[sortField] === null) return -1;
 				if (a[sortField] === null && b[sortField] === null) return 0;
@@ -35,16 +36,15 @@ export const DataTable = () => {
 	};
 
 	const handleSortingChange = (field: string) => {
-		const sort = field === sortField && sortOrder === 'asc' ? 'dsc' : 'asc';
 		setSortField(field);
 		setSortOrder(sortOrder);
-		handleSorting(field, sort);
+		handleSorting(field === sortField && sortOrder === 'asc' ? 'dsc' : 'asc');
 	};
 
 	useEffect(() => {
 		if (selectedTable) {
 			selectedTable.records().then((records) => setTableRecords(records));
-			selectedTable.fields().then((fields) => console.log({ fields }));
+			// selectedTable.fields().then((fields) => console.log({ fields }));
 		}
 	}, [selectedTable, tableRecords]);
 
@@ -79,7 +79,14 @@ export const DataTable = () => {
 					// rome-ignore lint/suspicious/noArrayIndexKey: <explanation>
 					<tr key={rowIndex}>
 						<td className='b:1|solid|#222632 p:5|8 t:center'>
-							<input type='checkbox' />
+							<input
+								type='checkbox'
+								checked={selectedTableRecords.includes(row[0])}
+								onClick={() => {
+									if (!selectedTableRecords.includes(row[0]))
+										setSelectedTableRecords((current) => [...current, row[0]]);
+								}}
+							/>
 						</td>
 						{Object.values(row).map((cell, cellIndex) => (
 							<td
