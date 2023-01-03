@@ -12,7 +12,7 @@
 	"dependencies": {
 		"@master/css": "^2.0.0-beta.84",
 		"@master/normal.css": "^2.0.0-beta.84",
-		"@master/style-element.react": "^1.1.10",
+		"@master/style-element.react": "^2.0.0-beta.5",
 		"lodash": "^4.17.21",
 		"next": "13.0.6",
 		"pluralize": "^8.0.0",
