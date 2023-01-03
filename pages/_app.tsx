@@ -14,11 +14,11 @@ const master = new Master();
 export default function App({ Component, pageProps }: AppProps) {
 	return (
 		<SurrealProvider
-			url='http://localhost:8000/rpc'
-			user='root'
-			pass='root'
-			ns='foretag'
-			db='workshop'
+			url={process.env.NEXT_PUBLIC_SURREAL_HOST}
+			user={process.env.NEXT_PUBLIC_SURREAL_USER}
+			pass={process.env.NEXT_PUBLIC_SURREAL_PASS}
+			ns={process.env.NEXT_PUBLIC_SURREAL_NS}
+			db={process.env.NEXT_PUBLIC_SURREAL_DB}
 		>
 			<TerminalContextProvider>
 				<Component {...pageProps} />
