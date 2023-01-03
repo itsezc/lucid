@@ -12,7 +12,7 @@ export default function Dashboard() {
 	const { ns, db, tables, selectedTable, setSelectedTable } = useSurreal();
 
 	return (
-		<div className='bg:#171a21 h:100vh max-h:100vh flex:col'>
+		<div className='bg:#171a21 fg:#ffffff h:100vh max-h:100vh flex:col'>
 			<div className='flex flex:col h:full'>
 				<div className='flex ai:center bb:1|solid|#2e343f'>
 					<div className='p:8 min-w:360 br:1|solid|#2e343f'>
