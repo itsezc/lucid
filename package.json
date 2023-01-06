@@ -6,6 +6,7 @@
 		"db": "surreal start --user=root --pass=root file://.dev/database",
 		"dev": "next dev",
 		"build": "next build",
+		"export": "next export",
 		"start": "next start",
 		"lint": "next lint"
 	},
