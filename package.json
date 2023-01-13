@@ -7,7 +7,8 @@
 	],
 	"devDependencies": {
 		"@types/node": "^18.11.18",
-		"bun-types": "^0.4.0"
+		"bun-types": "^0.4.0",
+		"reflect-metadata": "^0.1.13"
 	},
 	"dependencies": {
 		"surrealdb.js": "latest"

@@ -1,30 +1,30 @@
-import { Model } from "./model";
-import { TPermissions } from "./permissions";
-import { ITable } from "./table";
+import { Model } from './model';
+import { TPermissions } from './permissions';
+import { ITable } from './table';
 
-type TIndex = "unique" | boolean;
+export type TSurrealFieldIndex = 'unique' | boolean;
 
 export type TSurrealDataType =
-	| "string"
-	| "enum"
-	| "bool"
-	| "int"
-	| "float"
-	| "decimal"
-	| "datetime"
-	| "object"
-	| "polygon"
-	| "point"
-	| "line"
-	| "multipoint"
-	| "multiline"
-	| "multipolygon"
-	| "collection"
-	| "array"
-	| "future"
-	| "record";
+	| 'string'
+	| 'enum'
+	| 'bool'
+	| 'int'
+	| 'float'
+	| 'decimal'
+	| 'datetime'
+	| 'object'
+	| 'polygon'
+	| 'point'
+	| 'line'
+	| 'multipoint'
+	| 'multiline'
+	| 'multipolygon'
+	| 'collection'
+	| 'array'
+	| 'future'
+	| 'record';
 
-export type TSurrealDataTypePrimitive = Omit<TSurrealDataType, "future">;
+export type TSurrealDataTypePrimitive = Omit<TSurrealDataType, 'future'>;
 
 type TAssertHandler<SubModel> = (model: SubModel, value: SubModel) => boolean;
 
@@ -44,7 +44,7 @@ interface ITableFieldProps<
 	array?: TSurrealDataTypePrimitive | SurrealRecord<SubModel>;
 	record?: SurrealRecord<RecordModel>;
 	enum?: EnumType;
-	index?: TIndex;
+	index?: TSurrealFieldIndex;
 	default?: Descriptor;
 	assert?: TAssertHandler<SubModel>;
 	permissions?: TPermissions<SubModel>;
@@ -53,12 +53,12 @@ interface ITableFieldProps<
 export function Field<
 	SubModel extends Model = Model,
 	Key extends string | symbol = string | symbol,
-	SurrealType extends TSurrealDataType = "string",
-	Descriptor extends TypedPropertyDescriptor<SurrealType>["value"] = SurrealType,
+	SurrealType extends TSurrealDataType = 'string',
+	Descriptor extends TypedPropertyDescriptor<SurrealType>['value'] = SurrealType,
 >(props?: ITableFieldProps<SubModel, Descriptor>) {
 	return function (target: SubModel, propertyKey: Key) {
-		let value: ITableFieldProps<SubModel, Descriptor> | undefined = {
-			type: "string",
+		let value: ITableFieldProps<SubModel, Descriptor> = {
+			type: 'string',
 			...props,
 		};
 

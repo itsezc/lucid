@@ -15,7 +15,11 @@ export type QueryBuilder<SubModel extends Model> = {
 
 	from: (id: string) => QueryBuilder<SubModel>;
 
+	build: () => string;
+
 	execute: () => void;
+
+	live: () => void;
 };
 
 /**
