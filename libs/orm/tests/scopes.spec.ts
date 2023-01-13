@@ -1,5 +1,5 @@
 import { Account } from './account.spec';
-import { Scope } from '../scope';
+import { Scope } from '../src/scope';
 
 export const $account = new Scope({
 	name: 'account',

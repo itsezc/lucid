@@ -1,11 +1,8 @@
 import { Model } from './';
 
-// Omit<SubModel, 'save' | 'getTableName'>]
 
 type TModelProperties<SubModel extends Model> = {
-	[P in keyof SubModel]: SubModel[P] extends number
-		? SubModel[P] | ((value: SubModel[P]) => number)
-		: SubModel[P];
+	[P in keyof Omit<SubModel, 'save' | 'getTableName'>]: SubModel[P];
 };
 
 export type TQueryArgs<SubModel extends Model> = {

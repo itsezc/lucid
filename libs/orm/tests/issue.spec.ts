@@ -1,4 +1,4 @@
-import { Field, Model, Table } from '../';
+import { Field, Model, Table } from '../src';
 
 import { Account } from './account.spec';
 import { IssueLabel } from './issue_label.spec';
@@ -63,3 +63,7 @@ export class Issue extends Model {
 	@Field({ type: 'record', record: Account })
 	creator?: Account;
 }
+
+
+
+Issue.query({ where: { } });

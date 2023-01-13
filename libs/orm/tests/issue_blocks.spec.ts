@@ -1,4 +1,4 @@
-import { Table, Model, Field } from '../';
+import { Table, Model, Field } from '../src';
 
 import { Issue } from './issue.spec';
 

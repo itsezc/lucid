@@ -1,4 +1,4 @@
-import { Field, Model, Table } from '..';
+import { Field, Model, Table } from '../src';
 import { $admin } from './scopes.spec';
 
 @Table({
