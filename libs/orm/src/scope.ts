@@ -1,4 +1,3 @@
-import { ITable, SurrealRecord } from '.';
 import { Model } from './model';
 
 export type ScopeSessionTimeout = `${string}m` | `${string}h`;
