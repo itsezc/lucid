@@ -1,7 +1,13 @@
 import { Account } from './account.spec';
-import { DefaultSessionVars, IScope, ScopeSessionTimeout } from '../src/scope';
+import {
+	DefaultSessionVars,
+	ISurrealScope,
+	ScopeSessionTimeout,
+} from '../src/scope';
 
-export class AccountScope<Vars = DefaultSessionVars> implements IScope<Vars> {
+export class AccountScope<Vars = DefaultSessionVars>
+	implements ISurrealScope<Vars>
+{
 	name = 'account';
 	timeout: ScopeSessionTimeout = '15m';
 	table = Account;
@@ -9,7 +15,9 @@ export class AccountScope<Vars = DefaultSessionVars> implements IScope<Vars> {
 	siginup: (vars: Vars) => {};
 }
 
-export class AdminScope<Vars = DefaultSessionVars> implements IScope<Vars> {
+export class AdminScope<Vars = DefaultSessionVars>
+	implements ISurrealScope<Vars>
+{
 	name: 'admin';
 	timeout: ScopeSessionTimeout = '15m';
 	table = Account;
