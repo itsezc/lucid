@@ -1,4 +1,3 @@
-
 export type GeoPoint = [number, number];
 
 export type GeoMultiPoint = GeoPoint[];
@@ -13,7 +12,25 @@ export type GeoMultiPolygon = GeoPolygon[];
 
 export type GeoCollection = GeoObject[];
 
+export type Decimal = number;
+
+export type Float = number;
+
+export type DateTime = Date;
+
 type GeoObject = {
-	type: 'Point' | 'MultiPoint' | 'Line' | 'MultiLine' | 'Polygon' | 'MultiPolygon';
-	coordinates: GeoLine | GeoMultiPoint | GeoLine | GeoMultiLine | GeoPolygon | GeoMultiPolygon;
-}
+	type:
+		| 'Point'
+		| 'MultiPoint'
+		| 'Line'
+		| 'MultiLine'
+		| 'Polygon'
+		| 'MultiPolygon';
+	coordinates:
+		| GeoLine
+		| GeoMultiPoint
+		| GeoLine
+		| GeoMultiLine
+		| GeoPolygon
+		| GeoMultiPolygon;
+};

@@ -1,9 +1,9 @@
-import { Table, Model, Field } from "../src";
-import { $admin } from "./scopes.spec";
+import { Table, Model, Field } from '../src';
+import { AdminScope } from './scopes.spec';
 
 @Table<Account>({
 	permissions: {
-		create: { scope: [$admin] },
+		create: { scope: [AdminScope] },
 		delete: false,
 		select: { auth: ['id', 'id'] },
 		update: { auth: ['id', 'id'] }
@@ -39,7 +39,7 @@ export class Account extends Model {
 
 // SELECT * FROM account WHERE username = 'test';
 Account.query({
-	where: { username: "string" },
+	where: { username: 'string' },
 }).execute();
 
 // Select all account records with IDs between the given range
@@ -52,13 +52,13 @@ Account.query({
 // SELECT * FROM account:['London', '2022-08-29T08:03:39']..['London', '2022-08-29T08:09:31'];
 Account.query({
 	range: [
-		["London", "2022-08-29T08:03:39"],
-		["London", "2022-08-29T08:09:31"],
+		['London', '2022-08-29T08:03:39'],
+		['London', '2022-08-29T08:09:31'],
 	],
 }).execute();
 
 // With Select (Select changes type?):
 // SELECT username, verified FROM account WHERE username = 'test';
-Account.query({ where: { username: "test" } })
-	.select(["username", "verified"])
+Account.query({ where: { username: 'test' } })
+	.select(['username', 'verified'])
 	.execute();

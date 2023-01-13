@@ -1,17 +1,17 @@
-import { Field, Model, Table } from "../src";
+import { Field, Model, Table } from '../src';
 
-import { Account } from "./account.spec";
-import { IssueLabel } from "./issue_label.spec";
-import { Project } from "./project.spec";
+import { Account } from './account.spec';
+import { IssueLabel } from './issue_label.spec';
+import { Project } from './project.spec';
 
-import { $account, $admin } from "./scopes.spec";
+import { AccountScope, AdminScope } from './scopes.spec';
 
 @Table({
 	permissions: {
-		create: { scope: [$admin] },
-		delete: { scope: [$admin] },
-		update: { scope: [$admin, $account] },
-		select: { scope: [$admin] }
+		create: { scope: [AdminScope] },
+		delete: { scope: [AdminScope] },
+		update: { scope: [AdminScope, AccountScope] },
+		select: { scope: [AdminScope] }
 	}
 })
 export class Issue extends Model {

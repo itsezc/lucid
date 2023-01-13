@@ -1,21 +1,26 @@
-import { Account } from './tests/account.spec';
+import { ITable, SurrealRecord } from '.';
 import { Model } from './model';
 
 type ScopeSessionTimeout = `${string}m` | `${string}h`;
 
-type DefaultSessionVars = {
+export type DefaultSessionVars = {
 	$email: string;
 	$pass: string;
 };
 
-interface IScope<Vars = DefaultSessionVars> {
+export interface IScope<Vars = DefaultSessionVars> {
 	name: string;
 	timeout: ScopeSessionTimeout;
 	table: typeof Model;
 	signin: (vars: Vars) => {};
-	// siginup: {};
+	siginup: (vars: Vars) => {};
 }
 
-export class Scope<Vars = DefaultSessionVars> {
-	constructor(public props: IScope<Vars>) {}
+export class Scope<Vars = DefaultSessionVars> implements IScope<Vars> {
+	public name: string;
+	public timeout: ScopeSessionTimeout;
+	public table: typeof Model;
+
+	public signin: (vars: Vars) => {};
+	public siginup: (vars: Vars) => {};
 }

@@ -30,7 +30,7 @@ type TAssertHandler<SubModel> = (model: SubModel, value: SubModel) => boolean;
 
 type EnumType = string[];
 
-export type SurrealRecord<SubModel extends Model> = new (
+export type SurrealRecord<SubModel extends Model = Model> = new (
 	props?: ITable<Model>,
 ) => SubModel;
 

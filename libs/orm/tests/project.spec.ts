@@ -1,13 +1,12 @@
 import { Field, Model, Table } from '../src';
-import { $admin } from './scopes.spec';
+import { AdminScope } from './scopes.spec';
 
 @Table({
-	timestamps: true,
 	permissions: {
-		select: { scope: [$admin] },
-		create: { scope: [$admin] },
-		delete: { scope: [$admin] },
-		update: { scope: [$admin] },
+		select: { scope: [AdminScope] },
+		create: { scope: [AdminScope] },
+		delete: { scope: [AdminScope] },
+		update: { scope: [AdminScope] },
 	}
 })
 export class Project extends Model {
