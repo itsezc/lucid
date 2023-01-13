@@ -1,13 +1,6 @@
-import { Model } from '.';
-import { Scope } from './scope';
+import { Model } from './model';
 
-/**
- * Surreal authentication context
- */
-export interface IContextAuth {
-	/** Id of the user thats signed in */
-	id: string;
-}
+import { Scope } from './scope';
 
 export type TPermissions<SubModel extends Model = Model> = {
 	select?: TPermissionHandler<SubModel> | boolean;
@@ -25,19 +18,36 @@ export type TPermissionHandler<
 	OR?: TPermissionHandler<SubModel>;
 };
 
-export interface ITableAuthConditions {
-	select: boolean;
-	update: boolean;
-	create: boolean;
-	delete: boolean;
+/**
+ * Surreal authentication context
+ */
+export interface IContextAuth {
+	/** Id of the user thats signed in */
+	id: string;
 }
+
+export type Permissions<SubModel extends Model = Model> = {
+	select?: PermissionHandler<SubModel> | boolean;
+	create?: PermissionHandler<SubModel> | boolean;
+	update?: PermissionHandler<SubModel> | boolean;
+	delete?: PermissionHandler<SubModel> | boolean;
+};
+
+type PermissionHandler<
+	SubModel extends Model,
+	ScopeInstance extends Scope = Scope,
+> = {
+	scope?: ScopeInstance[];
+	auth?: [keyof SubModel, keyof IContextAuth];
+	OR?: PermissionHandler<SubModel>;
+};
 
 function addBrackets(str: string) {
 	return `(${str})`;
 }
 
 function generatePermissions<T extends Model = Model>(
-	config: TPermissions<T>,
+	config: Permissions<T>,
 ): string {
 	let permissions = '';
 
@@ -51,7 +61,7 @@ function generatePermissions<T extends Model = Model>(
 }
 
 function schemaPermissions<SubModel extends Model>(
-	value: boolean | TPermissionHandler<SubModel>,
+	value: boolean | PermissionHandler<SubModel>,
 	root = false,
 ) {
 	let permission = '';

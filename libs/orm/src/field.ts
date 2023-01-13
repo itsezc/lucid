@@ -1,5 +1,5 @@
 import { Model } from './model';
-import { TPermissions } from './permission';
+import { TPermissions } from './permissions';
 import { ITable } from './table';
 
 type TIndex = 'unique' | boolean;
