@@ -13,6 +13,10 @@ interface IDBInfo {
 	tb: object;
 }
 
+interface IKVInfo {
+	ns: string;
+}
+
 interface ISurrealContext {
 	url?: string;
 	user?: string;
@@ -21,17 +25,25 @@ interface ISurrealContext {
 	db?: string;
 
 	tables: string[];
+	namespaces: string[];
 	selectedTable?: Table;
 	setSelectedTable?: React.Dispatch<React.SetStateAction<Table | undefined>>;
 	query: (query: string) => Promise<Result<unknown>[]>;
 	use: (ns: string, db: string) => Promise<void>;
+	auth: (host: string, user: string, pass: string) => Promise<void>;
+	isAuth: boolean;
 }
 
 interface ISurrealProviderProps
-	extends Pick<ISurrealContext, 'url' | 'user' | 'pass' | 'ns' | 'db'> {}
+	extends Partial<
+		Pick<ISurrealContext, 'url' | 'user' | 'pass' | 'ns' | 'db'>
+	> {}
 
 export const SurrealContext = React.createContext<ISurrealContext>({
 	tables: [],
+	namespaces: [],
+	isAuth: false,
+	auth: async () => undefined,
 	query: async () => [],
 	use: async () => undefined,
 });
@@ -40,34 +52,55 @@ export const SurrealProvider: FC<PropsWithChildren<ISurrealProviderProps>> = ({
 	children,
 	...props
 }) => {
+	const [isAuth, setAuth] = useState(false);
 	const [ns, setNS] = useState(props.ns);
 	const [db, setDB] = useState(props.db);
 
+	const [namespaces, setNamespaces] = useState<string[]>([]);
 	const [tables, setTables] = useState<string[]>([]);
 	const [selectedTable, setSelectedTable] = useState<Table>();
 
-	useEffect(() => {
-		const init = async () => {
-			if (!props?.url) throw new Error('DB url not found or valid');
-
-			if (!(props?.user && props?.pass))
-				throw new Error('DB user and pass not found or valid');
-
-			await Surreal.Instance.connect(props?.url);
-
+	const init = async () => {
+		if (props.url && props.user && props.pass) {
+			await Surreal.Instance.connect(props.url);
 			await Surreal.Instance.signin({
 				user: props.user,
 				pass: props.pass,
 			});
 
 			if (ns && db) await Surreal.Instance.use(ns, db);
+		}
+	};
 
-			await query('INFO FOR DB;').then((data) => {
+	useEffect(() => {
+		init();
+	}, []);
+
+	useEffect(() => {
+		if (isAuth) {
+			query('INFO FOR KV;').then((data) => {
+				setNamespaces(Object.keys((data[0].result as IKVInfo).ns));
+			});
+		}
+	}, [isAuth]);
+
+	useEffect(() => {
+		if (ns) {
+			query('INFO FOR DB;').then((data) => {
 				setTables(Object.keys((data[0].result as IDBInfo).tb));
 			});
-		};
+		}
+	}, [ns]);
 
-		init();
+	const auth = useCallback(async (host: string, user: string, pass: string) => {
+		Surreal.Instance.connect(host).then(() => {
+			Surreal.Instance.signin({
+				user,
+				pass,
+			}).then(() => {
+				setAuth(true);
+			});
+		});
 	}, []);
 
 	const query = useCallback(async (query: string) => {
@@ -82,7 +115,17 @@ export const SurrealProvider: FC<PropsWithChildren<ISurrealProviderProps>> = ({
 
 	return (
 		<SurrealContext.Provider
-			value={{ ...props, selectedTable, setSelectedTable, tables, use, query }}
+			value={{
+				...props,
+				auth,
+				namespaces,
+				isAuth,
+				selectedTable,
+				setSelectedTable,
+				tables,
+				use,
+				query,
+			}}
 		>
 			{children}
 		</SurrealContext.Provider>

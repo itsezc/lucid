@@ -2,15 +2,29 @@ import { useContext } from 'react';
 import { SurrealContext } from './context';
 
 export const useSurreal = () => {
-	const { user, use, ns, db, query, tables, selectedTable, setSelectedTable } =
-		useContext(SurrealContext);
+	const {
+		user,
+		auth,
+		isAuth,
+		use,
+		ns,
+		db,
+		query,
+		namespaces,
+		tables,
+		selectedTable,
+		setSelectedTable,
+	} = useContext(SurrealContext);
 
 	return {
 		user,
+		auth,
+		isAuth,
 		db,
 		ns,
 		use,
 		query,
+		namespaces,
 		tables,
 		selectedTable,
 		setSelectedTable,
