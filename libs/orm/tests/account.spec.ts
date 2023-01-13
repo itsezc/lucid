@@ -14,6 +14,9 @@ export class Account extends Model {
 	@Field({ index: 'unique' })
 	username?: string;
 
+	@Field({ type: 'array', array: 'object' })
+	emails: { active: boolean; }[];
+
 	@Field({
 		permissions: {
 			create: false,
