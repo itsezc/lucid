@@ -14,7 +14,7 @@ export class Account extends Model {
 	@Field({ index: 'unique' })
 	username?: string;
 
-	@Field({ type: 'array', array: 'object' })
+	@Field()
 	emails: { active: boolean }[];
 
 	@Field({
@@ -30,10 +30,10 @@ export class Account extends Model {
 	@Field()
 	passKey?: string;
 
-	@Field({ type: 'bool' })
+	@Field()
 	verified?: boolean;
 
-	@Field({ type: 'int' })
+	@Field()
 	years_active?: number;
 }
 

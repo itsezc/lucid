@@ -34,15 +34,8 @@ export type SurrealRecord<SubModel extends Model = Model> = new (
 	props?: ITable<Model>,
 ) => SubModel;
 
-interface ITableFieldProps<
-	SubModel extends Model,
-	Descriptor,
-	RecordModel extends Model = Model,
-> {
+interface ITableFieldProps<SubModel extends Model, Descriptor> {
 	name?: string;
-	type?: TSurrealDataType;
-	array?: TSurrealDataTypePrimitive | SurrealRecord<SubModel>;
-	record?: SurrealRecord<RecordModel>;
 	enum?: EnumType;
 	index?: TSurrealFieldIndex;
 	default?: Descriptor;
@@ -58,7 +51,6 @@ export function Field<
 >(props?: ITableFieldProps<SubModel, Descriptor>) {
 	return function (target: SubModel, propertyKey: Key) {
 		let value: ITableFieldProps<SubModel, Descriptor> = {
-			type: 'string',
 			...props,
 		};
 

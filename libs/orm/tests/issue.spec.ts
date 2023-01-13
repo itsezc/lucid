@@ -1,4 +1,4 @@
-import { Field, Model, Table } from '../src';
+import { DateTime, Field, Model, Table } from '../src';
 
 import { Account } from './account.spec';
 import { IssueLabel } from './issue_label.spec';
@@ -21,34 +21,16 @@ export class Issue extends Model {
 	@Field()
 	body?: string;
 
-	@Field({
-		type: 'enum',
-		enum: [
-			'no_priority',
-			'urgent',
-			'high',
-			'medium',
-			'low'
-		]
-	})
-	priority?: string;
+	@Field()
+	priority?: 'no_priority' | 'urgent' | 'high' | 'medium' | 'low';
 
-	@Field({
-		type: 'enum',
-		enum: [
-			'backlog',
-			'todo',
-			'in_progress',
-			'done',
-			'canceled'
-		]
-	})
-	status?: string;
+	@Field()
+	status?: 'backlog' | 'todo' | 'in_progress' | 'done' | 'canceled';
 
-	@Field({ type: 'datetime' })
-	due?: Date;
+	@Field()
+	due?: DateTime;
 
-	@Field({ type: 'array' })
+	@Field()
 	labels?: IssueLabel[];
 
 	@Field()
@@ -63,5 +45,3 @@ export class Issue extends Model {
 	@Field()
 	creator?: Account;
 }
-
-Issue.query({ where: {} });

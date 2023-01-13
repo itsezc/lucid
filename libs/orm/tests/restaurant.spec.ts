@@ -5,7 +5,7 @@ export class Restaurant extends Model {
 	@Field()
 	title?: string;
 
-	@Field({ type: 'point' })
+	@Field()
 	location?: GeoPoint;
 }
 
@@ -33,10 +33,3 @@ export class Restaurant extends Model {
 // 		[-0.38314819, 51.37692386]
 // 	]]
 // };
-
-
-Restaurant.query({
-	where: {
-		location: {}
-	}
-});
