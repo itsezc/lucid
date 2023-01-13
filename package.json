@@ -1,0 +1,11 @@
+{
+	"name": "surreal-tools",
+	"private": true,
+	"workspaces": [
+		"apps/*",
+		"libs/*"
+	],
+	"devDependencies": {
+		"@types/node": "^18.11.18"
+	}
+}

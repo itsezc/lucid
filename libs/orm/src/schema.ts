@@ -1,11 +1,11 @@
 import { ITable, Model, TSurrealDataType } from './';
 
-import { Account } from './tests/account.spec';
-import { Issue } from './tests/issue.spec';
-import { IssueBlocks } from './tests/issue_blocks.spec';
-import { IssueLabel } from './tests/issue_label.spec';
-import { Organization, MemberOf } from './tests/organization.spec';
-import { Project } from './tests/project.spec';
+import { Account } from '../tests/account.spec';
+import { Issue } from '../tests/issue.spec';
+import { IssueBlocks } from '../tests/issue_blocks.spec';
+import { IssueLabel } from '../tests/issue_label.spec';
+import { Organization, MemberOf } from '../tests/organization.spec';
+import { Project } from '../tests/project.spec';
 
 export function generateSchemaFromModel<SubModel extends Model>(
 	initModel: new (
