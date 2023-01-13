@@ -1,7 +1,7 @@
 import { ITable, SurrealRecord } from '.';
 import { Model } from './model';
 
-type ScopeSessionTimeout = `${string}m` | `${string}h`;
+export type ScopeSessionTimeout = `${string}m` | `${string}h`;
 
 export type DefaultSessionVars = {
 	$email: string;
