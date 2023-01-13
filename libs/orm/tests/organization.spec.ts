@@ -1,5 +1,5 @@
-import { Table, Model, Field } from '../src';
-import { Account } from './account.spec';
+import { Table, Model, Field } from "../src";
+import { Account } from "./account.spec";
 
 @Table()
 export class Organization extends Model {
@@ -17,15 +17,11 @@ export class Organization extends Model {
 export class MemberOf extends Model {
 	@Field<MemberOf>({
 		name: 'in',
-		type: 'record',
-		record: Account,
 		assert: ({ out }, value) => value !== out
 	})
 	inside?: Account;
 
 	@Field<MemberOf>({
-		type: 'record',
-		record: Organization,
 		assert: ({ inside }, value) => value !== inside
 	})
 	out?: Organization;

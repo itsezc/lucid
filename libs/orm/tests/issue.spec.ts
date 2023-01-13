@@ -1,10 +1,10 @@
-import { Field, Model, Table } from '../src';
+import { Field, Model, Table } from "../src";
 
-import { Account } from './account.spec';
-import { IssueLabel } from './issue_label.spec';
-import { Project } from './project.spec';
+import { Account } from "./account.spec";
+import { IssueLabel } from "./issue_label.spec";
+import { Project } from "./project.spec";
 
-import { $account, $admin } from './scopes.spec';
+import { $account, $admin } from "./scopes.spec";
 
 @Table({
 	permissions: {
@@ -48,22 +48,20 @@ export class Issue extends Model {
 	@Field({ type: 'datetime' })
 	due?: Date;
 
-	@Field({ type: 'array', array: IssueLabel })
+	@Field({ type: 'array' })
 	labels?: IssueLabel[];
 
-	@Field({ type: 'record', record: Project })
+	@Field()
 	project?: Project;
 
-	@Field({ type: 'record', record: Issue })
+	@Field()
 	parent?: Issue;
 
-	@Field({ type: 'record', record: Account })
+	@Field()
 	assignee?: Account;
 
-	@Field({ type: 'record', record: Account })
+	@Field()
 	creator?: Account;
 }
 
-
-
-Issue.query({ where: { } });
+Issue.query({ where: {} });
