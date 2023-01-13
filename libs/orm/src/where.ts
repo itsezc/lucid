@@ -1,6 +1,5 @@
 import { Model } from './';
 
-
 type TModelProperties<SubModel extends Model> = {
 	[P in keyof Omit<SubModel, 'save' | 'getTableName'>]: SubModel[P];
 };

@@ -13,6 +13,13 @@ export type TSurrealDataType =
 	| 'decimal'
 	| 'datetime'
 	| 'object'
+	| 'polygon'
+	| 'point'
+	| 'line'
+	| 'multipoint'
+	| 'multiline'
+	| 'multipolygon'
+	| 'collection'
 	| 'array'
 	| 'future'
 	| 'record';
