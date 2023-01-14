@@ -1,19 +1,25 @@
-import { Model, SQL, TModelProperties } from './';
+import { Model, TModelProperties } from './';
+
+type TSurrealEventType = 'CREATE' | 'DELETE';
 
 type TSurrealEventAccessors<SubModel extends Model> = {
+	$event: TSurrealEventType;
 	$after: TModelProperties<SubModel>;
 	$before: TModelProperties<SubModel>;
 };
 
+// rome-ignore lint/suspicious/noExplicitAny: Currently the type is unknown
 type TSurrealEventWhenOperation<M extends Model, T extends any = any> = {
 	$: [T, '=' | '!=', T];
 	OR?: TSurrealEventTopLevelOperator<M, T>;
 };
 
+// rome-ignore lint/suspicious/noExplicitAny: Currently the type is unknown
 type TSurrealEventTopLevelOperator<M extends Model, T extends any = any> =
 	| TSurrealEventWhenOperation<M, T>
 	| TSurrealEventWhenOperation<M, T>[];
 
+// rome-ignore lint/suspicious/noExplicitAny: Currently the type is unknown
 type TSurrealEventWhen<M extends Model, T extends any = any> = {
 	$: TSurrealEventTopLevelOperator<M, T>[];
 	OR: TSurrealEventTopLevelOperator<M, T>[];

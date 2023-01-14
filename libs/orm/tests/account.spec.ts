@@ -41,13 +41,16 @@ export class Account extends Model {
 Account.events([
 	{
 		name: 'change_username',
-		when: ({ $after, $before }) => ({
+		when: ({ $after, $before, $event }) => ({
 			$: [
 				{
 					$: [$before.username, '!=', $after.username],
 				},
 				{
 					$: [$before.passKey, '!=', $after.username],
+				},
+				{
+					$: [$event, '=', 'CREATE'],
 				},
 			],
 			OR: [
