@@ -8,7 +8,8 @@
 	"devDependencies": {
 		"@types/node": "^18.11.18",
 		"bun-types": "^0.4.0",
-		"reflect-metadata": "^0.1.13"
+		"reflect-metadata": "^0.1.13",
+		"typescript": "^4.9.4"
 	},
 	"dependencies": {
 		"surrealdb.js": "latest"
