@@ -3,8 +3,8 @@ export class SurealString {
 		return `string::concat(${str})`;
 	}
 
-	public static endsWith(str: string) {
-		return `string::endsWith(${str})`;
+	public static endsWith(str: string, str2: string) {
+		return `string::endsWith('${str}', '${str2}')`;
 	}
 
 	public static join(str: string) {
@@ -20,16 +20,16 @@ export class SurealString {
 		return `string::lowercase(${str})`;
 	}
 
-	public static repeat(str: string) {
-		return `string::repeat(${str})`;
+	public static repeat(str: string, times: number) {
+		return `string::repeat('${str}', ${times})`;
 	}
 
-	public static replace(str: string) {
-		return `string::replace(${str})`;
+	public static replace(str: string, find: string, replace: string) {
+		return `string::replace('${str}', '${find}', '${replace}')`;
 	}
 
 	public static reverse(str: string) {
-		return `string::reverse(${str})`;
+		return `string::reverse('${str}')`;
 	}
 
 	public static slice(str: string) {
