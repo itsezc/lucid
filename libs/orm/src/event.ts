@@ -19,7 +19,7 @@ type TSurrealEventWhen<M extends Model, T extends string = string> = {
 export type TSurrealEventProps<SubModel extends Model> = {
 	name: string;
 	when: (cb: TSurrealEventAccessors<SubModel>) => TSurrealEventWhen<SubModel>;
-	then: (cb: TSurrealEventAccessors<SubModel>) => string;
+	then: (cb: TSurrealEventAccessors<SubModel>) => string | string[];
 };
 
 export class SurrealEvent<SubModel extends Model> {
