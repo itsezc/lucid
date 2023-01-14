@@ -6,14 +6,13 @@ type TSurrealEventAccessors<SubModel extends Model> = {
 };
 
 type TSurrealEventWhenOperation<M extends Model, T extends string = string> = {
-	from: T;
-	$: '=' | '!=';
-	to: T;
+	$: [T, '=' | '!=', T];
 	OR?: TSurrealEventWhen<M, T>;
 };
 
 type TSurrealEventWhen<M extends Model, T extends string = string> = {
 	IF: TSurrealEventWhenOperation<M, T>[];
+	OR: TSurrealEventWhenOperation<M, T>[];
 };
 
 export type TSurrealEventProps<SubModel extends Model> = {

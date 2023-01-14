@@ -44,21 +44,15 @@ Account.events([
 		when: ({ $after, $before }) => ({
 			IF: [
 				{
-					from: $before.username,
-					$: '!=',
-					to: $after.username,
+					$: [$before.username, '!=', $after.username],
 				},
 				{
-					from: $before.passKey,
-					$: '!=',
-					to: $after.passKey,
+					$: [$before.passKey, '!=', $after.username],
 				},
 			],
 			OR: [
 				{
-					from: $before.username,
-					$: '!=',
-					to: $after.username,
+					$: [$before.username, '!=', $after.username],
 				},
 			],
 		}),
