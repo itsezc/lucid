@@ -5,16 +5,16 @@ type TSurrealEventAccessors<SubModel extends Model> = {
 	$before: TModelProperties<SubModel>;
 };
 
-type TSurrealEventWhenOperation<M extends Model, T extends string = string> = {
+type TSurrealEventWhenOperation<M extends Model, T extends any = any> = {
 	$: [T, '=' | '!=', T];
 	OR?: TSurrealEventTopLevelOperator<M, T>;
 };
 
-type TSurrealEventTopLevelOperator<M extends Model, T extends string = string> =
+type TSurrealEventTopLevelOperator<M extends Model, T extends any = any> =
 	| TSurrealEventWhenOperation<M, T>
 	| TSurrealEventWhenOperation<M, T>[];
 
-type TSurrealEventWhen<M extends Model, T extends string = string> = {
+type TSurrealEventWhen<M extends Model, T extends any = any> = {
 	$: TSurrealEventTopLevelOperator<M, T>[];
 	OR: TSurrealEventTopLevelOperator<M, T>[];
 };
