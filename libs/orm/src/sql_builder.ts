@@ -1,14 +1,25 @@
-import { Model, TModelProperties } from './';
+import { Model, TQueryArgs } from './';
 import { Account } from '../tests/account.spec';
+import { joinFields } from './util';
+
+interface ISQLBuilderProps<SubModel extends Model> {
+	from_table: string;
+	args?: TQueryArgs<SubModel>;
+}
 
 export class SQLBuilder<SubModel extends Model> {
-	constructor(private query = '') {}
+	private from_table: string;
+	private range: string;
+	private select_fields = '*';
 
-	public select(fields: (keyof SubModel)[]): SQLBuilder<SubModel> {
-		return this;
+	constructor(props: ISQLBuilderProps<SubModel>) {
+		this.from_table = props.from_table;
+		this.range = joinFields(props.args?.range);
 	}
 
-	public range(): SQLBuilder<SubModel> {
+	public select(fields: (keyof SubModel)[]): SQLBuilder<SubModel> {
+		this.select_fields = fields.join(', ');
+
 		return this;
 	}
 
@@ -24,12 +35,15 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
-	public from(): SQLBuilder<SubModel> {
+	public from(table: string): SQLBuilder<SubModel> {
+		this.from_table = table;
 		return this;
 	}
 
 	public build() {
-		return this.query;
+		return `SELECT ${this.select_fields} FROM ${this.from_table}${
+			this.range ? `:${this.range}` : ''
+		};`;
 	}
 
 	public execute() {}
@@ -37,4 +51,21 @@ export class SQLBuilder<SubModel extends Model> {
 	public live() {}
 }
 
-Account.query().select(['username', 'password']).range();
+console.log(Account.query().select(['username', 'password']).build());
+
+console.log(
+	Account.query({ range: [1, 1000] })
+		.select(['username', 'password'])
+		.build(),
+);
+
+console.log(
+	Account.query({
+		range: [
+			['London', '2022-08-29T08:03:39'],
+			['London', '2022-08-29T08:09:31'],
+		],
+	})
+		.select(['username', 'password'])
+		.build(),
+);

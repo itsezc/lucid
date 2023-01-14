@@ -1,5 +1,4 @@
 import { db, TQueryArgs, TSurrealDataType } from './';
-import { QueryBuilder } from './query';
 import { SQLBuilder } from './sql_builder';
 import type { ITable } from './table';
 import { extrapolateTableName } from './util';
@@ -45,12 +44,15 @@ export class Model {
 	}
 
 	public static query<SubModel extends Model>(
-		this: {
-			new (props?: ITable<Model>): SubModel;
-		},
+		this: { new (props?: ITable<Model>): SubModel },
 		args?: TQueryArgs<SubModel>,
 	) {
-		return new SQLBuilder<SubModel>();
+		const model = new this();
+
+		return new SQLBuilder<SubModel>({
+			from_table: model.getTableName(),
+			args,
+		});
 	}
 
 	// @todo
