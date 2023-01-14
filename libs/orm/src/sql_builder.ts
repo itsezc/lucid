@@ -19,19 +19,22 @@ export class SQLBuilder<SubModel extends Model> {
 
 	public select(fields: (keyof SubModel)[]): SQLBuilder<SubModel> {
 		this.select_fields = fields.join(', ');
-
 		return this;
 	}
 
-	public through(): SQLBuilder<SubModel> {
+	public through(model: Model): SQLBuilder<SubModel> {
 		return this;
 	}
 
-	public in(): SQLBuilder<SubModel> {
+	public over(model: Model): SQLBuilder<SubModel> {
 		return this;
 	}
 
-	public of(): SQLBuilder<SubModel> {
+	public in(model: Model): SQLBuilder<SubModel> {
+		return this;
+	}
+
+	public of(model: Model): SQLBuilder<SubModel> {
 		return this;
 	}
 

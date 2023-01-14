@@ -15,19 +15,18 @@ export function extrapolateTableName(name: string): string {
 }
 
 export function joinFields(arr?: string[][] | number[]) {
-	if (arr) {
-		if (arr[0] instanceof Array) {
-			let res = `['${arr[0].join("', '")}']`;
-			for (let i = 1; i < arr.length; i++) {
-				res += `..['${(arr[i] as string[]).join("', '")}']`;
-			}
-			return res;
-		} else {
-			const seperator = '..';
-			let res = '';
-			for (let i = arr.length; i--; ) res = (i ? seperator : '') + arr[i] + res;
-			return res;
+	if (!arr) return '';
+
+	if (arr[0] instanceof Array) {
+		let res = `['${arr[0].join("', '")}']`;
+		for (let i = 1; i < arr.length; i++) {
+			res += `..['${(arr[i] as string[]).join("', '")}']`;
 		}
+		return res;
+	} else {
+		const seperator = '..';
+		let res = '';
+		for (let i = arr.length; i--; ) res = (i ? seperator : '') + arr[i] + res;
+		return res;
 	}
-	return '';
 }
