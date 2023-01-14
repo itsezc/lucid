@@ -1,9 +1,14 @@
-import { Model, SQL } from './';
+import { Model, SQL, TModelProperties } from './';
+
+type TSurrealEventAccessors<SubModel extends Model> = {
+	$after: TModelProperties<SubModel>;
+	$before: TModelProperties<SubModel>;
+};
 
 export type TSurrealEventProps<SubModel extends Model> = {
 	name: string;
-	when: (keyof SubModel)[];
-	then: SQL;
+	when: (cb: TSurrealEventAccessors<SubModel>) => (keyof SubModel)[];
+	then: (cb: TSurrealEventAccessors<SubModel>) => string;
 };
 
 export class SurrealEvent<SubModel extends Model> {

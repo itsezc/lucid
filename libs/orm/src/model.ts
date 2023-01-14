@@ -50,6 +50,12 @@ export class Model {
 		return this;
 	}
 
+	public static create<SubModel extends Model>(this: {
+		new (props?: ITable<Model>): SubModel;
+	}) {
+		return new SQLBuilder();
+	}
+
 	public static query<SubModel extends Model>(
 		this: { new (props?: ITable<Model>): SubModel },
 		args?: TQueryArgs<SubModel>,

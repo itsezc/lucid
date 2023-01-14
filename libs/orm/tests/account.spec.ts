@@ -1,4 +1,5 @@
-import { Table, Model, Field, SurrealEvent } from '../src';
+import { Table, Model, Field } from '../src';
+import { Issue } from './issue.spec';
 import { AdminScope } from './scopes.spec';
 
 @Table<Account>({
@@ -40,8 +41,8 @@ export class Account extends Model {
 Account.events([
 	{
 		name: 'change_username',
-		when: ['username'],
-		then: '',
+		when: ({ $after, $before }) => ['username'],
+		then: ({ $after, $before }) => Issue.create().build(),
 	},
 ]);
 
