@@ -9,7 +9,9 @@ export * from './table';
 export * from './scope';
 
 export * from './where';
-export * from './types';
 export * from './event';
 
 export * from './sql';
+
+export * from './types';
+export * from './constants';

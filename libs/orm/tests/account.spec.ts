@@ -41,7 +41,27 @@ export class Account extends Model {
 Account.events([
 	{
 		name: 'change_username',
-		when: ({ $after, $before }) => ['username'],
+		when: ({ $after, $before }) => ({
+			IF: [
+				{
+					from: $before.username,
+					$: '!=',
+					to: $after.username,
+				},
+				{
+					from: $before.passKey,
+					$: '!=',
+					to: $after.passKey,
+				},
+			],
+			OR: [
+				{
+					from: $before.username,
+					$: '!=',
+					to: $after.username,
+				},
+			],
+		}),
 		then: ({ $after, $before }) => Issue.create().build(),
 	},
 ]);

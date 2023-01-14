@@ -5,9 +5,20 @@ type TSurrealEventAccessors<SubModel extends Model> = {
 	$before: TModelProperties<SubModel>;
 };
 
+type TSurrealEventWhenOperation<M extends Model, T extends string = string> = {
+	from: T;
+	$: '=' | '!=';
+	to: T;
+	OR?: TSurrealEventWhen<M, T>;
+};
+
+type TSurrealEventWhen<M extends Model, T extends string = string> = {
+	IF: TSurrealEventWhenOperation<M, T>[];
+};
+
 export type TSurrealEventProps<SubModel extends Model> = {
 	name: string;
-	when: (cb: TSurrealEventAccessors<SubModel>) => (keyof SubModel)[];
+	when: (cb: TSurrealEventAccessors<SubModel>) => TSurrealEventWhen<SubModel>;
 	then: (cb: TSurrealEventAccessors<SubModel>) => string;
 };
 
