@@ -42,7 +42,7 @@ Account.events([
 	{
 		name: 'change_username',
 		when: ({ $after, $before }) => ({
-			IF: [
+			$: [
 				{
 					$: [$before.username, '!=', $after.username],
 				},
