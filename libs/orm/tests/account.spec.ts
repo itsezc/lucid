@@ -1,4 +1,4 @@
-import { Table, Model, Field } from '../src';
+import { Table, Model, Field, SurrealEvent } from '../src';
 import { AdminScope } from './scopes.spec';
 
 @Table<Account>({
@@ -36,6 +36,14 @@ export class Account extends Model {
 	@Field()
 	years_active?: number;
 }
+
+Account.events([
+	{
+		name: 'change_username',
+		when: ['username'],
+		then: '',
+	},
+]);
 
 // // SELECT * FROM account WHERE username = 'test';
 // Account.query({

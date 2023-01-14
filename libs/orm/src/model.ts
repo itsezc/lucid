@@ -1,4 +1,11 @@
-import { db, TQueryArgs, TSurrealDataType } from './';
+import {
+	db,
+	SurrealEvent,
+	SurrealEventManager,
+	TQueryArgs,
+	TSurrealDataType,
+	TSurrealEventProps,
+} from './';
 import { SQLBuilder } from './sql_builder';
 import type { ITable } from './table';
 import { extrapolateTableName } from './util';
@@ -53,6 +60,15 @@ export class Model {
 			from_table: model.getTableName(),
 			args,
 		});
+	}
+
+	public static events<SubModel extends Model>(
+		this: { new (props?: ITable<Model>): SubModel },
+		args: TSurrealEventProps<SubModel>[],
+	) {
+		const model = new this();
+
+		return new SurrealEventManager(model, args);
 	}
 
 	// @todo

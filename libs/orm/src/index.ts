@@ -10,3 +10,6 @@ export * from './scope';
 
 export * from './where';
 export * from './types';
+export * from './event';
+
+export * from './sql';
