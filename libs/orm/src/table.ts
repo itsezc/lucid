@@ -1,5 +1,5 @@
 import { Model } from './model';
-import { TPermissions } from './permission';
+import { TPermissions } from './permissions';
 
 export type ITable<SubModel extends Model> = {
 	edge?: boolean;

@@ -1,8 +1,5 @@
 import { Model, TModelProperties } from './';
 
-import { Account } from '../tests/account.spec';
-import { Issue } from '../tests/issue.spec';
-
 export type QueryBuilder<SubModel extends Model> = {
 	select: (
 		fields: (keyof TModelProperties<SubModel>)[],
@@ -18,9 +15,12 @@ export type QueryBuilder<SubModel extends Model> = {
 
 	from: (id: string) => QueryBuilder<SubModel>;
 
-	execute: () => void;
-};
+	build: () => string;
 
+	execute: () => void;
+
+	live: () => void;
+};
 
 /**
 	With Maths:

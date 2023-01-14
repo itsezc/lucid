@@ -1,21 +1,16 @@
-import { Account } from './tests/account.spec';
 import { Model } from './model';
 
-type ScopeSessionTimeout = `${string}m` | `${string}h`;
+export type ScopeSessionTimeout = `${string}m` | `${string}h`;
 
-type DefaultSessionVars = {
+export type DefaultSessionVars = {
 	$email: string;
 	$pass: string;
 };
 
-interface IScope<Vars = DefaultSessionVars> {
+export interface ISurrealScope<Vars = DefaultSessionVars> {
 	name: string;
 	timeout: ScopeSessionTimeout;
 	table: typeof Model;
 	signin: (vars: Vars) => {};
-	// siginup: {};
-}
-
-export class Scope<Vars = DefaultSessionVars> {
-	constructor(public props: IScope<Vars>) {}
+	siginup: (vars: Vars) => {};
 }

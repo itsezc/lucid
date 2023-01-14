@@ -1,17 +1,17 @@
-import { Field, Model, Table } from "../src";
+import { DateTime, Field, Model, Table } from '../src';
 
-import { Account } from "./account.spec";
-import { IssueLabel } from "./issue_label.spec";
-import { Project } from "./project.spec";
+import { Account } from './account.spec';
+import { IssueLabel } from './issue_label.spec';
+import { Project } from './project.spec';
 
-import { $account, $admin } from "./scopes.spec";
+import { AccountScope, AdminScope } from './scopes.spec';
 
 @Table({
 	permissions: {
-		create: { scope: [$admin] },
-		delete: { scope: [$admin] },
-		update: { scope: [$admin, $account] },
-		select: { scope: [$admin] }
+		create: { scope: [AdminScope] },
+		delete: { scope: [AdminScope] },
+		update: { scope: [AdminScope, AccountScope] },
+		select: { scope: [AdminScope] }
 	}
 })
 export class Issue extends Model {
@@ -21,34 +21,16 @@ export class Issue extends Model {
 	@Field()
 	body?: string;
 
-	@Field({
-		type: 'enum',
-		enum: [
-			'no_priority',
-			'urgent',
-			'high',
-			'medium',
-			'low'
-		]
-	})
-	priority?: string;
+	@Field()
+	priority?: 'no_priority' | 'urgent' | 'high' | 'medium' | 'low';
 
-	@Field({
-		type: 'enum',
-		enum: [
-			'backlog',
-			'todo',
-			'in_progress',
-			'done',
-			'canceled'
-		]
-	})
-	status?: string;
+	@Field()
+	status?: 'backlog' | 'todo' | 'in_progress' | 'done' | 'canceled';
 
-	@Field({ type: 'datetime' })
-	due?: Date;
+	@Field()
+	due?: DateTime;
 
-	@Field({ type: 'array' })
+	@Field()
 	labels?: IssueLabel[];
 
 	@Field()
@@ -63,5 +45,3 @@ export class Issue extends Model {
 	@Field()
 	creator?: Account;
 }
-
-Issue.query({ where: {} });

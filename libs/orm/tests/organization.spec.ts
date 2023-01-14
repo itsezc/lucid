@@ -1,15 +1,12 @@
-import { Table, Model, Field } from "../src";
-import { Account } from "./account.spec";
+import { Table, Model, Field, DateTime } from '../src';
+import { Account } from './account.spec';
 
 @Table()
 export class Organization extends Model {
 	@Field()
 	name?: string;
 
-	@Field({
-		type: 'record',
-		record: Account
-	})
+	@Field()
 	createdBy?: Account;
 }
 
@@ -26,8 +23,8 @@ export class MemberOf extends Model {
 	})
 	out?: Organization;
 
-	@Field({ type: 'datetime' })
-	joinDate?: Date;
+	@Field()
+	joinDate?: DateTime;
 }
 
 let foretag = new Organization();

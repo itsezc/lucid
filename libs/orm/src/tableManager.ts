@@ -1,4 +1,4 @@
-import { db } from './';
+import { db, Model } from './';
 
 interface ISurrealResult {}
 
@@ -9,7 +9,9 @@ interface ISurrealDBInfoResult {
 	error?: Error;
 }
 
-export class TableManager {
+export class TableManager<SubModel extends Model> {
+	constructor(protected model: SubModel) {}
+
 	/**
 	 * tags: @testing
 	 * Check if the table is defined in the database
@@ -19,7 +21,7 @@ export class TableManager {
 	public async isDefined(): Promise<boolean> {
 		const info = await db.query<ISurrealDBInfoResult[]>('INFO FOR DB');
 		if (info[0].error) return false;
-		if (this.getTableName() in info[0].result.tb) return true;
+		if (this.model.getTableName() in info[0].result.tb) return true;
 		return false;
 	}
 
@@ -31,6 +33,6 @@ export class TableManager {
 	// TODO: Run query to check for `in` and `out` fields
 	// tags: @testing
 	public async isEdge(): Promise<boolean> {
-		return this.edge;
+		return false;
 	}
 }
