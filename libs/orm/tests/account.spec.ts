@@ -15,8 +15,8 @@ export class Account extends Model {
 	@Field({ index: 'unique' })
 	username?: string;
 
-	@Field()
-	emails: { active: boolean }[];
+	@Field({ assert: 'email' })
+	email: string;
 
 	@Field({
 		permissions: {
@@ -41,24 +41,11 @@ export class Account extends Model {
 Account.events([
 	{
 		name: 'change_username',
-		when: ({ $after, $before, $event }) => ({
-			$: [
-				{
-					$: [$before.username, '!=', $after.username],
-				},
-				{
-					$: [$before.passKey, '!=', $after.username],
-				},
-				{
-					$: [$event, '=', 'CREATE'],
-				},
-			],
-			OR: [
-				{
-					$: [$before.username, '!=', $after.username],
-				},
-			],
-		}),
+		when: ({ $after, $before, $event }) =>
+			($before.username !== $after.username &&
+				$before.passKey !== $after.passKey &&
+				$event === 'CREATE') ||
+			$before.username !== $before.username,
 		then: ({ $after, $before }) => Issue.create().build(),
 	},
 ]);

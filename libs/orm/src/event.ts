@@ -27,7 +27,7 @@ type TSurrealEventWhen<M extends Model, T extends any = any> = {
 
 export type TSurrealEventProps<SubModel extends Model> = {
 	name: string;
-	when: (cb: TSurrealEventAccessors<SubModel>) => TSurrealEventWhen<SubModel>;
+	when: (cb: TSurrealEventAccessors<SubModel>) => boolean;
 	then: (cb: TSurrealEventAccessors<SubModel>) => string | string[];
 };
 

@@ -26,7 +26,19 @@ export type TSurrealDataType =
 
 export type TSurrealDataTypePrimitive = Omit<TSurrealDataType, 'future'>;
 
-type TAssertHandler<SubModel> = (model: SubModel, value: SubModel) => boolean;
+type TAssertHandler<SubModel> =
+	| 'alpha'
+	| 'alphanum'
+	| 'ascii'
+	| 'domain'
+	| 'email'
+	| 'hexadecimal'
+	| 'latitude'
+	| 'longitude'
+	| 'numeric'
+	| 'semver'
+	| 'uuid'
+	| ((model: SubModel, value: SubModel) => boolean);
 
 type EnumType = string[];
 
