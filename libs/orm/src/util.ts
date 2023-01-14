@@ -17,9 +17,9 @@ export function extrapolateTableName(name: string): string {
 export function joinFields(arr?: string[][] | number[]) {
 	if (arr) {
 		if (arr[0] instanceof Array) {
-			let res = `[${arr[0].join(', ')}]`;
+			let res = `['${arr[0].join("', '")}']`;
 			for (let i = 1; i < arr.length; i++) {
-				res += `..[${(arr[i] as string[]).join(', ')}]`;
+				res += `..['${(arr[i] as string[]).join("', '")}']`;
 			}
 			return res;
 		} else {
