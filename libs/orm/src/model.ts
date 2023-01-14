@@ -1,5 +1,6 @@
 import { db, TQueryArgs, TSurrealDataType } from './';
 import { QueryBuilder } from './query';
+import { SQLBuilder } from './sql_builder';
 import type { ITable } from './table';
 import { extrapolateTableName } from './util';
 
@@ -48,19 +49,8 @@ export class Model {
 			new (props?: ITable<Model>): SubModel;
 		},
 		args?: TQueryArgs<SubModel>,
-	): QueryBuilder<SubModel> {
-		const select = (fields: (keyof SubModel)[]) => {
-			return Model.query(args);
-		};
-
-		const through = (through: typeof Model) => {
-			return Model.query(args);
-		};
-
-		return {
-			select,
-			through,
-		};
+	) {
+		return new SQLBuilder<SubModel>();
 	}
 
 	// @todo
