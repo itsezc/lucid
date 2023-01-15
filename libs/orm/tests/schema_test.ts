@@ -55,61 +55,72 @@ sourceFile.getChildren().forEach(child => {
 
 
         fields.forEach(f => {
-            tableDef += parseField(identifier.getText(), f.getChildren().find(n => n.kind == ts.SyntaxKind.Identifier).getText(), f);
+            tableDef += parseUnknown(f);
         })
 
 
     })
 })
 
-//Parses a node and returns a SurrealQL schema string for it.
-function parseField(table: string, name: string, f: ts.Node) {
-    //TODO: parse decorator for permissions, defaults and constraints.
-    //The decorator will be the only possible SyntaxList on the field.
-    const decorator = f.getChildren().find(n => n.kind == ts.SyntaxKind.SyntaxList);
+//Takes a node of unknown type, identifies its type and parses it.
+function parseUnknown(n: ts.Node): string {
+    //String
+    if (n.getChildren().some(n => n.kind == ts.SyntaxKind.StringKeyword)) {
+        return parseString(n);
+    }
 
-    //Whether this field is optional or not (ie contains ?)
-    const optional: boolean = f.getChildren().some(n => n.kind == ts.SyntaxKind.QuestionToken);
+    //Number
+    if (n.getChildren().some(n => n.kind == ts.SyntaxKind.NumberKeyword)) {
+        return parseNum(n);
+    }
 
-    let type;
-
-    //Assign type string if it doesn't already have a type.
-    type ||= f.getChildren()?.find(n => n.kind == 152)?.getText();
-
-    //Assign tpe number if it doesn't already have a type.
-    type ||= f.getChildren()?.find(n => n.kind == 148)?.getText();
+    //SyntaxList, parse deeper.
+    if (n.getChildren().some(n => n.kind == ts.SyntaxKind.SyntaxList)) {
+        //SyntaxList might contain an array, object or some other funky non-primitive type.
+    }
     
-    
-    //The Type Reference (if it exists). Since we already assume this type exists,
-    //We just need to clarify to Surreal that its a table reference.
-    const ref = f.getChildren().find(n => n.kind == ts.SyntaxKind.TypeReference);
-
-    if (ref) {
-        //Type needs to be record(underlyingType).
-        const ident = ref.getChildren().find(c => ts.isIdentifier(c));
-
-        //This does not work for Date types.
-        type = `record(${ident.getText()})`;
-    }
-
-    //The array type, if it is an array. This type will contain the inner type/ident.
-    const arr = f.getChildren().find(n => n.kind == ts.SyntaxKind.ArrayType);
-
-    if (arr) {
-        type = 'array';
-    }
-
-    let fieldStr = `DEFINE FIELD ${name} ON TABLE ${table} SCHEMAFULL\n\tTYPE ${type}`;
-
-    if (arr) {
-        //TODO: verify that getChildAt does not lead to bugs.
-        fieldStr += parseField(table, name + '.*', f.getChildAt(0));
-    }
-
-    fieldStr += '\n\t\tPERMISSIONS';
-
-    console.log(fieldStr);
 }
+
+function parseString(n: ts.Node, table: string): string {
+    const name = n.getChildren().find(n => ts.isIdentifier(n)).getText();
+    return `DEFINE FIELD ${name} ON TABLE ${table}\n` +
+            `\tTYPE string\n` +
+            `\tASSERT ${null}\n` +
+            `\t\tPERMISSIONS FULL`;
+}
+
+function parseNum(n: ts.Node, table: string): string {
+    const name = n.getChildren().find(n => ts.isIdentifier(n)).getText();
+    return `DEFINE FIELD ${table} ON TABLE ${table}\n` +
+            `\tTYPE number\n` +
+            `\tASSERT ${null}\n` +
+            `\t\tPERMISSIONS FULL`;
+}
+
+function parseRef(n: ts.Node, table: string) {
+    const name = n.getChildren().find(n => ts.isIdentifier(n)).getText();
+    return `DEFINE FIELD ${name} ON TABLE ${table}\n` +
+            `\tTYPE number\n` +
+            `\tASSERT ${null}\n` +
+            `\t\tPERMISSIONS FULL`;
+}
+
+function parseArr(n: ts.Node, table: string) {
+    const name = n.getChildren().find(n => ts.isIdentifier(n)).getText();
+
+    //TODO:
+    //The underlying array type must be found so the array entries can be strongly typed with a schema.
+
+    return `DEFINE FIELD ${name} ON TABLE ${table}\n` +
+            `\tTYPE array\n` +
+            `\tASSERT ${null}\n` +
+            `\t\tPERMISSIONS FULL`;
+}
+
+function parseObject(n: ts.Node) {
+
+}
+
 
 //Generates a full SurrealQL field definition for the node. Expects node to be a PropertyDeclaration.
 function generateField(node: ts.Node): string {
