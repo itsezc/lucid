@@ -1,6 +1,6 @@
-import { Table, Model, Field } from "../src";
+import { Table, Model, Field } from '../src';
 
-import { Issue } from "./issue.spec";
+import { Issue } from './issue.spec';
 
 @Table({ edge: true })
 export class IssueBlocks extends Model {
@@ -15,5 +15,3 @@ export class IssueBlocks extends Model {
 	})
 	out?: Issue;
 }
-
-let x = new IssueBlocks();

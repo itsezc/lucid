@@ -2,10 +2,8 @@ import { Table, Model, Field, GeoPoint } from '../src';
 
 @Table()
 export class Restaurant extends Model {
-	@Field()
 	title?: string;
 
-	@Field()
 	location?: GeoPoint;
 }
 

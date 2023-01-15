@@ -1,14 +1,14 @@
-import { Table, Model, Field } from '../src';
+import { Table, Model, Field, Scope } from '../src';
 import { Issue } from './issue.spec';
 import { AdminScope } from './scopes.spec';
 
 @Table<Account>({
-	permissions: {
-		create: { scope: [AdminScope] },
+	permissions: ({ id }, { $scope, $auth }) => ({
+		create: $scope === Scope(AdminScope),
 		delete: false,
-		select: { auth: ['id', 'id'] },
-		update: { auth: ['id', 'id'] }
-	},
+		select: id === $auth.id,
+		update: id === $auth.id
+	}),
 	auditable: true,
 })
 export class Account extends Model {
@@ -19,22 +19,19 @@ export class Account extends Model {
 	email: string;
 
 	@Field({
-		permissions: {
+		permissions: ({ id }, { $auth }) => ({
 			create: false,
 			select: false,
 			delete: false,
-			update: { auth: ['id', 'id'] }
-		}
+			update: id === $auth.id
+		})
 	})
 	password?: string;
 
-	@Field()
 	passKey?: string;
 
-	@Field()
 	verified?: boolean;
 
-	@Field()
 	years_active?: number;
 }
 

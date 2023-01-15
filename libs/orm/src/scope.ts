@@ -1,6 +1,6 @@
 import { Model } from './model';
 
-export type ScopeSessionTimeout = `${string}m` | `${string}h`;
+export type TScopeSessionTimeout = `${string}m` | `${string}h`;
 
 export type DefaultSessionVars = {
 	$email: string;
@@ -9,8 +9,12 @@ export type DefaultSessionVars = {
 
 export interface ISurrealScope<Vars = DefaultSessionVars> {
 	name: string;
-	timeout: ScopeSessionTimeout;
+	timeout: TScopeSessionTimeout;
 	table: typeof Model;
-	signin: (vars: Vars) => {};
-	siginup: (vars: Vars) => {};
+	signin: (vars: Vars) => void;
+	siginup: (vars: Vars) => void;
 }
+
+export const Scope = (scope: ISurrealScope) => {
+	return `$scope === ${scope}`;
+};

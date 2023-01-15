@@ -3,10 +3,8 @@ import { Account } from './account.spec';
 
 @Table()
 export class Organization extends Model {
-	@Field()
 	name?: string;
 
-	@Field()
 	createdBy?: Account;
 }
 
@@ -23,7 +21,6 @@ export class MemberOf extends Model {
 	})
 	out?: Organization;
 
-	@Field()
 	joinDate?: DateTime;
 }
 
