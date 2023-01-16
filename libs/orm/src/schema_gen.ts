@@ -43,24 +43,13 @@ function buildQuery() {
         },
     });
 
-    console.log(source);
-}
-
-
+    program.getSourceFiles().forEach(x => parseSourceFile(x));
 
 buildQuery();
-exit();
-
-
-const diagnostics = ts.getPreEmitDiagnostics(program);
-if (diagnostics.length > 0) {
-    console.error('Error: the specified file has errors! Fix these errors and try again.');
-    console.error(diagnostics[0].messageText);
-    throw new Error('File has errors.');
-}
 
 
 
+function parseSourceFile(sourceFile: ts.SourceFile) {
 sourceFile.getChildren().forEach(child => {
     const classes = child.getChildren().filter(n => ts.isClassDeclaration(n));
 
@@ -86,6 +75,8 @@ sourceFile.getChildren().forEach(child => {
         });
     })
 })
+}
+
 
 function constructTable(n: ts.Node) {
     const identifier = n.getChildren().find(n => ts.isIdentifier(n));
