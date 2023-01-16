@@ -1,3 +1,4 @@
 {
-	"name": "@surreal-tools/orm"
+	"name": "@surreal-tools/orm",
+	"main": "src/index.ts"
 }

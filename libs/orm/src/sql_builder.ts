@@ -1,5 +1,4 @@
 import { Model, TQueryArgs } from './';
-import { Account } from '../tests/account.spec';
 import { joinFields } from './util';
 
 interface ISQLBuilderProps<SubModel extends Model> {
@@ -57,22 +56,3 @@ export class SQLBuilder<SubModel extends Model> {
 
 	public live() {}
 }
-
-console.log(Account.query().select(['username', 'password']).build());
-
-console.log(
-	Account.query({ range: [1, 1000] })
-		.select(['username', 'password'])
-		.build(),
-);
-
-console.log(
-	Account.query({
-		range: [
-			['London', '2022-08-29T08:03:39'],
-			['London', '2022-08-29T08:09:31'],
-		],
-	})
-		.select(['username', 'password'])
-		.build(),
-);

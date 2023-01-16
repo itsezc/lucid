@@ -1,13 +1,13 @@
-import { Table, Model, Field, Scope } from '../src';
-import { Issue } from './issue.spec';
-import { AdminScope } from './scopes.spec';
+import { Table, Model, Field, Scope } from '@surreal-tools/orm';
+import { Issue } from './issue';
+import { AdminScope } from './scopes';
 
 @Table<Account>({
-	permissions: ({ id }, { $auth }) => ({
-		create: Scope(AdminScope),
-		delete: false,
-		select: id === $auth.id,
-		update: id === $auth.id
+	permissions: () => ({
+		create: true,
+		select: AdminScope,
+		delete: true,
+		update: true
 	}),
 	auditable: true,
 })

@@ -7,83 +7,82 @@ const fileName = './organization.spec.ts';
 
 //Read project files and create program.
 
-
 process.chdir('../../../example');
 
 
 const cfgFile = ts.findConfigFile(process.cwd(), ts.sys.fileExists, 'tsconfig.json');
 const { config } = ts.readConfigFile(cfgFile, ts.sys.readFile);
+
+//Disable JS emit
+config.compilerOptions.noEmit = true;
+
 const { options, fileNames, errors } = ts.parseJsonConfigFileContent(config, ts.sys, process.cwd());
+
 
 function buildQuery() {
     const program = ts.createProgram(fileNames, options);
 
-
     const { diagnostics, emitSkipped } = program.emit()
 
-	const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(diagnostics, errors)
-	
-    //Print any warnings that Typescript has detected.
-	if (allDiagnostics.length) {
-		const formatHost: ts.FormatDiagnosticsHost = {
-			getCanonicalFileName: (path) => path,
-			getCurrentDirectory: ts.sys.getCurrentDirectory,
-			getNewLine: () => ts.sys.newLine,
-		}
-		const message = ts.formatDiagnostics(allDiagnostics, formatHost)
-		console.warn(message)
-	}
+    const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(diagnostics, errors)
 
-    const source = ts.transpileModule(program.getSourceFiles().map(x => x.getText()).join(), {
-        compilerOptions: {
-            target: ts.ScriptTarget.ES2022,
-            module: ts.ModuleKind.CommonJS,
-            moduleResolution: ts.ModuleResolutionKind.NodeJs,
-            noEmit: true
-        },
-    });
+    //Print any warnings that Typescript has detected.
+    if (allDiagnostics.length) {
+        const formatHost: ts.FormatDiagnosticsHost = {
+            getCanonicalFileName: (path) => path,
+            getCurrentDirectory: ts.sys.getCurrentDirectory,
+            getNewLine: () => ts.sys.newLine,
+        }
+        const message = ts.formatDiagnostics(allDiagnostics, formatHost)
+        console.warn(message)
+    }
 
     program.getSourceFiles().forEach(x => parseSourceFile(x));
+}
 
 buildQuery();
 
 
 
 function parseSourceFile(sourceFile: ts.SourceFile) {
-sourceFile.getChildren().forEach(child => {
-    const classes = child.getChildren().filter(n => ts.isClassDeclaration(n));
+    sourceFile.getChildren().forEach(child => {
+        const classes = child.getChildren().filter(n => ts.isClassDeclaration(n));
 
-    classes.forEach(classNode => {
-        //Finds and verifies that the decorator matches.
-        classNode.getChildren().filter(n => n.kind == ts.SyntaxKind.SyntaxList).forEach(ch => {
-            //Each SyntaxList,
-            const decorators = ch.getChildren().filter(n => ts.isDecorator(n));
+        classes.forEach(classNode => {
+            //Finds and verifies that the decorator matches.
+            classNode.getChildren().filter(n => n.kind == ts.SyntaxKind.SyntaxList).forEach(ch => {
+                //Each SyntaxList,
+                const decorators = ch.getChildren().filter(n => ts.isDecorator(n));
 
-            //Visit each decorator and check if it contains the 'Table' identifier.
-            decorators.forEach(dec => {
-                const callExpression = dec.getChildren().find(ce => ts.isCallExpression(ce));
-                const ident = callExpression.getChildren().find(c => ts.isIdentifier(c));
+                //Visit each decorator and check if it contains the 'Table' identifier.
+                decorators.forEach(dec => {
+                    const callExpression = dec.getChildren().find(ce => ts.isCallExpression(ce));
+                    const ident = callExpression.getChildren().find(c => ts.isIdentifier(c));
 
-                parseDecorator(dec, ident.getText());
-         
+                    parseDecorator(dec, ident.getText());
 
-                if (ident.getText() == 'Table') {
-                    //Decorator matches, construct SurrealQL.
-                    constructTable(classNode);
-                }
+
+                    const tableIdent = classNode.getChildren().find(n => ts.isIdentifier(n));
+
+                    console.log("TABLE: " + tableIdent.getText());
+
+                    if (ident.getText() == 'Table') {
+                        //Decorator matches, construct SurrealQL.
+                        constructTable(classNode);
+                    }
+                });
             });
-        });
-    })
-})
+        })
+    });
 }
 
 
 function constructTable(n: ts.Node) {
     const identifier = n.getChildren().find(n => ts.isIdentifier(n));
     let tableDef = `DEFINE TABLE ${identifier.getText()} SCHEMAFULL\n\tPERMISSIONS\n\t\tNONE`;
-    
+
     //Construct table perms, assertions.
-    
+
 
     //Construct table fields.
 }
@@ -110,34 +109,34 @@ function parseUnknown(n: ts.Node, table: string): string {
 
         const syntaxList = n.getChildren().filter(n => n.kind == ts.SyntaxKind.SyntaxList);
         syntaxList.forEach(sl => {
-           
+
         })
     }
-    
+
 }
 
 function parseString(n: ts.Node, table: string): string {
     const name = n.getChildren().find(n => ts.isIdentifier(n)).getText();
     return `DEFINE FIELD ${name} ON TABLE ${table}\n` +
-            `\tTYPE string\n` +
-            `\tASSERT ${null}\n` +
-            `\t\tPERMISSIONS FULL`;
+        `\tTYPE string\n` +
+        `\tASSERT ${null}\n` +
+        `\t\tPERMISSIONS FULL`;
 }
 
 function parseNum(n: ts.Node, table: string): string {
     const name = n.getChildren().find(n => ts.isIdentifier(n)).getText();
     return `DEFINE FIELD ${table} ON TABLE ${table}\n` +
-            `\tTYPE number\n` +
-            `\tASSERT ${null}\n` +
-            `\t\tPERMISSIONS FULL`;
+        `\tTYPE number\n` +
+        `\tASSERT ${null}\n` +
+        `\t\tPERMISSIONS FULL`;
 }
 
 function parseRef(n: ts.Node, table: string) {
     const name = n.getChildren().find(n => ts.isIdentifier(n)).getText();
     return `DEFINE FIELD ${name} ON TABLE ${table}\n` +
-            `\tTYPE record()\n` +
-            `\tASSERT ${null}\n` +
-            `\t\tPERMISSIONS FULL`;
+        `\tTYPE record()\n` +
+        `\tASSERT ${null}\n` +
+        `\t\tPERMISSIONS FULL`;
 }
 
 function parseArr(n: ts.Node, table: string) {
@@ -147,48 +146,50 @@ function parseArr(n: ts.Node, table: string) {
     //The underlying array type must be found so the array entries can be strongly typed with a schema.
 
     return `DEFINE FIELD ${name} ON TABLE ${table}\n` +
-            `\tTYPE array\n` +
-            `\tASSERT ${null}\n` +
-            `\t\tPERMISSIONS FULL`;
+        `\tTYPE array\n` +
+        `\tASSERT ${null}\n` +
+        `\t\tPERMISSIONS FULL`;
 }
 
 //Returns a permission string + assertions for the decorator supplied.
 function parseDecorator(n: ts.Node, tableName: string) {
     //The body of the decorator.
     const callExpression = n.getChildren().find(ce => ts.isCallExpression(ce));
-    const syntax = callExpression.getChildren().find(c => c.kind == ts.SyntaxKind.SyntaxList);
+    const syntax = callExpression.getChildren()?.find(c => c.kind == ts.SyntaxKind.SyntaxList);
 
-    const decoratorBody = syntax.getChildren().find(c => ts.isObjectLiteralExpression(c));
+    const decoratorBody = syntax.getChildren().find(c => ts.isObjectLiteralExpression(c)) || null;
 
 
-    const decoratorSl = decoratorBody.getChildren().find(c => c.kind == ts.SyntaxKind.SyntaxList);
+    const decoratorSl = decoratorBody?.getChildren()?.find(c => c.kind == ts.SyntaxKind.SyntaxList) || null;
 
     //Get all prop assignments in this property.
-    const propAssignment = decoratorSl.getChildren().filter(c => ts.isPropertyAssignment(c));
+    const propAssignment = decoratorSl?.getChildren()?.filter(c => ts.isPropertyAssignment(c)) || null;
 
-    propAssignment.forEach(propAss => {
-        //Check if it is a permissions, assertion, edge, or name.
-        const ident = propAss.getChildren().find(c => ts.isIdentifier(c));
-
-        switch (ident.getText()) {
-            case 'edge':
-                break;
-
-            case 'permissions':
-                parsePermissions(propAss);
-                break;
-
-            case 'assert':
-                break;
-
-            case 'name':
-                break;
-        
-            default:
-                break;
-        }
-    });
+    if (propAssignment) {
+        propAssignment.forEach(propAss => {
+            //Check if it is a permissions, assertion, edge, or name.
+            const ident = propAss.getChildren().find(c => ts.isIdentifier(c));
     
+            switch (ident.getText()) {
+                case 'edge':
+                    break;
+    
+                case 'permissions':
+                    parsePermissions(propAss);
+                    break;
+    
+                case 'assert':
+                    break;
+    
+                case 'name':
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
+
+
 }
 
 
@@ -204,59 +205,59 @@ function parsePermissions(n: ts.Node): string {
 
     const propertyAssignments = objLiteralSyntax.getChildren().filter(c => ts.isPropertyAssignment(c));
 
-    let permStr = '\tPERMISSIONS';
+    let permStr = '\tPERMISSIONS\n';
 
     propertyAssignments.forEach(prop => {
+
         const permType = prop.getChildren().find(c => ts.isIdentifier(c)).getText();
 
-        const expr = prop.getChildren().find(c => ts.isBinaryExpression(c));
+        console.log(prop.getChildren().map(c => ts.SyntaxKind[c.kind]));
 
-        let parsedExpr = '';
+        permStr += `\tFOR ${permType.toUpperCase()}`
 
-        if (!expr) {
-            //We should expect a true/false keyword.
-            if (prop.getChildren().find(c => c.kind == ts.SyntaxKind.TrueKeyword)) {
-                parsedExpr = 'FULL,';
-            }
-            else if (prop.getChildren().find(c => c.kind == ts.SyntaxKind.FalseKeyword)) { 
-                //Automatically false,
-                parsedExpr = 'NONE,';
-            }
-            //String literal child.
-            else if(prop.getChildren().find(c => ts.isStringLiteral(c))) {
-                const text = prop.getChildren().find(c => ts.isStringLiteral(c)).getText().replaceAll('\'', '').replaceAll('\"', '');
+        const trueKeyword = prop.getChildren().find(c => c.kind == ts.SyntaxKind.TrueKeyword);
+        const falseKeyword = prop.getChildren().find(c => c.kind == ts.SyntaxKind.FalseKeyword);
 
-                if (text == 'FULL') {
-                    parsedExpr = 'FULL,';
-                }
-                if (text == 'NONE') {
-                    parsedExpr = 'NONE,';
-                }
+        const binExpression = prop.getChildren().find(c => ts.isBinaryExpression(c));
+        const callExpression = prop.getChildren().find(c => ts.isCallExpression(c));
+        const identifier = prop.getChildren().find(c => ts.isIdentifier(c));
 
-                parsedExpr = 'WHERE ' + text + ',';
-            }
-            else {
-                if (prop.getChildren().find(c => ts.isCallExpression(c))) { 
-                    //CallExpression, likely a scope assignment.
-                    //console.log(eval(prop.getChildren().find(c => ts.isCallExpression(c)).getText()));
-                    
-                }
-                else {
-                    throw Error('Non binary expression detected in permission decorator.');
-                }
 
-            }
+
+        if (trueKeyword) {
+            permStr += ` FULL`;
         }
+        else if (falseKeyword) {
+            permStr += ` NONE`;
+        }
+        else if (binExpression) {
+            const callExpr = binExpression.getChildren().find(c => ts.isCallExpression(c));
+            //TODO: Trace scope for things like AdminScope, query(), methods on types.
+            console.log("Binary expression!");
+        }
+        else if (callExpression) {
+            //Handle complex queries.
+        }
+        else if (identifier) {
+            //Get prototype on identifier (ie AdminScope.prototype.getText());
+            
+        }
+        else if (prop.getChildren().find(c => c.kind == ts.SyntaxKind.ArrayType)) {
+            //Array: [[[CREATE, UPDATE, SELECT], false]]
+        }
+        
         else {
-            //Its a binary expression.
-            const binExprText = expr.getText();
-            parsedExpr = binExprText.replaceAll('===', '=').replaceAll('==', '=').replaceAll('!==', '!='); + ',';
+            console.log("Other kind: " + prop.getChildren().map(c => ts.SyntaxKind[c.kind]))
+            //Unknown type? Might be a scope reference or object method.
+           
         }
-    
-        permStr +=`\n\t\tFOR ${permType.toUpperCase()} ${parsedExpr}` 
+
+        permStr += ',\n';
+
     });
 
     console.log(permStr);
+
 }
 
 
