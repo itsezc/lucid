@@ -5,15 +5,21 @@ type TPermissionsCallback<SubModel extends Model = Model> = {
 	$auth: IContextAuth;
 };
 
+type TPermissionCommand = 'CREATE' | 'UPDATE' | 'DELETE' | 'SELECT';
+
+type TPermissionMultiple = [TPermissionCommand, string];
+
 export type TPermissions<SubModel extends Model = Model> = (
 	model: SubModel,
 	args: TPermissionsCallback<SubModel>,
-) => {
-	select?: string | boolean;
-	create?: string | boolean;
-	update?: string | boolean;
-	delete?: string | boolean;
-};
+) =>
+	| {
+			select?: string | boolean;
+			create?: string | boolean;
+			update?: string | boolean;
+			delete?: string | boolean;
+	  }
+	| TPermissionMultiple[][];
 
 /**
  * Surreal authentication context

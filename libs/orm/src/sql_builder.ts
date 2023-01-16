@@ -22,6 +22,10 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
+	public where(): SQLBuilder<SubModel> {
+		return this;
+	}
+
 	public through(model: Model): SQLBuilder<SubModel> {
 		return this;
 	}

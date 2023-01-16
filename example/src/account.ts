@@ -3,8 +3,8 @@ import { Issue } from './issue.spec';
 import { AdminScope } from './scopes.spec';
 
 @Table<Account>({
-	permissions: ({ id }, { $scope, $auth }) => ({
-		create: $scope === Scope(AdminScope),
+	permissions: ({ id }, { $auth }) => ({
+		create: Scope(AdminScope),
 		delete: false,
 		select: id === $auth.id,
 		update: id === $auth.id
