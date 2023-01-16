@@ -53,30 +53,38 @@ sourceFile.getChildren().forEach(child => {
         let tableDef = `DEFINE TABLE ${identifier.getText()} schemaless\n\tPERMISSIONS\n\t\tNONE`;
         
 
-
         fields.forEach(f => {
-            tableDef += parseUnknown(f);
+            parseUnknown(f);
         })
 
 
     })
 })
 
-//Takes a node of unknown type, identifies its type and parses it.
-function parseUnknown(n: ts.Node): string {
+//Takes a field of unknown type, identifies its type and parses it.
+function parseUnknown(n: ts.Node, table: string): string {
     //String
     if (n.getChildren().some(n => n.kind == ts.SyntaxKind.StringKeyword)) {
-        return parseString(n);
+        return parseString(n, table);
     }
 
     //Number
     if (n.getChildren().some(n => n.kind == ts.SyntaxKind.NumberKeyword)) {
-        return parseNum(n);
+        return parseNum(n, table);
     }
+
+    //console.log(n.getChildren().map(n => n.getText()));
 
     //SyntaxList, parse deeper.
     if (n.getChildren().some(n => n.kind == ts.SyntaxKind.SyntaxList)) {
-        //SyntaxList might contain an array, object or some other funky non-primitive type.
+        //The decorator generally is a SyntaxList.
+
+        //Try to extract the Decorator, Anonymous Object or Array.
+
+        const syntaxList = n.getChildren().filter(n => n.kind == ts.SyntaxKind.SyntaxList);
+        syntaxList.forEach(sl => {
+           
+        })
     }
     
 }
@@ -100,7 +108,7 @@ function parseNum(n: ts.Node, table: string): string {
 function parseRef(n: ts.Node, table: string) {
     const name = n.getChildren().find(n => ts.isIdentifier(n)).getText();
     return `DEFINE FIELD ${name} ON TABLE ${table}\n` +
-            `\tTYPE number\n` +
+            `\tTYPE record()\n` +
             `\tASSERT ${null}\n` +
             `\t\tPERMISSIONS FULL`;
 }
@@ -117,6 +125,8 @@ function parseArr(n: ts.Node, table: string) {
             `\t\tPERMISSIONS FULL`;
 }
 
+
+//Parses an object and returns the equivalent SurrealQL string. (ie, each subfield of that object will have its own 'DEFINE' ).
 function parseObject(n: ts.Node) {
 
 }
