@@ -1,4 +1,6 @@
 {
+	"include": ["**/*"],
+	"exclude": [],
 	"compilerOptions": {
 		"target": "ESNext",
 		"moduleResolution": "node",

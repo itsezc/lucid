@@ -35,17 +35,17 @@ export class Account extends Model {
 	years_active?: number;
 }
 
-Account.events([
-	{
-		name: 'change_username',
-		when: ({ $after, $before, $event }) =>
-			($before.username !== $after.username &&
-				$before.passKey !== $after.passKey &&
-				$event === 'CREATE') ||
-			$before.username !== $before.username,
-		then: ({ $after, $before }) => Issue.create().build(),
-	},
-]);
+// Account.events([
+// 	{
+// 		name: 'change_username',
+// 		when: ({ $after, $before, $event }) =>
+// 			($before.username !== $after.username &&
+// 				$before.passKey !== $after.passKey &&
+// 				$event === 'CREATE') ||
+// 			$before.username !== $before.username,
+// 		then: ({ $after, $before }) => Issue.create().build(),
+// 	},
+// ]);
 
 // // SELECT * FROM account WHERE username = 'test';
 // Account.query({

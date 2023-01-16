@@ -16,5 +16,5 @@ export interface ISurrealScope<Vars = DefaultSessionVars> {
 }
 
 export const Scope = (scope: ISurrealScope) => {
-	return `$scope === ${scope}`;
+	return `$scope = ${scope}`;
 };

@@ -3,7 +3,8 @@
 	"private": true,
 	"workspaces": [
 		"apps/*",
-		"libs/*"
+		"libs/*",
+		"example"
 	],
 	"devDependencies": {
 		"@types/node": "^18.11.18",

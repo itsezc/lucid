@@ -1,0 +1,10 @@
+{
+	"include": ["./src/**/*"],
+	"compilerOptions": {
+		"rootDir": "./src",
+		"target": "ESNext",
+		"moduleResolution": "node",
+		"experimentalDecorators": true,
+        "resolveJsonModule": true
+	}
+}
