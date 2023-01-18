@@ -1,4 +1,4 @@
-import { DateTime, Field, Model, Scope, Table } from '@surreal-tools/orm';
+import { DateTime, Field, Model, Table } from '@surreal-tools/orm';
 
 import { Account } from './account';
 import { IssueLabel } from './issue_label';
@@ -8,9 +8,10 @@ import { AccountScope, AdminScope } from './scopes';
 
 @Table({
 	permissions: ({ id }, { $auth }) => ({
-		create: AdminScope && id === $auth.id,
-		delete: false,
-		update: AdminScope || AccountScope,
+		create: AccountScope && id === $auth.id,
+		delete: 'id === $auth.id',
+		//Nested types are ParenestizedExpression, BinaryExpression
+		update: AdminScope || (AccountScope && id === $auth.id || AdminScope && id === $auth.id),
 		select: AdminScope
 	}),
 })

@@ -1,4 +1,7 @@
 {
 	"name": "@surreal-tools/orm",
-	"main": "src/index.ts"
+	"main": "src/index.ts",
+	"dependencies": {
+		"byots": "^5.0.0-dev.20221103.1.34"
+	}
 }

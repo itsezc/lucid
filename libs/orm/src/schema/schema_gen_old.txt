@@ -1,6 +1,6 @@
 import { exit } from "process";
-import { Field, ITable, Model, Table, Scope } from ".";
-import * as ts from 'typescript';
+import { Field, ITable, Model, Table, Scope } from "..";
+import * as ts from 'byots';
 
 const fileName = './organization.spec.ts';
 

@@ -1,10 +1,10 @@
-import { Table, Model, Field, Scope } from '@surreal-tools/orm';
+import { Table, Model, Field } from '@surreal-tools/orm';
 import { Issue } from './issue';
 import { AdminScope } from './scopes';
 
 @Table<Account>({
 	permissions: () => ({
-		create: true,
+		create: false,
 		select: AdminScope,
 		delete: true,
 		update: true
