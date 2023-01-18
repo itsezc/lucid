@@ -4,6 +4,6 @@
 	"compilerOptions": {
 		"target": "ESNext",
 		"moduleResolution": "node",
-		"experimentalDecorators": true
+		"experimentalDecorators": true,
 	}
 }

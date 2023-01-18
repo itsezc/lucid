@@ -2,6 +2,7 @@ import { Model } from './model';
 import { TPermissions } from './permissions';
 
 export type ITable<SubModel extends Model> = {
+	name?: string;
 	edge?: boolean;
 	auditable?: boolean;
 	permissions?: TPermissions<SubModel>;

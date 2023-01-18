@@ -2,6 +2,7 @@ import { Table, Model, Field } from '@surreal-tools/orm';
 import { Issue } from './issue';
 import { AdminScope } from './scopes';
 
+
 @Table<Account>({
 	permissions: () => ({
 		create: false,
@@ -26,7 +27,7 @@ export class Account extends Model {
 			update: id === $auth.id
 		})
 	})
-	password?: string;
+	password: string;
 
 	passKey?: string;
 
@@ -34,6 +35,7 @@ export class Account extends Model {
 
 	years_active?: number;
 }
+
 
 // Account.events([
 // 	{

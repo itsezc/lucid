@@ -5,6 +5,6 @@
 		"target": "ESNext",
 		"moduleResolution": "node",
 		"experimentalDecorators": true,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
 	}
 }

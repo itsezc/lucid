@@ -79,6 +79,7 @@ export function parseType(n: ts.Node) {
 			break;
 
 		case ts.SyntaxKind.ParenthesizedExpression: 
+            //Todo, make this a bit more robust. Support other nested types in parentheses.
             const binExpr = n.getChildren().find(c => ts.isBinaryExpression(c));
             if (binExpr) {
                 schema += `(${parseType(binExpr)})`;

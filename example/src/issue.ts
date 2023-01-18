@@ -6,24 +6,24 @@ import { Project } from './project';
 
 import { AccountScope, AdminScope } from './scopes';
 
-@Table({
-	permissions: ({ id }, { $auth }) => ({
+@Table<Issue>({
+	permissions: ({ id, title }, { $auth }) => ({
 		create: AccountScope && id === $auth.id,
 		delete: 'id === $auth.id',
 		//Nested types are ParenestizedExpression, BinaryExpression
 		update: AdminScope || (AccountScope && id === $auth.id || AdminScope && id === $auth.id),
-		select: AdminScope
+		select: AdminScope || (id == $auth.id && title != null && (AdminScope) && AccountScope)
 	}),
 })
 export class Issue extends Model {
 	@Field({ index: true })
-	title?: string;
+	title!: string;
 
-	body?: string;
+	body!: string;
 
 	priority?: 'no_priority' | 'urgent' | 'high' | 'medium' | 'low';
 
-	status?: 'backlog' | 'todo' | 'in_progress' | 'done' | 'canceled';
+	status: 'backlog' | 'todo' | 'in_progress' | 'done' | 'canceled';
 
 	due?: DateTime;
 

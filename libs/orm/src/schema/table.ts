@@ -11,11 +11,12 @@ export function parseTable(n: ts.Node): string {
     //TableDecorator.
     const tableDec = n.getChildren().filter(n => n.kind == ts.SyntaxKind.SyntaxList).map(n => n.getChildren().filter(n => ts.isDecorator(n))).flat().find(n => n.getChildren().find(n => ts.isCallExpression(n)).getChildren().find(n => ts.isIdentifier(n)).getText() == 'Table');
 
-    const decorator = parseDecorator(tableDec);
+    const [decoratorSchema, tableName] = parseDecorator(tableDec);
 
     //An array of each field's SurrealQL definition.
     const fields = n.getChildren().filter(n => n.kind == ts.SyntaxKind.SyntaxList).map(n => n.getChildren().filter(n => ts.isPropertyDeclaration(n))).flat().map(n => parseField(n));
 
     //Define the table with its coresponding data, and the fields themselves.
-    return `DEFINE TABLE ${extrapolateTableName(tableIdent)} SCHEMAFULL ${decorator}`;
+
+    return `DEFINE TABLE ${tableName || extrapolateTableName(tableIdent)} SCHEMAFULL ${decoratorSchema}`.replaceAll('/\s{2,}*/', ' ')
 }

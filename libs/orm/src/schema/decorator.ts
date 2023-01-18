@@ -5,11 +5,12 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 //Returns a SurrealQL string representing the decorator.
-export function parseDecorator(dec: ts.Node): string {
+export function parseDecorator(dec: ts.Node): string[] {
     //Only one call expression for this decorator.
     const callExpression = dec.getChildren().find(ce => ts.isCallExpression(ce));
+    let trueName: string = null;
 
-    return callExpression.getChildren().filter(se => se.kind == ts.SyntaxKind.SyntaxList).map(se => {
+    return [callExpression.getChildren().filter(se => se.kind == ts.SyntaxKind.SyntaxList).map(se => {
         //Visit every SyntaxList on the callExpressions.
 
         //This will not exist in default scenarios.
@@ -34,19 +35,20 @@ export function parseDecorator(dec: ts.Node): string {
                     str += '\n\tPERMISSIONS\n' + parsePermissionAssignment(prop, ident.getText());
                 }
                 else if (ident.getText() == 'assert') {
-                    str += '\n\t ASSERT';
+                    str += '\n\t ASSERT\n';
                 }
                 else if (ident.getText() == 'edge') {
                     //TODO: parse edge.
                 }
                 else if (ident.getText() == 'name') {
-                    //TODO: propogate assigned name back to table parser.
+                    const stringLit = prop.getChildren().find(c => ts.isStringLiteral(c));
+                    trueName = stringLit.getText().replaceAll(`'`, '');
                 }
             });
 
-            return str;
+            return str.slice(0, -1) + ';';
         }
-    }).join('');
+    }).join(''), trueName]
 }
 
 //Parses the right-hand side of the 'permission' field.
@@ -128,5 +130,5 @@ function parsePermissionAssignment(prop: ts.Node, type: string): string {
 
 function sanitizeText(n: string) {
     return n.replaceAll('===', '==')
-        .replaceAll('\'', '');
+        .replaceAll('\'', '').replaceAll('null', 'NULL');
 }
