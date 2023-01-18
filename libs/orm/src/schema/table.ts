@@ -14,9 +14,9 @@ export function parseTable(n: ts.Node): string {
     const [decoratorSchema, tableName] = parseDecorator(tableDec);
 
     //An array of each field's SurrealQL definition.
-    const fields = n.getChildren().filter(n => n.kind == ts.SyntaxKind.SyntaxList).map(n => n.getChildren().filter(n => ts.isPropertyDeclaration(n))).flat().map(n => parseField(n));
+    const fields = n.getChildren().filter(n => n.kind == ts.SyntaxKind.SyntaxList).map(n => n.getChildren().filter(n => ts.isPropertyDeclaration(n))).flat().map(n => parseField(n, tableName || extrapolateTableName(tableIdent))).join("\n");;
 
     //Define the table with its coresponding data, and the fields themselves.
 
-    return `DEFINE TABLE ${tableName || extrapolateTableName(tableIdent)} SCHEMAFULL ${decoratorSchema}`.replaceAll('/\s{2,}*/', ' ')
+    return `DEFINE TABLE ${tableName || extrapolateTableName(tableIdent)} SCHEMAFULL ${decoratorSchema}\n${fields}`.replaceAll('/\s{2,}*/', ' ')
 }

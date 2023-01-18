@@ -81,9 +81,20 @@ export function parseType(n: ts.Node) {
 		case ts.SyntaxKind.ParenthesizedExpression: 
             //Todo, make this a bit more robust. Support other nested types in parentheses.
             const binExpr = n.getChildren().find(c => ts.isBinaryExpression(c));
-            if (binExpr) {
-                schema += `(${parseType(binExpr)})`;
-            }
+
+            const children = n.getChildren();
+            children.forEach(child => {
+                console.log(ts.SyntaxKind[child.kind]);
+                if (child.kind == ts.SyntaxKind.BinaryExpression || 
+                    child.kind == ts.SyntaxKind.PropertyAccessExpression ||
+                    child.kind == ts.SyntaxKind.Identifier ||
+                    child.kind == ts.SyntaxKind.CallExpression ||
+                    child.kind == ts.SyntaxKind.ParenthesizedExpression ||
+                    child.kind == ts.SyntaxKind.StringLiteral 
+                ) {
+                    schema += `( ${parseType(child)})`;
+                }
+            });
 			break;
 
 		case ts.SyntaxKind.CallExpression:

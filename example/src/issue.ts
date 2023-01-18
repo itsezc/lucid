@@ -21,9 +21,9 @@ export class Issue extends Model {
 
 	body!: string;
 
-	priority?: 'no_priority' | 'urgent' | 'high' | 'medium' | 'low';
+	priority!: 'no_priority' | 'urgent' | 'high' | 'medium' | 'low';
 
-	status: 'backlog' | 'todo' | 'in_progress' | 'done' | 'canceled';
+	status!: 'backlog' | 'todo' | 'in_progress' | 'done' | 'canceled';
 
 	due?: DateTime;
 

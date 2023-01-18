@@ -50,6 +50,7 @@ interface ITableFieldProps<SubModel extends Model, Descriptor> {
 	name?: string;
 	enum?: EnumType;
 	index?: TSurrealFieldIndex;
+	flexible?: boolean;
 	default?: Descriptor;
 	assert?: TAssertHandler<SubModel>;
 	permissions?: TPermissions<SubModel>;

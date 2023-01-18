@@ -1,4 +1,4 @@
-import { Table, Model, Field } from '@surreal-tools/orm';
+import { Table, Model, Field, Decimal, Float, DateTime } from '@surreal-tools/orm';
 import { Issue } from './issue';
 import { AdminScope } from './scopes';
 
@@ -17,7 +17,7 @@ export class Account extends Model {
 	username?: string;
 
 	@Field({ assert: 'email' })
-	email: string;
+	email!: string;
 
 	@Field({
 		permissions: ({ id }, { $auth }) => ({
@@ -27,11 +27,33 @@ export class Account extends Model {
 			update: id === $auth.id
 		})
 	})
-	password: string;
+	password!: string;
 
 	passKey?: string;
 
 	verified?: boolean;
+
+	money?: Decimal;
+
+	floatExample?: Float;
+
+	birthday?: DateTime;
+
+	metadata?: {
+		marketing: boolean;
+		cookies?: boolean;
+	};
+
+	@Field({ flexible: true })
+	otherMetadata?: {};
+
+	//DEFINE FIELD metadata.marketing TYPE boolean ASSERT exists
+	//DEFINE FIELD metadata.cookies TYPE boolean ASSERT nothing
+
+	logins?: {
+		when: DateTime;
+		verified?: boolean;
+	}[];
 
 	years_active?: number;
 }
