@@ -27,7 +27,7 @@ type TRelate<
 	parallel?: boolean;
 }
 
-export function relate<
+export function relate2<
 	T1 extends Model, 
 	T2 extends Model, 
 	EdgeProps extends typeof Model
