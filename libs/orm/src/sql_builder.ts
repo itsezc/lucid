@@ -15,6 +15,8 @@ export class SQLBuilder<SubModel extends Model> {
 	private where_condition: string;
 	private count_condition: string;
 
+	private query_select_fields: string[] = [];
+
 	private query_parallel = false;
 	private query_split: string | null = null;
 
@@ -25,7 +27,12 @@ export class SQLBuilder<SubModel extends Model> {
 		'COLLATE' | 'NUMERIC' | undefined
 	][] = [];
 
-	private query_limit: number | null = null;
+	private query_fetch_fields: string[] = [];
+
+	private query_groupBy = false;
+
+	private query_limit: number = null;
+	private query_limit_start: number = null;
 
 	constructor(props: ISQLBuilderProps<SubModel>) {
 		this.from_table = props.from_table;
@@ -93,6 +100,14 @@ export class SQLBuilder<SubModel extends Model> {
 	}
 
 	/**
+	 * SurrealDB supports data aggregation and grouping, with support for multiple fields, nested fields, and aggregate functions. In SurrealDB, every field which appears in the field projections of the select statement (and which is not an aggregate function), must also be present in the `GROUP BY` clause.
+	 */
+	public groupBy(): SQLBuilder<SubModel> {
+		this.query_groupBy = true;
+		return this;
+	}
+
+	/**
 	 * As SurrealDB supports arrays and nested fields within arrays, it is possible to split the result on a specific field name, returning each value in an array as a separate value, along with the record content itself. This is useful in data analysis contexts.
 	 */
 	public split(field: keyof SubModel): SQLBuilder<SubModel> {
@@ -100,13 +115,19 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
-	public limit(limit: number): SQLBuilder<SubModel> {
+	public limit(limit: number, start?: number): SQLBuilder<SubModel> {
 		this.query_limit = limit;
+		this.query_limit_start = start;
 		return this;
 	}
 
 	public parallel(): SQLBuilder<SubModel> {
 		this.query_parallel = true;
+		return this;
+	}
+
+	public fetch(fields: (keyof SubModel)[]): SQLBuilder<SubModel> {
+		this.query_fetch_fields = fields.map(field => field.toString());
 		return this;
 	}
 
