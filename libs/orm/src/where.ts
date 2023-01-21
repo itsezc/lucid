@@ -7,6 +7,7 @@ type TModelProperties<SubModel extends Model> = {
 export type TQueryArgs<SubModel extends Model> = {
 	range?: string[][] | number[];
 	where?: Partial<TModelProperties<SubModel>>;
+	timeout?: `${number}s`;
 };
 
 type TQueryArgInt = {};

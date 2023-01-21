@@ -1,4 +1,4 @@
-import { Model, TQueryArgs } from './';
+import { Model, SQL, TQueryArgs } from './';
 import { joinFields } from './util';
 
 interface ISQLBuilderProps<SubModel extends Model> {
@@ -9,7 +9,14 @@ interface ISQLBuilderProps<SubModel extends Model> {
 export class SQLBuilder<SubModel extends Model> {
 	private from_table: string;
 	private range: string;
-	private select_fields = '*';
+	private select_fields = '';
+
+	private subquery: string[] = [];
+	private where_condition: string;
+	private count_condition: string;
+
+	private query_parallel = false;
+	private query_orderBy: [string, 'ASC' | 'DESC'][] = [];
 
 	constructor(props: ISQLBuilderProps<SubModel>) {
 		this.from_table = props.from_table;
@@ -21,23 +28,37 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
-	public where(): SQLBuilder<SubModel> {
+	public where(condition: string): SQLBuilder<SubModel> {
+		if (typeof condition === 'string')
+			this.where_condition = condition;
+		
 		return this;
 	}
 
-	public through(model: Model): SQLBuilder<SubModel> {
+	public count<T extends Model>(
+		condition: string | SQLBuilder<T>,
+		operator: '<'| '<=' | '=' | '>' | '>=',
+		value: number
+	): SQLBuilder<SubModel> {
+		if (typeof condition === 'string')
+			this.count_condition = condition;
+		else
+			this.count_condition = `${condition.build()} ${operator} ${value}`;
+
 		return this;
 	}
 
-	public over(model: Model): SQLBuilder<SubModel> {
+	public in(model: typeof Model | string): SQLBuilder<SubModel> {
+		if (typeof model === 'string') this.subquery.push(model);
+		else this.subquery.push(`->${new model().getTableName()}`);
+
 		return this;
 	}
 
-	public in(model: Model): SQLBuilder<SubModel> {
-		return this;
-	}
+	public of(model: typeof Model | string): SQLBuilder<SubModel> {
+		if (typeof model === 'string') this.subquery.push(model);
+		else this.subquery.push(`<-${new model().getTableName()}`);
 
-	public of(model: Model): SQLBuilder<SubModel> {
 		return this;
 	}
 
@@ -46,9 +67,25 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
+	public orderBy(key: keyof SubModel, order: 'ASC' | 'DESC'): SQLBuilder<SubModel> {
+		this.query_orderBy.push([key.toString(), order]);
+		return this;
+	}
+
+	public parallel(): SQLBuilder<SubModel> {
+		this.query_parallel = true;
+		return this;
+	}
+
+	// @todo FROM is optional i.e. 
+	// `SELECT * FROM person WHERE ->knows->person->(knows WHERE influencer = true) TIMEOUT 5s;`
 	public build() {
-		return `SELECT ${this.select_fields} FROM ${this.from_table}${
-			this.range ? `:${this.range}` : ''
+		const is_subquery = this.subquery.length > 0;
+		const subquery = `${this.subquery.join('')}->${this.from_table}`;
+
+		return `SELECT 
+			${is_subquery ? '' : this.select_fields}${subquery} FROM 
+			${this.from_table}${this.range ? `:${this.range}` : ''
 		};`;
 	}
 
@@ -56,3 +93,4 @@ export class SQLBuilder<SubModel extends Model> {
 
 	public live() {}
 }
+ 
