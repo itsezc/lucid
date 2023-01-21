@@ -16,7 +16,11 @@ export class SQLBuilder<SubModel extends Model> {
 	private count_condition: string;
 
 	private query_parallel = false;
-	private query_orderBy: [string, 'ASC' | 'DESC'][] = [];
+	private query_orderBy: [
+		string, 
+		'ASC' | 'DESC', 
+		'COLLATE' | 'NUMERIC' | undefined
+	][] = [];
 
 	constructor(props: ISQLBuilderProps<SubModel>) {
 		this.from_table = props.from_table;
@@ -67,8 +71,12 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
-	public orderBy(key: keyof SubModel, order: 'ASC' | 'DESC'): SQLBuilder<SubModel> {
-		this.query_orderBy.push([key.toString(), order]);
+	public orderBy(
+		key: keyof SubModel, 
+		order: 'ASC' | 'DESC', 
+		extra?: 'COLLATE' | 'NUMERIC'
+	): SQLBuilder<SubModel> {
+		this.query_orderBy.push([key.toString(), order, extra]);
 		return this;
 	}
 
