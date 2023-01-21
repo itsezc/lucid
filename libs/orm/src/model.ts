@@ -32,8 +32,6 @@ export class Model {
 	protected edge = false;
 
 	public id!: string;
-	public created_on?: Date;
-	public updated_on?: Date;
 
 	constructor(protected props?: ITable<Model>) {
 		if (props) {
