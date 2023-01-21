@@ -16,11 +16,16 @@ export class SQLBuilder<SubModel extends Model> {
 	private count_condition: string;
 
 	private query_parallel = false;
+	private query_split: string | null = null;
+
+	private query_orderByRand = false;
 	private query_orderBy: [
 		string, 
 		'ASC' | 'DESC', 
 		'COLLATE' | 'NUMERIC' | undefined
 	][] = [];
+
+	private query_limit: number | null = null;
 
 	constructor(props: ISQLBuilderProps<SubModel>) {
 		this.from_table = props.from_table;
@@ -77,6 +82,26 @@ export class SQLBuilder<SubModel extends Model> {
 		extra?: 'COLLATE' | 'NUMERIC'
 	): SQLBuilder<SubModel> {
 		this.query_orderBy.push([key.toString(), order, extra]);
+		return this;
+	}
+
+	// ORDER BY RAND()
+	public orderRandomly(): SQLBuilder<SubModel> {
+		this.query_orderByRand = true;
+		this.query_orderBy = [];
+		return this;
+	}
+
+	/**
+	 * As SurrealDB supports arrays and nested fields within arrays, it is possible to split the result on a specific field name, returning each value in an array as a separate value, along with the record content itself. This is useful in data analysis contexts.
+	 */
+	public split(field: keyof SubModel): SQLBuilder<SubModel> {
+		this.query_split = field.toString();
+		return this;
+	}
+
+	public limit(limit: number): SQLBuilder<SubModel> {
+		this.query_limit = limit;
 		return this;
 	}
 
