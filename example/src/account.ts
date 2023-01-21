@@ -1,6 +1,4 @@
-import { Table, Model, Field, Decimal, Float, DateTime } from '@surreal-tools/orm';
-import { Issue } from './issue';
-import { IssueLabel } from './issue_label';
+import { Table, Model, Field, Decimal, Float, DateTime, sql } from '@surreal-tools/orm';
 import { AdminScope } from './scopes';
 
 
@@ -107,17 +105,70 @@ export class Account extends Model {
 // 	)
 // 	.execute();
 
-
 // Account.query({ 
 // 		where: { username: 'test' },
 // 		timeout: '10s',
 // 	})
 // 	.select(['username', 'verified'])
-// 	.count(
-// 		Issue.query()
-// 			.in(IssueLabel),
-// 		'<', 5
-// 	)
-// 	.orderBy('username', 'ASC')
+// 	.split('passKey')
+// 	.orderBy('passKey', 'DESC', 'COLLATE')
+// 	.groupBy()
 // 	.parallel()
+// 	.limit(5)
 // 	.execute();
+
+Account.query()
+	.select('*')
+	.select(['username', 'passKey'])
+	.select({
+		$: 'birthday',
+		as: 'dob'
+	})
+	.select({ $: ['birthday', '>=', '18'], as: 'date' })
+	.select([
+		{ $: ['username', '=', 'Arthur fleck'], as: 'joker' },
+		{ $: ['birthday', '>=', '18'], as: 'date' }
+	])
+	.select([
+		'*',
+		{
+			$$: 'tags.*.value',
+			as: 'tags'
+		}
+	])
+	.select([
+		{
+			$: 'username',
+			where: 'active = true'
+		}
+	])
+	.select([
+		{ 
+			$$: '->like->friend.name',
+			as: 'farenheit'
+		}
+	])
+	.select([
+		{ 
+			$$: '((celcius * 2) + 30)',
+			as: 'farenheit'
+		}
+	])
+	.select([
+		{
+			$$: {
+				username: 'xD'
+			},
+			as: 'marketing_settings'
+		}
+	])
+	.select([
+		'*',
+		{
+			$$: sql(
+				'SELECT * FROM events WHERE host == $parent.id', 
+				{ subquery: true }
+			),
+			as: 'self_hosted'
+		}
+	])

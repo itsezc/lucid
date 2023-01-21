@@ -6,8 +6,26 @@ interface ISQLBuilderProps<SubModel extends Model> {
 	args?: TQueryArgs<SubModel>;
 }
 
+type TComparisonOperator = '<'| '<=' | '=' | '>' | '>=';
+type TMappedModelProperty<T extends Model> = { [P in keyof T]: T[keyof T]};
+
+type TSelectionExpression<SubModel extends Model> = 
+	'*' 
+	| (keyof SubModel)[] 
+	| TSelectExpressionAlias<SubModel>
+	| TSelectExpressionAlias<SubModel>[]
+	| ['*', TSelectExpressionAlias<SubModel>]
+	| ['*', TSelectExpressionAlias<SubModel>][];
+
+type TSelectExpressionAlias<T extends Model> = { 
+	$?: [keyof T, TComparisonOperator, T[keyof T]] | keyof T, 
+	$$?: string | { [P in keyof T]?: T[keyof T]}, 
+	as?: string, 
+	where?: string
+};
+
 export class SQLBuilder<SubModel extends Model> {
-	private from_table: string;
+	private query_table: string;
 	private range: string;
 	private select_fields = '';
 
@@ -35,12 +53,16 @@ export class SQLBuilder<SubModel extends Model> {
 	private query_start: number = null;
 
 	constructor(props: ISQLBuilderProps<SubModel>) {
-		this.from_table = props.from_table;
+		this.query_table = props.from_table;
 		this.range = joinFields(props.args?.range);
 	}
 
-	public select(fields: (keyof SubModel)[]): SQLBuilder<SubModel> {
-		this.select_fields = fields.join(', ');
+	public select(
+		fields: TSelectionExpression<SubModel>
+	): SQLBuilder<SubModel> {
+		// If fields are fields of table
+		if(Array.isArray(fields)) this.select_fields = fields.join(', ');
+		
 		return this;
 	}
 
@@ -53,7 +75,7 @@ export class SQLBuilder<SubModel extends Model> {
 
 	public count<T extends Model>(
 		condition: string | SQLBuilder<T>,
-		operator: '<'| '<=' | '=' | '>' | '>=',
+		operator: TComparisonOperator,
 		value: number
 	): SQLBuilder<SubModel> {
 		if (typeof condition === 'string')
@@ -78,8 +100,8 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
-	public from(table: string): SQLBuilder<SubModel> {
-		this.from_table = table;
+	public from(record: string): SQLBuilder<SubModel> {
+		this.query_table = record;
 		return this;
 	}
 
@@ -139,11 +161,11 @@ export class SQLBuilder<SubModel extends Model> {
 	// `SELECT * FROM person WHERE ->knows->person->(knows WHERE influencer = true) TIMEOUT 5s;`
 	public build() {
 		const is_subquery = this.subquery.length > 0;
-		const subquery = `${this.subquery.join('')}->${this.from_table}`;
+		const subquery = `${this.subquery.join('')}->${this.query_table}`;
 
 		return `SELECT 
 			${is_subquery ? '' : this.select_fields}${subquery} FROM 
-			${this.from_table}${this.range ? `:${this.range}` : ''
+			${this.query_table}${this.range ? `:${this.range}` : ''
 		};`;
 	}
 

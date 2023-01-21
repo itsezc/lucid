@@ -1,5 +1,9 @@
 export type SQL = string;
 
-export function sql<T = string>(query: string): T {
+type SQLOptions = {
+	subquery?: true;
+}
+
+export function sql<T = string>(query: string, options?: SQLOptions): T {
 	return query as T;
 }
