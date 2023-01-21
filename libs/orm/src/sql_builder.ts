@@ -32,7 +32,7 @@ export class SQLBuilder<SubModel extends Model> {
 	private query_groupBy = false;
 
 	private query_limit: number = null;
-	private query_limit_start: number = null;
+	private query_start: number = null;
 
 	constructor(props: ISQLBuilderProps<SubModel>) {
 		this.from_table = props.from_table;
@@ -115,9 +115,13 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
-	public limit(limit: number, start?: number): SQLBuilder<SubModel> {
+	public limit(limit: number): SQLBuilder<SubModel> {
 		this.query_limit = limit;
-		this.query_limit_start = start;
+		return this;
+	}
+
+	public start(start: number): SQLBuilder<SubModel> {
+		this.query_start = start
 		return this;
 	}
 
