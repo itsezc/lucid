@@ -62,22 +62,28 @@ export type QueryBuilder<SubModel extends Model> = {
 
 	Select all person records (and their recipients), who have sent more than 5 emails
 
-	query(Account)
-		.through(Sent)
+	Account.query({
+		select: ['*'],
+		where: {
+			
+		}
+	})
+		.select(['*'])
+		.in(Sent)
 		.in(Email)
 		.in(To)
-		.where()
-		.count()
-		.through(Sent)
-		.in(Email)
-		.gt(5)
+		.count(
+			Email.query()
+				.in(Sent),
+			'>', 5
+		)
 
 	// SELECT *, ->sent->email->to->person FROM person WHERE count(->sent->email) > 5;
 
 	Select other products purchased by people who purchased this laptop
 
 	query(Product)
-		.over(Purchased)
+		.of(Purchased)
 		.of(Person)
 		.in(Purchased)
 		.from('product:purchased');
@@ -85,7 +91,7 @@ export type QueryBuilder<SubModel extends Model> = {
 	// SELECT <-purchased<-person->purchased->product FROM product:laptop;
 
 	query(Product)
-		.through(Purchased)
+		.in(Purchased)
 		.in(Product)
 		.of(Purchased)
 		.of(Person)

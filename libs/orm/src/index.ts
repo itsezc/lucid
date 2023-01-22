@@ -12,6 +12,7 @@ export * from './where';
 export * from './event';
 
 export * from './sql';
+export * from './relate';
 
 export * from './types';
 export * from './constants';
