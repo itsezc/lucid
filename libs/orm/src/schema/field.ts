@@ -1,161 +1,121 @@
-import * as ts from 'byots';
+import * as ts from 'typescript';
 import { program } from './entry';
-import { getDeclaration, recurseToDepth } from './util';
-import { extrapolateTableName } from '../util';
+import { toSnakeCase, escapeString } from '../util';
+import { tsquery } from '@phenomnomnominal/tsquery';
+import { parseExpression } from './expression';
 
-//TODO: refactor so that this function can parse any field node, even a TypeLiteral, ArrayType, or Identifier
-export function parseField(n: ts.Node, tableName: string, baseName = ''): string {
-    const sl = n.getChildren().find(n => n.kind == ts.SyntaxKind.SyntaxList);
-    const dec = sl?.getChildren().find(n => ts.isDecorator(n));
+export function parseField(field: ts.PropertyDeclaration | ts.PropertySignature, tableName: string, rootName = ''): string {
+    const implicitName = toSnakeCase(field.name.getText());
+    const explicitName = tsquery(field, 'Decorator:has(Identifier[name="Field"]) > CallExpression > ObjectLiteralExpression > PropertyAssignment:has(Identifier[name="name"]) > StringLiteral')[0]?.getText();
 
-    if (dec) {
-        //Parse decorator for permissions and other information.
+    //ORs the implicit name with the explicit name provided.
+    const name =  escapeString(explicitName) || implicitName;
+    let type = getFieldType(field);
+
+    //TODO: fortify this to respect type constraint.
+    const required = (field as ts.PropertyDeclaration).exclamationToken;
+    const optional = field.questionToken;
+
+    //The assertion implicitly made in a union type.
+    let unionAssertion;
+
+    if (type == 'union') {
+        type = 'string';
+        unionAssertion = "\n\t ASSERT " + parseExpression(field.type) + ';';
     }
 
-    const optional = n.getChildren().find(n => n.kind == ts.SyntaxKind.QuestionToken);
-    const required = n.getChildren().find(n => n.kind == ts.SyntaxKind.ExclamationToken);
-
-    //Whether we have a type literal or not.
-
-    //! and ? can only be used in a Class, not an anonymous object.
-    if (!optional && !required && baseName == '') {
-        console.error(`Cannot parse field ${n.getText()}. Field must be either optional or required, annotated with ! or ? respectively.`);
-        process.exit();
-    }
-
-    const ident = n.getChildren().find(n => ts.isIdentifier(n));
-
-    let isFlexible = false;
-    let fieldName = baseName + ident?.getText();
-    let fieldType = 'string';
-
-    const primitiveTypes = {
-        'string': 'string',
-        'Decimal': 'decimal',
-        'Float': 'float',
-        'Date': 'datetime',
-        'DateTime': 'datetime',
-        'number': 'int',
-        'boolean': 'bool',
-        'GeoPoint': 'point',
-        'GeoMultiPoint': 'multipoint',
-        'GeoLine': 'line',
-        'GeoMultiLine': 'multiline',
-        'GeoPolygon': 'polygon',
-        'GeoMultiPolygon': 'multipolygon',
-        'GeoCollection': 'collection',
-        'typeLiteral': 'object'
-    };
-
-    let subFields = [];
-
-    n.getChildren().forEach(child => {
-        if (child.kind == ts.SyntaxKind.TypeLiteral) {
-            const sl = child.getChildren().find(n => n.kind == ts.SyntaxKind.SyntaxList);
-            const propSigs = sl?.getChildren().filter(n => ts.isPropertySignature(n));
-
-            propSigs?.forEach(prop => {
-                //For each inline property defined here, create a nested type and append to field.
-                //subFields.push(parseField(prop, tableName, ''));
-
-                const val = parseField(prop, tableName, ident.getText() + '.');
-
-                if (val) {
-                    subFields.push(val);
-                }
-            });
-
-            fieldType = 'object';
-        }
-        else if(primitiveTypes[child.getText()]) {
-            fieldType = primitiveTypes[child.getText()];
-        }
-        else if (child.kind == ts.SyntaxKind.ArrayType && baseName == '') {
-           fieldType = 'array';
-
-           //Get TypeLiteral children of the arraytype.
-            const tl = child.getChildren().find(n => n.kind == ts.SyntaxKind.TypeLiteral);
-            if(tl) {
-                subFields.push(parseField(tl, tableName, '.*'));
-            }
-            else {
-                subFields.push(parseField(n, tableName, '.*'));
-            }
-        }
-        else if (child.kind == ts.SyntaxKind.TypeReference) {
-            if (!primitiveTypes[child.getText()]) {
-                //Type isn't primitive, so continue.
-
-                const sourcePosition = ts.GoToDefinition.getDefinitionAndBoundSpan(program, child.getSourceFile(), child.getStart());
-                const identSrc = program.getSourceFile(sourcePosition?.definitions[0].fileName);
-                const declaration = getDeclaration(identSrc, child.getText());
-  
-                fieldType = extrapolateTableName(child.getText());
-                
-                if (declaration) {
-                    const declarationIdentifier = declaration?.getChildren().find(n => ts.isIdentifier(n));
-                    const declaration_sl = declaration?.getChildren().find(n => n.kind == ts.SyntaxKind.SyntaxList);
-                    const decorator = declaration_sl?.getChildren().find(n => ts.isDecorator(n));
+    let fieldSchema = `\nDEFINE FIELD ${name} ON ${tableName}${rootName} TYPE ${type}`;
+    fieldSchema += parseFieldDecorator(tsquery(field, 'Decorator:has(Identifier[name="Field"])')[0]);
     
-                    console.log(decorator?.getText());
-                    const decorator_ce = decorator?.getChildren().find(n => ts.isCallExpression(n));
-                    const decorator_ce_sl = decorator_ce?.getChildren().find(n => n.kind == ts.SyntaxKind.SyntaxList);
-                    const decorator_ce_sl_ol = decorator_ce_sl?.getChildren().find(n => n.kind == ts.SyntaxKind.ObjectLiteralExpression);
-                    const decorator_ce_sl_ol_sl = decorator_ce_sl_ol?.getChildren().find(n => n.kind == ts.SyntaxKind.SyntaxList);
-                    const decorator_ce_sl_ol_sl_pa = decorator_ce_sl_ol_sl?.getChildren().filter(n => ts.isPropertyAssignment(n));
+    if (type == 'object') {
+        //We must recursively parse the contents of this object into their own schemas.
+        //return fieldSchema + '' + tsquery(field, 'TypeLiteral > PropertySignature').map((prop) => parseField(prop as ts.PropertySignature, tableName, name + '.'));
+        const props = tsquery(field, 'TypeLiteral > PropertySignature');
 
-                    decorator_ce_sl_ol_sl_pa.forEach(pa => {
-                        const ident = pa.getChildren().find(n => ts.isIdentifier(n));
-                        if (ident.getText() == 'name') {
-                            const string = pa.getChildren().find(n => ts.isStringLiteral(n));
-                            fieldType = `record(${string.getText().replaceAll('"', '').replaceAll("'", '')})`;
-                        }
-                    });
-                }
-
-            }
-
-        }
-    });
-
-    if (dec) {
-        recurseToDepth((n: ts.Node) => {
-            if(ts.isPropertyAssignment(n)) {
-                // The identifer in this property assignment.
-                const ident = n.getChildren().find(n => ts.isIdentifier(n));
-
-                // console.log(ident.getText());
-
-                switch (ident.getText()) {
-                    case 'flexible':
-                        if (n.getChildren().find(n => n.kind == ts.SyntaxKind.TrueKeyword)) 
-                            isFlexible = true;
-                        break;
-
-                    case 'name':
-                        if (n.getChildren().find(n => n.kind === ts.SyntaxKind.StringLiteral))
-                            fieldName = n.getChildren().find(n => n.kind === ts.SyntaxKind.StringLiteral).getText().replaceAll('"', '').replaceAll("'", '');
-                        break;
-                
-                    default:
-                        break;
-                }
-            }
-
-            return;
-        }, dec, 5);
+        props.forEach(prop => {
+            fieldSchema += parseField(prop as ts.PropertySignature, tableName, `.${name}`);
+        });
     }
 
-    // const deccx = dec.getChildren().find(x => ts.isCallExpression(x));
-    // const deccxsl = deccx.getChildren().find(x => )
+    if (type == 'array') {
+        //The array type must also be recursively parsed, but very carefully.
+        const arr = tsquery(field, 'ArrayType')[0] as ts.ArrayTypeNode;
 
-    let fieldSchema = `DEFINE FIELD ${fieldName} ON TABLE ${tableName} ${isFlexible ? 'FLEXIBLE TYPE' : 'TYPE'} ${fieldType}`;
+        if (arr.elementType.kind == ts.SyntaxKind.TypeReference) {
+            //Constrain array children to this type.
+            const refType = parseExpression(arr.elementType);
 
-    //TODO: discover why these nested objects are not inserted correctly.
+            fieldSchema += `\nDEFINE FIELD ${name}.* ON ${tableName}${rootName} TYPE ${refType};`;
+        }
+        else if (arr.elementType.kind == ts.SyntaxKind.TypeLiteral) {
+            //A anonymous object is being used as the array type.
 
-    fieldSchema += (subFields.length > 0 ? '\n': '') + subFields.join('\n');
+            //We must insert an additional schema for the array object itself.
+            fieldSchema += `\nDEFINE FIELD ${name}.*${rootName ? '.' + rootName : ''} ON ${tableName} TYPE object;`;
 
-    // console.log('NEW: ', fieldSchema);
+            const props = tsquery(arr.elementType, 'TypeLiteral > PropertySignature');
+            props.forEach(prop => {
+                fieldSchema += parseField(prop as ts.PropertySignature, tableName, `.${name}`);
+            });
+        }
+        else {
+            throw new Error(`Unsupported array type: ${arr.elementType.getText()}`);
+        }
+    }
 
+    //Append the union assert.
+    fieldSchema += unionAssertion ?? '';
+
+    //Append a semicolon where neccessary.
+    if (!unionAssertion && !fieldSchema.endsWith(';')) {
+        fieldSchema += ';';
+    }
     return fieldSchema;
+}
+
+
+function getFieldType(field: ts.PropertyDeclaration | ts.PropertySignature): string {
+    switch(field.type.kind) {
+        case ts.SyntaxKind.StringKeyword:
+            return 'string';
+        case ts.SyntaxKind.NumberKeyword:
+            return 'number';
+        case ts.SyntaxKind.BooleanKeyword:
+            return 'boolean';
+        case ts.SyntaxKind.ArrayType:
+            return 'array';
+        case ts.SyntaxKind.TypeReference:
+            return parseExpression(field.type);
+        case ts.SyntaxKind.TypeLiteral:
+            return 'object';
+        case ts.SyntaxKind.UnionType:
+            return 'union';
+        default:
+            throw new Error(`Unknown field type: ${field.type.getText()}`);
+    }
+}
+
+function parseFieldDecorator(decorator?: ts.Node): string {
+    if (decorator) {
+        const perms = tsquery(decorator, 'CallExpression > ObjectLiteralExpression > PropertyAssignment:has(Identifier[name="permissions"]) > ArrowFunction > ParenthesizedExpression > ObjectLiteralExpression')[0];
+
+        let decoratorSchema = '';
+
+        if (perms) {
+            tsquery(perms, 'PropertyAssignment').forEach((prop: ts.PropertyAssignment) => {
+                const parsedExpr = parseExpression(prop.initializer);
+
+                if(decoratorSchema == '') {
+                    decoratorSchema += '\n\tPERMISSIONS';
+                }
+        
+                decoratorSchema += `\n\t\tFOR ${prop.name.getText().toUpperCase()} ${parsedExpr.includes('FULL') || parsedExpr.includes('NONE') ? parsedExpr: `WHERE ${parsedExpr}`},`;
+            });
+        }
+
+        //Remove trailing comma from string generated (it is replaced w/ a semicolon).
+        return decoratorSchema.slice(0, -1);
+    }
+
+    return '';
 }

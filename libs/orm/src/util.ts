@@ -1,11 +1,11 @@
-export function extrapolateTableName(name: string): string {
+export function toSnakeCase(name: string): string {
 	let newName = '';
 	for (let i = 0; i < name.length; i++) {
 		if (name[i] === name[i].toUpperCase()) {
 			if (i === 0) {
 				newName += name[i].toLowerCase();
 			} else {
-				newName += `_${name[i].toLowerCase()}`;
+				newName += `${name.includes('_') ?name[i].toLowerCase() : `_${name[i].toLowerCase()}`}`;
 			}
 		} else {
 			newName += name[i];
@@ -29,4 +29,12 @@ export function joinFields(arr?: string[][] | number[]) {
 		for (let i = arr.length; i--; ) res = (i ? seperator : '') + arr[i] + res;
 		return res;
 	}
+}
+
+export function escapeString(text?: string): string | void {
+	if (text) {
+		return text.replaceAll('\'', '').replaceAll('"', '');
+	}
+
+	return;
 }

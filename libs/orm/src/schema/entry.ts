@@ -1,7 +1,7 @@
-import * as ts from 'byots';
+import * as ts from 'typescript';
 import { parseTable } from './table';
 import * as path from 'path';
-
+import { tsquery } from '@phenomnomnominal/tsquery';
 
 export let checker: ts.TypeChecker | null;
 export let program: ts.Program | null;
@@ -43,20 +43,14 @@ function generateSchema(path: string) {
     console.log(resultSchema);
 }
 
+
 //Parse a source file in its entirety and returns a SurrealQL Schema as a string.
 function parseSourceFile(src: ts.SourceFile): string {
-    const dir = src.fileName;
-    process.chdir(path.dirname(dir));
-
-    // path.join(dir, '../')
-
-    const classDeclarations = src.getChildren().filter(n => n.kind == ts.SyntaxKind.SyntaxList).map(n => n.getChildren().filter(n => ts.isClassDeclaration(n))).flat();
-
-    //Filter out only ClassDeclarations with a SyntaxList/Decorator/CallExpression/Identifier of 'Table'.
-    const tableDeclarations = classDeclarations.filter(n => n.getChildren().filter(n => n.kind == ts.SyntaxKind.SyntaxList).map(n => n.getChildren().filter(n => ts.isDecorator(n))).flat().map(n => n.getChildren().find(n => ts.isCallExpression(n))).map(n => n.getChildren().find(n => ts.isIdentifier(n))).map(n => n.getText()).includes('Table'));
+    //Pick out all ClassDeclarations with the 'Table' decorator.
+    const tableDeclarations = tsquery(src, 'ClassDeclaration:has(Identifier[name="Table"])');
 
     //Since every Table results in at least one query, we do not need to filter out empty strings.
-    return tableDeclarations.map(n => parseTable(n)).join('\n');
+    return tableDeclarations.map(td => parseTable(td)).join('\n');
 }
 
 //The actual call to generateSchema. This will be abstracted away into either a vite plugin or a file watcher.

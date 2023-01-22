@@ -22,8 +22,8 @@ export class Account extends Model {
 	@Field({
 		permissions: ({ id }, { $auth }) => ({
 			create: false,
-			select: false,
-			delete: false,
+			select: AdminScope,
+			delete: true,
 			update: id === $auth.id
 		})
 	})

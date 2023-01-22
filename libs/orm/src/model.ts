@@ -8,7 +8,7 @@ import {
 } from './';
 import { SQLBuilder } from './sql_builder';
 import type { ITable } from './table';
-import { extrapolateTableName } from './util';
+import { toSnakeCase } from './util';
 
 type TSurrealTablePropertiesField = {
 	field: string;
@@ -40,7 +40,7 @@ export class Model {
 	}
 
 	public getTableName() {
-		return extrapolateTableName(this.constructor.name);
+		return toSnakeCase(this.constructor.name);
 	}
 
 	// @todo

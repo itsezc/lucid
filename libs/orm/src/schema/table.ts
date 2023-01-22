@@ -1,22 +1,79 @@
-import * as ts from 'byots';
-import { parseDecorator } from './decorator';
+import * as ts from 'typescript';
+import { tsquery } from '@phenomnomnominal/tsquery';
 import { parseField } from './field';
-import { extrapolateTableName } from '../util';
+import { toSnakeCase } from '../util';
+import { parseExpression } from './expression';
 
-//Parses a single Typescript AST node table and returns a SurrealQL Schema for the table itself and its fields.
-export function parseTable(n: ts.Node): string {
+//Parses a single Typescript AST table node and returns a SurrealQL Schema for the table itself and its fields.
+export function parseTable(table: ts.Node): string {
     //Get the actual textual representation of 'n'.
-    const tableIdent = n.getChildren().find(n => ts.isIdentifier(n)).getText();
+    const identifier = tsquery(table, 'Identifier');
+    
+    //Grab the 'Table' decorator (if it exists), and its corresponding ObjectLiteral inside.
+    const decorator = tsquery(table, 'Decorator:has(Identifier[name="Table"])')[0];
 
-    //TableDecorator.
-    const tableDec = n.getChildren().filter(n => n.kind == ts.SyntaxKind.SyntaxList).map(n => n.getChildren().filter(n => ts.isDecorator(n))).flat().find(n => n.getChildren().find(n => ts.isCallExpression(n)).getChildren().find(n => ts.isIdentifier(n)).getText() == 'Table');
 
-    const [decoratorSchema, tableName] = parseDecorator(tableDec);
+    //Generate name if it does not exist in the decorator.
+    const implicitTableName = toSnakeCase(tsquery(table.parent, 'ClassDeclaration > Identifier')[0]?.getText());
 
-    //An array of each field's SurrealQL definition.
-    const fields = n.getChildren().filter(n => n.kind == ts.SyntaxKind.SyntaxList).map(n => n.getChildren().filter(n => ts.isPropertyDeclaration(n))).flat().map(n => parseField(n, tableName || extrapolateTableName(tableIdent))).join("\n");;
+    const [decoratorSchema, tableName = implicitTableName] = parseTableDecorator(decorator);
 
-    //Define the table with its coresponding data, and the fields themselves.
 
-    return `DEFINE TABLE ${tableName || extrapolateTableName(tableIdent)} SCHEMAFULL ${decoratorSchema}\n${fields}`.replaceAll('/\s{2,}*/', ' ')
+    //Parse each field according
+    const fields = tsquery(table, 'PropertyDeclaration').map(property => parseField(property as ts.PropertyDeclaration, tableName));
+
+    return `DEFINE TABLE ${tableName} SCHEMAFULL;${decoratorSchema ? '\n': ''}${decoratorSchema}${fields.join('')}`;
+}
+
+//Parses and returns the decorator for the table.
+function parseTableDecorator(decorator: ts.Node): [string | null, string | null] {
+    let decoratorSchema = '';
+
+    //Get the TableName assigned in the decorator, if it exists.
+    const decoratorBody = tsquery(decorator, 'CallExpression > ObjectLiteralExpression')[0];
+
+    if(!decoratorBody) {
+        //This is an empty decorator.
+        return [null, null];
+    }
+
+    const tableName = tsquery(decoratorBody, 'PropertyAssignment:has(Identifier[name="name"]) > StringLiteral')[0]?.getText()
+        //Remove the quotes from the string.
+        .replaceAll('"', '')
+        .replaceAll("'", '');
+    
+    //Get the permissions AST on this decorator (if it exists).
+    const perms = tsquery(decorator, 'ObjectLiteralExpression > PropertyAssignment:has(Identifier[name="permissions"]) > ArrowFunction > ParenthesizedExpression > ObjectLiteralExpression')[0];
+
+    if (perms) {
+        decoratorSchema += `\tPERMISSIONS`;
+        tsquery(perms, 'PropertyAssignment')?.forEach(prop => { 
+            const propAssign = prop as ts.PropertyAssignment;
+    
+            const propName = propAssign.name.getText();
+            const propValue = propAssign.initializer;
+            decoratorSchema += `\n\t\tFOR ${propName.toUpperCase()} `;
+            if (propValue.kind === ts.SyntaxKind.TrueKeyword) {
+                decoratorSchema += 'FULL';
+            }
+            else if (propValue.kind === ts.SyntaxKind.FalseKeyword) {
+                decoratorSchema += 'NONE';
+            }
+            else {
+                decoratorSchema += parseExpression(propValue);
+            }
+
+            decoratorSchema += ',';
+        });
+
+    }
+
+
+
+    //These will only pick out 'TrueKeyword' since they are false by default.
+    const auditable = tsquery(decorator, 'PropertyAssignment:has(Identifier[name="auditable"]) > TrueKeyword')?.length > 0;
+    const edge = tsquery(decorator, 'PropertyAssignment:has(Identifier[name="edge"]) > TrueKeyword')?.length > 0;
+
+    //Returns the tableName and the Schema corresponding to the decorator.
+    return [decoratorSchema, tableName]
 }
