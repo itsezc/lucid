@@ -4,7 +4,7 @@ import { toSnakeCase, escapeString } from '../util';
 import { tsquery } from '@phenomnomnominal/tsquery';
 import { parseExpression } from './expression';
 
-export function parseField(field: ts.PropertyDeclaration | ts.PropertySignature, tableName: string, rootName = ''): string {
+export function parseField(field: ts.PropertyDeclaration | ts.PropertySignature, tableName: string, rootName = '', subscriptName = ''): string {
     const implicitName = toSnakeCase(field.name.getText());
     const explicitName = tsquery(field, 'Decorator:has(Identifier[name="Field"]) > CallExpression > ObjectLiteralExpression > PropertyAssignment:has(Identifier[name="name"]) > StringLiteral')[0]?.getText();
 
@@ -24,7 +24,7 @@ export function parseField(field: ts.PropertyDeclaration | ts.PropertySignature,
         unionAssertion = "\n\t ASSERT " + parseExpression(field.type) + ';';
     }
 
-    let fieldSchema = `\nDEFINE FIELD ${name} ON ${tableName}${rootName} TYPE ${type}`;
+    let fieldSchema = `\nDEFINE FIELD ${subscriptName}${name} ON ${tableName}${rootName} TYPE ${type}`;
     fieldSchema += parseFieldDecorator(tsquery(field, 'Decorator:has(Identifier[name="Field"])')[0]);
     
     if (type == 'object') {
@@ -55,7 +55,7 @@ export function parseField(field: ts.PropertyDeclaration | ts.PropertySignature,
 
             const props = tsquery(arr.elementType, 'TypeLiteral > PropertySignature');
             props.forEach(prop => {
-                fieldSchema += parseField(prop as ts.PropertySignature, tableName, `.${name}`);
+                fieldSchema += parseField(prop as ts.PropertySignature, tableName, '', name + '.*.');
             });
         }
         else {
