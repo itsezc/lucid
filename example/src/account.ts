@@ -16,7 +16,7 @@ export class Account extends Model {
 	@Field({ index: 'unique' })
 	username?: string;
 
-	@Field({ assert: 'email' })
+	@Field({ assert: 'email', name: 'email_address' })
 	email!: string;
 
 	@Field({

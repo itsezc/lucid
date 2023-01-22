@@ -1,8 +1,10 @@
 import * as ts from 'byots';
-
+import { program } from './entry';
+import { getDeclaration, recurseToDepth } from './util';
+import { extrapolateTableName } from '../util';
 
 //TODO: refactor so that this function can parse any field node, even a TypeLiteral, ArrayType, or Identifier
-export function parseField(n: ts.Node, tableName: string, baseName = '', typeLit = false): string {
+export function parseField(n: ts.Node, tableName: string, baseName = ''): string {
     const sl = n.getChildren().find(n => n.kind == ts.SyntaxKind.SyntaxList);
     const dec = sl?.getChildren().find(n => ts.isDecorator(n));
 
@@ -16,13 +18,15 @@ export function parseField(n: ts.Node, tableName: string, baseName = '', typeLit
     //Whether we have a type literal or not.
 
     //! and ? can only be used in a Class, not an anonymous object.
-    if (!optional && !required && !typeLit) {
+    if (!optional && !required && baseName == '') {
         console.error(`Cannot parse field ${n.getText()}. Field must be either optional or required, annotated with ! or ? respectively.`);
         process.exit();
     }
 
     const ident = n.getChildren().find(n => ts.isIdentifier(n));
 
+    let isFlexible = false;
+    let fieldName = baseName + ident?.getText();
     let fieldType = 'string';
 
     const primitiveTypes = {
@@ -43,7 +47,6 @@ export function parseField(n: ts.Node, tableName: string, baseName = '', typeLit
         'typeLiteral': 'object'
     };
 
-    
     let subFields = [];
 
     n.getChildren().forEach(child => {
@@ -54,32 +57,105 @@ export function parseField(n: ts.Node, tableName: string, baseName = '', typeLit
             propSigs?.forEach(prop => {
                 //For each inline property defined here, create a nested type and append to field.
                 //subFields.push(parseField(prop, tableName, ''));
-                subFields.push(parseField(prop, tableName, ident.getText() + '.', true));
+
+                const val = parseField(prop, tableName, ident.getText() + '.');
+
+                if (val) {
+                    subFields.push(val);
+                }
             });
 
             fieldType = 'object';
         }
-        if(primitiveTypes[child.getText()]) {
+        else if(primitiveTypes[child.getText()]) {
             fieldType = primitiveTypes[child.getText()];
         }
-        else {
-            //Either an Array, Object, or Identifier that must be resolved. Type will not be provided yet.
+        else if (child.kind == ts.SyntaxKind.ArrayType && baseName == '') {
+           fieldType = 'array';
 
-            if (child.kind == ts.SyntaxKind.ArrayType) {
-                //Resolve underlying type to define schema on arr.* 
+           //Get TypeLiteral children of the arraytype.
+            const tl = child.getChildren().find(n => n.kind == ts.SyntaxKind.TypeLiteral);
+            if(tl) {
+                subFields.push(parseField(tl, tableName, '.*'));
             }
-            else if (child.kind == ts.SyntaxKind.Identifier) {
-                //This is a user type that we must resolve, or a table reference (must be resolved).
+            else {
+                subFields.push(parseField(n, tableName, '.*'));
             }
+        }
+        else if (child.kind == ts.SyntaxKind.TypeReference) {
+            if (!primitiveTypes[child.getText()]) {
+                //Type isn't primitive, so continue.
+
+                const sourcePosition = ts.GoToDefinition.getDefinitionAndBoundSpan(program, child.getSourceFile(), child.getStart());
+                const identSrc = program.getSourceFile(sourcePosition?.definitions[0].fileName);
+                const declaration = getDeclaration(identSrc, child.getText());
+  
+                fieldType = extrapolateTableName(child.getText());
+                
+                if (declaration) {
+                    const declarationIdentifier = declaration?.getChildren().find(n => ts.isIdentifier(n));
+                    const declaration_sl = declaration?.getChildren().find(n => n.kind == ts.SyntaxKind.SyntaxList);
+                    const decorator = declaration_sl?.getChildren().find(n => ts.isDecorator(n));
+    
+                    console.log(decorator?.getText());
+                    const decorator_ce = decorator?.getChildren().find(n => ts.isCallExpression(n));
+                    const decorator_ce_sl = decorator_ce?.getChildren().find(n => n.kind == ts.SyntaxKind.SyntaxList);
+                    const decorator_ce_sl_ol = decorator_ce_sl?.getChildren().find(n => n.kind == ts.SyntaxKind.ObjectLiteralExpression);
+                    const decorator_ce_sl_ol_sl = decorator_ce_sl_ol?.getChildren().find(n => n.kind == ts.SyntaxKind.SyntaxList);
+                    const decorator_ce_sl_ol_sl_pa = decorator_ce_sl_ol_sl?.getChildren().filter(n => ts.isPropertyAssignment(n));
+
+                    decorator_ce_sl_ol_sl_pa.forEach(pa => {
+                        const ident = pa.getChildren().find(n => ts.isIdentifier(n));
+                        if (ident.getText() == 'name') {
+                            const string = pa.getChildren().find(n => ts.isStringLiteral(n));
+                            fieldType = `record(${string.getText().replaceAll('"', '').replaceAll("'", '')})`;
+                        }
+                    });
+                }
+
+            }
+
         }
     });
 
-    // bool (SQL) boolean
+    if (dec) {
+        recurseToDepth((n: ts.Node) => {
+            if(ts.isPropertyAssignment(n)) {
+                // The identifer in this property assignment.
+                const ident = n.getChildren().find(n => ts.isIdentifier(n));
 
-    let fieldSchema = `DEFINE FIELD ${baseName + ident.getText()} ON TABLE ${tableName} TYPE ${fieldType}`;
+                // console.log(ident.getText());
+
+                switch (ident.getText()) {
+                    case 'flexible':
+                        if (n.getChildren().find(n => n.kind == ts.SyntaxKind.TrueKeyword)) 
+                            isFlexible = true;
+                        break;
+
+                    case 'name':
+                        if (n.getChildren().find(n => n.kind === ts.SyntaxKind.StringLiteral))
+                            fieldName = n.getChildren().find(n => n.kind === ts.SyntaxKind.StringLiteral).getText().replaceAll('"', '').replaceAll("'", '');
+                        break;
+                
+                    default:
+                        break;
+                }
+            }
+
+            return;
+        }, dec, 5);
+    }
+
+    // const deccx = dec.getChildren().find(x => ts.isCallExpression(x));
+    // const deccxsl = deccx.getChildren().find(x => )
+
+    let fieldSchema = `DEFINE FIELD ${fieldName} ON TABLE ${tableName} ${isFlexible ? 'FLEXIBLE TYPE' : 'TYPE'} ${fieldType}`;
 
     //TODO: discover why these nested objects are not inserted correctly.
-    fieldSchema += subFields.length > 0 ? '\n': '' + subFields.join('\n');
+
+    fieldSchema += (subFields.length > 0 ? '\n': '') + subFields.join('\n');
+
+    // console.log('NEW: ', fieldSchema);
 
     return fieldSchema;
 }

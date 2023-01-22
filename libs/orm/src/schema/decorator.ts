@@ -1,8 +1,6 @@
 import * as ts from 'byots';
 import { getDeclaration, parseBinaryExpression } from './util';
 import { checker, program } from './entry';
-import * as path from 'path';
-import * as fs from 'fs';
 
 //Returns a SurrealQL string representing the decorator.
 export function parseDecorator(dec: ts.Node): string[] {
@@ -18,7 +16,6 @@ export function parseDecorator(dec: ts.Node): string[] {
 
         if (objLiteral) {
             const objLiteralSyntax = objLiteral.getChildren().find(c => c.kind == ts.SyntaxKind.SyntaxList);
-
 
             //Return empty string if there is no object literal.
             if(!objLiteralSyntax) {

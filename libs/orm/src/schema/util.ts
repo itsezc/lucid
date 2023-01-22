@@ -27,13 +27,13 @@ export function getDeclaration(src: ts.SourceFile, ident: string, searchDepth: n
 }
 
 export function recurseToDepth(
-    callback: (n: ts.Node) => ts.Node,
+    callback: (n: ts.Node) => ts.Node | void,
     n: ts.Node, 
     depth: number
 ) {
     if (depth === 0) return;
 
-    n.getChildren().forEach((child: ts.Node) => {
+    n.getChildren()?.forEach((child: ts.Node) => {
         callback(child);
         recurseToDepth(callback, child, depth - 1);
     });
@@ -84,7 +84,7 @@ export function parseType(n: ts.Node) {
 
             const children = n.getChildren();
             children.forEach(child => {
-                console.log(ts.SyntaxKind[child.kind]);
+                // console.log(ts.SyntaxKind[child.kind]);
                 if (child.kind == ts.SyntaxKind.BinaryExpression || 
                     child.kind == ts.SyntaxKind.PropertyAccessExpression ||
                     child.kind == ts.SyntaxKind.Identifier ||

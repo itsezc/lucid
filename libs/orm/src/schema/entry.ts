@@ -41,7 +41,6 @@ function generateSchema(path: string) {
     const resultSchema = program.getSourceFiles().map(sf => parseSourceFile(sf)).filter(n => n != '').join('\n');
 
     console.log(resultSchema);
-
 }
 
 //Parse a source file in its entirety and returns a SurrealQL Schema as a string.

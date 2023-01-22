@@ -14,6 +14,7 @@ import { AccountScope, AdminScope } from './scopes';
 		update: AdminScope || (AccountScope && id === $auth.id || AdminScope && id === $auth.id),
 		select: AdminScope || (id == $auth.id && title != null && (AdminScope) && AccountScope)
 	}),
+	name: 'my_weird_issue_tablename'
 })
 export class Issue extends Model {
 	@Field({ index: true })
@@ -21,6 +22,7 @@ export class Issue extends Model {
 
 	body!: string;
 
+	//TODO: allow default values without !.
 	priority!: 'no_priority' | 'urgent' | 'high' | 'medium' | 'low';
 
 	status!: 'backlog' | 'todo' | 'in_progress' | 'done' | 'canceled';
