@@ -1,5 +1,23 @@
 {
-	"name": "@surreal-tools/orm",
-	"version": "0.1.0",
-	"main": "src/index.ts"
+  "name": "@surreal-tools/orm",
+  "version": "0.1.0",
+  "main": "src/index.ts",
+  "dependencies": {
+    "cmd-ts": "^0.12.0",
+    "typescript": "^4.9.4"
+  },
+  "scripts": {
+    "build": "packemon build",
+    "pack": "packemon pack --addEngines --addFiles --declaration"
+  },
+  "packemon": {
+    "format": "lib",
+    "inputs": {
+      "index": "src/schema/entry.ts"
+    },
+    "platform": "node"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.4"
+  }
 }

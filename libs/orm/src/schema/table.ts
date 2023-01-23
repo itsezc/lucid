@@ -6,9 +6,6 @@ import { parseExpression } from './expression';
 
 //Parses a single Typescript AST table node and returns a SurrealQL Schema for the table itself and its fields.
 export function parseTable(table: ts.Node): string {
-    //Get the actual textual representation of 'n'.
-    const identifier = tsquery(table, 'Identifier');
-    
     //Grab the 'Table' decorator (if it exists), and its corresponding ObjectLiteral inside.
     const decorator = tsquery(table, 'Decorator:has(Identifier[name="Table"])')[0];
 
@@ -16,13 +13,17 @@ export function parseTable(table: ts.Node): string {
     //Generate name if it does not exist in the decorator.
     const implicitTableName = toSnakeCase(tsquery(table.parent, 'ClassDeclaration > Identifier')[0]?.getText());
 
-    const [decoratorSchema, tableName = implicitTableName] = parseTableDecorator(decorator);
 
+    let [decoratorSchema, tableName] = parseTableDecorator(decorator);
+
+    if(!tableName) {
+        tableName = implicitTableName;
+    }
 
     //Parse each field according
     const fields = tsquery(table, 'PropertyDeclaration').map(property => parseField(property as ts.PropertyDeclaration, tableName));
 
-    return `DEFINE TABLE ${tableName} SCHEMAFULL;${decoratorSchema ? '\n': ''}${decoratorSchema}${fields.join('')}`;
+    return `DEFINE TABLE ${tableName} SCHEMAFULL;${decoratorSchema ? '\n': ''}${decoratorSchema ?? ''}${fields.join('')}`;
 }
 
 //Parses and returns the decorator for the table.

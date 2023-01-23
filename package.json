@@ -14,6 +14,8 @@
 		"typescript": "^4.9.4"
 	},
 	"dependencies": {
+		"isomorphic-fetch": "^3.0.0",
+		"isomorphic-ws": "^5.0.0",
 		"surrealdb.js": "latest"
 	}
 }

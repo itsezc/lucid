@@ -1,15 +1,55 @@
 import * as ts from 'typescript';
 import { parseTable } from './table';
-import * as path from 'path';
 import { tsquery } from '@phenomnomnominal/tsquery';
+import { command, run, positional, optional, option } from 'cmd-ts';
+import { Directory, File } from 'cmd-ts/batteries/fs';
+import { Url } from 'cmd-ts/batteries/url';
+import { writeFileSync} from 'fs';
+
+
+const cmd = command({
+    name: 'SQLSG',
+    description: 'Generates SurrealQL schemas from typescript source files.',
+    version: '0.0.1',
+    args: {
+        project: positional({ type: Directory, displayName: 'The project to generate a schema for.'}),
+        output: positional({
+            type: optional(File),
+            displayName: 'The file to output the schema to.'
+        }),
+        url: positional({
+            type: optional(Url),
+            displayName: 'The database URL. If left blank, schema will not be applied to the database.'
+        })
+    },  
+    handler: (args) => {
+        //Go into the directory of this project.
+        process.chdir(args.project);
+
+        generateSchema();
+
+        if (args.output) {
+            //Write the schema to the specified file.
+            writeFileSync(args.output, generateSchema());
+        }
+
+        if (args.url) {
+            //The schema needs to be applied to the database as a commit.
+            
+        }
+    }
+});
+
+run(cmd, process.argv.slice(2));
+
+
+
 
 export let checker: ts.TypeChecker | null;
 export let program: ts.Program | null;
 
 //Generates a full SurrealQL Schema for the project at the specified directory.
-function generateSchema(path: string) {
-    process.chdir(path);
-
+function generateSchema(): string {
     const cfgFile = ts.findConfigFile(process.cwd(), ts.sys.fileExists, 'tsconfig.json');
     const { config } = ts.readConfigFile(cfgFile, ts.sys.readFile);
 
@@ -33,14 +73,15 @@ function generateSchema(path: string) {
             getNewLine: () => ts.sys.newLine,
         }
         const message = ts.formatDiagnostics(allDiagnostics, formatHost)
-        console.warn('Cannot generate a schema for a project with active Typescript errors!\n  ' + message);
+        console.error('Cannot generate a schema for a project with active Typescript errors!\n  ' + message);
+        process.exit();
     }
 
 
     //The resulting schema in its entirety.
     const resultSchema = program.getSourceFiles().map(sf => parseSourceFile(sf)).filter(n => n != '').join('\n');
 
-    console.log(resultSchema);
+    return resultSchema;
 }
 
 
@@ -53,5 +94,3 @@ function parseSourceFile(src: ts.SourceFile): string {
     return tableDeclarations.map(td => parseTable(td)).join('\n');
 }
 
-//The actual call to generateSchema. This will be abstracted away into either a vite plugin or a file watcher.
-generateSchema('../../../../example');
