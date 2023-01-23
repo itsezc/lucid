@@ -71,3 +71,12 @@ tasks:
     # The platform to run the command on, and where to locate it.
     # Accepts "node" or "system". Defaults based on project `language`.
     platform: 'node'
+
+  build:
+    platform: 'node'
+    inputs: ['src/**/*']
+    command: 'tsc'
+    args: [
+        '--outDir',
+        'dist'
+    ]

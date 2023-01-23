@@ -1,4 +1,4 @@
-import { db, Model } from './';
+import { Model } from './';
 
 interface ISurrealResult {}
 
@@ -19,9 +19,9 @@ export class TableManager<SubModel extends Model> {
 	 * @returns Promise<boolean>
 	 */
 	public async isDefined(): Promise<boolean> {
-		const info = await db.query<ISurrealDBInfoResult[]>('INFO FOR DB');
-		if (info[0].error) return false;
-		if (this.model.getTableName() in info[0].result.tb) return true;
+		// const info = await db.query<ISurrealDBInfoResult[]>('INFO FOR DB');
+		// if (info[0].error) return false;
+		// if (this.model.getTableName() in info[0].result.tb) return true;
 		return false;
 	}
 

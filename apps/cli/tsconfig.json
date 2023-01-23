@@ -1,0 +1,14 @@
+{
+	"include": [
+		"src/*"
+	],
+	"exclude": [],
+	"compilerOptions": {
+		"module": "CommonJS",
+		"outDir": "../../.moon/cache/types/apps/cli",
+		"target": "ESNext",
+		"moduleResolution": "node",
+		"experimentalDecorators": true,
+		"sourceMap": false
+	}
+}

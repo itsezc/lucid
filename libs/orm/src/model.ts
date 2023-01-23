@@ -1,5 +1,4 @@
 import {
-	db,
 	SurrealEvent,
 	SurrealEventManager,
 	TQueryArgs,
@@ -82,7 +81,7 @@ export class Model {
 
 	public async save(): Promise<boolean> {
 		try {
-			await db.create(this.getTableName(), {});
+			//await db.create(this.getTableName(), {});
 		} catch (error) {
 			return false;
 		}

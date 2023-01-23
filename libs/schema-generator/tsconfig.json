@@ -1,0 +1,12 @@
+{
+	"include": ["**/*"],
+	"exclude": [],
+	"compilerOptions": {
+		"module": "CommonJS",
+		"outDir": "build",
+		"target": "ESNext",
+		"moduleResolution": "node",
+		"experimentalDecorators": true,
+		"sourceMap": false
+	}
+}

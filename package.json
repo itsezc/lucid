@@ -1,21 +1,26 @@
 {
 	"name": "surreal-tools",
+	"version": "0.1.0",
 	"private": true,
 	"workspaces": [
 		"apps/*",
-		"libs/*",
-		"example"
+		"libs/*"
 	],
 	"devDependencies": {
 		"@phenomnomnominal/tsquery": "^5.0.0",
 		"@types/node": "^18.11.18",
 		"bun-types": "^0.4.0",
-		"reflect-metadata": "^0.1.13",
-		"typescript": "^4.9.4"
+		"reflect-metadata": "^0.1.13"
 	},
 	"dependencies": {
+		"@surreal-tools/schema-generator": "file:libs/schema-generator",
+		"cmd-ts": "^0.12.0",
 		"isomorphic-fetch": "^3.0.0",
 		"isomorphic-ws": "^5.0.0",
-		"surrealdb.js": "latest"
+		"typescript": "^4.9.4"
+	},
+	"packageManager": "npm@8.19.2",
+	"engines": {
+		"node": "18.12.0"
 	}
 }
