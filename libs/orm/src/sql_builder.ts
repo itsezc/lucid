@@ -1,16 +1,18 @@
-import { Model, SQL, TQueryArgs, TSubModelWhere } from './';
+import { Model, SQL, TSubModelWhere } from './';
 import { TTimeout } from './internal';
 import { joinRangeFields } from './util';
 
 interface ISQLBuilderProps<SubModel extends Model> {
 	from_table: string;
-	args?: TQueryArgs<SubModel>;
+	args?: {
+		from_table: string;
+	};
 }
 
 type TComparisonOperator = '<'| '<=' | '=' | '>' | '>=';
 type TMappedModelProperty<T extends Model> = { [P in keyof T]: T[keyof T]};
 
-type TSelectExpression<SubModel extends Model> = 
+export type TSelectExpression<SubModel extends Model> = 
 	'*' 
 	| (keyof SubModel)[] 
 	| TSelectExpressionAlias<SubModel>
@@ -53,14 +55,14 @@ export class SQLBuilder<SubModel extends Model> {
 	private query_fetch_fields: string[];
 
 	private query_groupBy = false;
-	private query_groupByFields: string[];
+	private query_groupByFields: (keyof SubModel)[];
 
 	private query_limit: number;
 	private query_start: number;
 
 	constructor(props: ISQLBuilderProps<SubModel>) {
 		this.query_table = props.from_table;
-		this.query_range = joinRangeFields(props.args?.range);
+		// this.query_range = joinRangeFields(props.args?.range);
 	}
 
 	public select(

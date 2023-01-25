@@ -1,11 +1,10 @@
 import {
 	SurrealEvent,
 	SurrealEventManager,
-	TQueryArgs,
 	TSurrealDataType,
 	TSurrealEventProps,
 } from './';
-import { SQLBuilder } from './sql_builder';
+import { SQLBuilder, TSelectExpression } from './sql_builder';
 import type { ITable } from './table';
 import { toSnakeCase } from './util';
 
@@ -55,14 +54,14 @@ export class Model {
 
 	public static select<SubModel extends Model>(
 		this: { new (props?: ITable<Model>): SubModel },
-		args?: TQueryArgs<SubModel>,
+		fields: TSelectExpression<SubModel> = '*',
 	) {
 		const model = new this();
 
 		return new SQLBuilder<SubModel>({
-			from_table: model.getTableName(),
-			args,
-		});
+				from_table: model.getTableName()
+			})
+			.select(fields);
 	}
 
 	public static events<SubModel extends Model>(
@@ -80,11 +79,11 @@ export class Model {
 	}
 
 	public async save(): Promise<boolean> {
-		try {
-			//await db.create(this.getTableName(), {});
-		} catch (error) {
-			return false;
-		}
+		// try {
+		// 	//await db.create(this.getTableName(), {});
+		// } catch (error) {
+		// 	return false;
+		// }
 
 		return true;
 	}
