@@ -2,17 +2,14 @@ import { Model, TSubModelWhere, WhereToSQL } from './';
 import { TTimeout } from './internal';
 import { joinRangeFields } from './util';
 
-interface ISQLBuilderProps<SubModel extends Model> {
+export interface ISQLBuilderProps<SubModel extends Model> {
 	from_table: string;
-	args?: {
-		from_table: string;
-	};
 }
 
 type TComparisonOperator = '<'| '<=' | '=' | '>' | '>=';
-type TMappedModelProperty<T extends Model> = { [P in keyof T]: T[keyof T]};
+type TMappedModelProperty<T extends Model> = { [P in keyof T]: T[keyof T] };
 
-export type TSelectExpression<SubModel extends Model> = 
+export type TSelectExpression<SubModel extends Model> =
 	'*' 
 	| (keyof SubModel)[] 
 	| TSelectExpressionAlias<SubModel>
@@ -21,9 +18,9 @@ export type TSelectExpression<SubModel extends Model> =
 	| ['*', TSelectExpressionAlias<SubModel>][];
 
 type TSelectExpressionAlias<T extends Model> = { 
-	$?: [keyof T, TComparisonOperator, T[keyof T]] | keyof T, 
-	$$?: string | { [P in keyof T]?: T[keyof T]}, 
-	as?: string, 
+	$?: [keyof T, TComparisonOperator, T[keyof T]] | keyof T,
+	$$?: string | { [P in keyof T]?: T[keyof T] },
+	as?: string,
 	where?: string
 };
 

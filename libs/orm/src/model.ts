@@ -4,6 +4,7 @@ import {
 	TSurrealDataType,
 	TSurrealEventProps,
 } from './';
+import { DeleteBuilder } from './builders/delete_builder';
 import { SQLBuilder, TSelectExpression } from './sql_builder';
 import type { ITable } from './table';
 import { toSnakeCase } from './util';
@@ -41,11 +42,10 @@ export class Model {
 		return toSnakeCase(this.constructor.name);
 	}
 
-	// public static create<SubModel extends Model>(this: {
-	// 	new (props?: ITable<Model>): SubModel;
-	// }) {
-	// 	return new SQLBuilder();
-	// }
+	public static create<SubModel extends Model>(
+		this: { new (props?: ITable<Model>): SubModel; }, 
+		args: Partial<{ [P in keyof SubModel]: SubModel[P]}>
+	) {}
 
 	public static select<SubModel extends Model>(
 		this: { new (props?: ITable<Model>): SubModel },
@@ -53,6 +53,13 @@ export class Model {
 	) {
 		return new SQLBuilder<SubModel>({ from_table: new this().getTableName() })
 			.select(fields);
+	}
+
+	public static delete<SubModel extends Model>(
+		this: { new (props?: ITable<Model>): SubModel },
+		
+	) {
+		return new DeleteBuilder<SubModel>({ from_table: new this().getTableName() });
 	}
 
 	public static events<SubModel extends Model>(

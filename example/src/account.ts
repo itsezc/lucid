@@ -220,3 +220,20 @@ spec.canOperateWithPermission({
 	model: new Account({}),
 	query: Account.select()
 });
+
+Account.create({
+	username: '',
+	passKey: ''
+});
+
+Account.delete()
+	.where({
+		username: {
+			contains: ''
+		}
+	})
+	.returnAfter()
+	.returnBefore()
+	.returnDiff()
+	.timeout('1s')
+	.parallel();

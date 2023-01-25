@@ -2,7 +2,7 @@ import {
 	type ISurrealScope, 
 	type TSurrealPermissionOperation,
 	Model
-} from '.';
+} from './';
 import { SQLBuilder } from './sql_builder';
 
 interface ISurrealResult {}

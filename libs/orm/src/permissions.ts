@@ -12,13 +12,12 @@ type TPermissionMultiple = [TSurrealPermissionOperation, string];
 export type TPermissions<SubModel extends Model = Model> = (
 	model: SubModel,
 	args: TPermissionsCallback<SubModel>,
-) =>
-	| {
-			select?: string | boolean | object;
-			create?: string | boolean | object;
-			update?: string | boolean | object;
-			delete?: string | boolean | object;
-	  }
+) => {
+		select?: string | boolean | object;
+		create?: string | boolean | object;
+		update?: string | boolean | object;
+		delete?: string | boolean | object;
+	}
 	| TPermissionMultiple[][];
 
 /**
