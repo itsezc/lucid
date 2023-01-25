@@ -1,4 +1,5 @@
 import { Model, SQL, TQueryArgs } from './';
+import { TTimeout } from './internal';
 import { joinFields } from './util';
 
 interface ISQLBuilderProps<SubModel extends Model> {
@@ -26,7 +27,7 @@ type TSelectExpressionAlias<T extends Model> = {
 
 export class SQLBuilder<SubModel extends Model> {
 	private query_table: string;
-	private range: string;
+	private query_range: string;
 	private select_fields = '';
 
 	private subquery: string[] = [];
@@ -34,6 +35,9 @@ export class SQLBuilder<SubModel extends Model> {
 	private count_condition: string;
 
 	private query_select_fields: string[] = [];
+	private query_select_fields_projections: string[] = [];
+
+	private query_timeout: TTimeout = undefined;
 
 	private query_parallel = false;
 	private query_split: string | null = null;
@@ -54,7 +58,7 @@ export class SQLBuilder<SubModel extends Model> {
 
 	constructor(props: ISQLBuilderProps<SubModel>) {
 		this.query_table = props.from_table;
-		this.range = joinFields(props.args?.range);
+		this.query_range = joinFields(props.args?.range);
 	}
 
 	public select(
@@ -157,16 +161,29 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
-	// @todo FROM is optional i.e. 
-	// `SELECT * FROM person WHERE ->knows->person->(knows WHERE influencer = true) TIMEOUT 5s;`
+	public timeout(timeout: TTimeout): SQLBuilder<SubModel> {
+		return this;
+	}
+
 	public build() {
 		const is_subquery = this.subquery.length > 0;
 		const subquery = `${this.subquery.join('')}->${this.query_table}`;
 
-		return `SELECT 
-			${is_subquery ? '' : this.select_fields}${subquery} FROM 
-			${this.query_table}${this.range ? `:${this.range}` : ''
-		};`;
+		let groupBy;
+
+		if (this.groupBy) {
+			groupBy = '';
+		}
+
+		return `SELECT ${is_subquery ? subquery : this.select_fields} FROM 
+			${this.query_table}${this.query_range ? `:${this.query_range}` : ''}
+			${this.query_split ? this.query_split : ''}
+			${this.query_orderBy ? '' : this.query_orderByRand ? 'ORDER BY RAND()' : ''}
+			${this.query_limit ?? ''}
+			${this.query_start ?? ''}
+			${this.query_fetch_fields.length > 0 ? this.query_fetch_fields.join() : ''}
+			${this.query_timeout ? `TIMEOUT ${this.query_timeout}` : ''};
+			${this.query_parallel ? 'PARALLEL' : ''};`;
 	}
 
 	public execute() {}
