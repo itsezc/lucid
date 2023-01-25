@@ -14,7 +14,7 @@ export function toSnakeCase(name: string): string {
 	return newName;
 }
 
-export function joinFields(arr?: string[][] | number[]) {
+export function joinRangeFields(arr?: string[][] | number[]) {
 	if (!arr) return '';
 
 	if (arr[0] instanceof Array) {

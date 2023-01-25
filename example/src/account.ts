@@ -40,8 +40,10 @@ export class Account extends Model {
 	birthday?: DateTime;
 
 	metadata?: {
+		realAge: number;
 		marketing: boolean;
 		cookies?: boolean;
+		issue?: Issue;
 	};
 
 	@Field({ flexible: true })
@@ -173,3 +175,30 @@ export class Account extends Model {
 // 			as: 'self_hosted'
 // 		}
 // 	])
+
+Account.query()
+	.where({
+		username: '',
+		years_active: 8,
+		verified: true,
+		birthday: {
+			gt: new Date()
+		},
+		metadata: {
+			realAge: 18,
+			cookies: true,
+			issue: {
+				title: {
+					endsWith: ''
+				}
+			}
+		},
+		OR: {
+			birthday: new Date(),
+			metadata: {
+				realAge: 16,
+				marketing: false,
+			}
+		}
+	})
+	.build();

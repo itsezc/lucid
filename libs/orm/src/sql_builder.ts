@@ -1,6 +1,6 @@
-import { Model, SQL, TQueryArgs } from './';
+import { Model, SQL, TQueryArgs, TSubModelWhere } from './';
 import { TTimeout } from './internal';
-import { joinFields } from './util';
+import { joinRangeFields } from './util';
 
 interface ISQLBuilderProps<SubModel extends Model> {
 	from_table: string;
@@ -10,7 +10,7 @@ interface ISQLBuilderProps<SubModel extends Model> {
 type TComparisonOperator = '<'| '<=' | '=' | '>' | '>=';
 type TMappedModelProperty<T extends Model> = { [P in keyof T]: T[keyof T]};
 
-type TSelectionExpression<SubModel extends Model> = 
+type TSelectExpression<SubModel extends Model> = 
 	'*' 
 	| (keyof SubModel)[] 
 	| TSelectExpressionAlias<SubModel>
@@ -26,21 +26,22 @@ type TSelectExpressionAlias<T extends Model> = {
 };
 
 export class SQLBuilder<SubModel extends Model> {
+	private select_fields = '*';
+	
 	private query_table: string;
 	private query_range: string;
-	private select_fields = '';
 
-	private subquery: string[] = [];
-	private where_condition: string;
+	private subquery: string[];
+	private query_where: string;
 	private count_condition: string;
 
 	private query_select_fields: string[] = [];
-	private query_select_fields_projections: string[] = [];
+	private query_select_fields_projections: string[];
 
-	private query_timeout: TTimeout = undefined;
+	private query_timeout: TTimeout;
 
 	private query_parallel = false;
-	private query_split: string | null = null;
+	private query_split: string;
 
 	private query_orderByRand = false;
 	private query_orderBy: [
@@ -49,20 +50,21 @@ export class SQLBuilder<SubModel extends Model> {
 		'COLLATE' | 'NUMERIC' | undefined
 	][] = [];
 
-	private query_fetch_fields: string[] = [];
+	private query_fetch_fields: string[];
 
 	private query_groupBy = false;
+	private query_groupByFields: string[];
 
-	private query_limit: number = null;
-	private query_start: number = null;
+	private query_limit: number;
+	private query_start: number;
 
 	constructor(props: ISQLBuilderProps<SubModel>) {
 		this.query_table = props.from_table;
-		this.query_range = joinFields(props.args?.range);
+		this.query_range = joinRangeFields(props.args?.range);
 	}
 
 	public select(
-		fields: TSelectionExpression<SubModel>
+		fields: TSelectExpression<SubModel>
 	): SQLBuilder<SubModel> {
 		// If fields are fields of table
 		if(Array.isArray(fields)) this.select_fields = fields.join(', ');
@@ -70,9 +72,13 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
-	public where(condition: string): SQLBuilder<SubModel> {
-		if (typeof condition === 'string')
-			this.where_condition = condition;
+	public range(range: string[][] | number[]): SQLBuilder<SubModel> {
+		this.query_range = joinRangeFields(range);
+		return this;
+	}
+
+	public where(condition: string | TSubModelWhere<SubModel>): SQLBuilder<SubModel> {
+		if (typeof condition === 'string') this.query_where = condition;
 		
 		return this;
 	}
@@ -82,10 +88,8 @@ export class SQLBuilder<SubModel extends Model> {
 		operator: TComparisonOperator,
 		value: number
 	): SQLBuilder<SubModel> {
-		if (typeof condition === 'string')
-			this.count_condition = condition;
-		else
-			this.count_condition = `${condition.build()} ${operator} ${value}`;
+		if (typeof condition === 'string') this.count_condition = condition;
+		else this.count_condition = `${condition.build()} ${operator} ${value}`;
 
 		return this;
 	}
@@ -128,7 +132,8 @@ export class SQLBuilder<SubModel extends Model> {
 	/**
 	 * SurrealDB supports data aggregation and grouping, with support for multiple fields, nested fields, and aggregate functions. In SurrealDB, every field which appears in the field projections of the select statement (and which is not an aggregate function), must also be present in the `GROUP BY` clause.
 	 */
-	public groupBy(): SQLBuilder<SubModel> {
+	public groupBy(fields?: (keyof SubModel)[]): SQLBuilder<SubModel> {
+		if (fields) this.query_groupByFields = fields;
 		this.query_groupBy = true;
 		return this;
 	}
@@ -141,6 +146,10 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
+	/**
+	 * To limit the number of records returned, using the `LIMIT` clause.
+	 *	@param limit - Records limit
+	 */
 	public limit(limit: number): SQLBuilder<SubModel> {
 		this.query_limit = limit;
 		return this;
@@ -165,29 +174,48 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
-	public build() {
-		const is_subquery = this.subquery.length > 0;
-		const subquery = `${this.subquery.join('')}->${this.query_table}`;
+	public build(): string {
+		let query = 'SELECT';
 
-		let groupBy;
+		if (this.subquery) query.concat(' ', this.subquery.join(''), '->', this.query_table);
+		else query.concat(' ', this.select_fields);
 
-		if (this.groupBy) {
-			groupBy = '';
-		}
+		query.concat('FROM ', this.query_table);
 
-		return `SELECT ${is_subquery ? subquery : this.select_fields} FROM 
-			${this.query_table}${this.query_range ? `:${this.query_range}` : ''}
-			${this.query_split ? this.query_split : ''}
-			${this.query_orderBy ? '' : this.query_orderByRand ? 'ORDER BY RAND()' : ''}
-			${this.query_limit ?? ''}
-			${this.query_start ?? ''}
-			${this.query_fetch_fields.length > 0 ? this.query_fetch_fields.join() : ''}
-			${this.query_timeout ? `TIMEOUT ${this.query_timeout}` : ''};
-			${this.query_parallel ? 'PARALLEL' : ''};`;
+		if (this.query_range) query.concat(':', this.query_range);
+	
+		if (this.query_where) query.concat(' ', 'WHERE ', this.query_where);
+
+		if (this.query_split) query.concat(' ', this.query_split);
+		if (this.query_fetch_fields) query.concat(' ', this.query_fetch_fields.join(', '));
+
+		// @todo - OrderBy calculation
+		if (this.query_orderBy) query.concat();
+		else if (this.query_orderByRand) query.concat(' ', 'ORDER BY RAND()');
+
+		// @todo - GroupBy calculation
+		if (this.query_groupByFields) query.concat(' ', 'GROUP BY ', this.query_groupByFields.join(', '));
+		else if (this.query_groupBy) query.concat(' ', 'GROUP BY ', this.query_select_fields_projections.join(', '));
+
+		if (this.query_limit) query.concat(' ', this.query_limit.toString());
+		if (this.query_start) query.concat(' ', this.query_start.toString());
+		if (this.query_timeout) query.concat(' ', 'TIMEOUT ', this.query_timeout);
+		if (this.query_parallel) query.concat(' ', 'PARALLEL');
+
+		// return `SELECT ${is_subquery ? subquery : this.select_fields} FROM 
+		// 	${this.query_table}${this.query_range ? `:${this.query_range}` : ''}
+		// 	${this.query_split ?? ''}
+		// 	${this.query_fetch_fields.length > 0 ? this.query_fetch_fields.join() : ''}
+		// 	${this.query_orderBy ? '' : this.query_orderByRand ? 'ORDER BY RAND()' : ''}
+		// 	${this.query_limit ?? ''}
+		// 	${this.query_start ?? ''}
+		// 	${this.query_timeout ? `TIMEOUT ${this.query_timeout}` : ''};
+		// 	${this.query_parallel ? 'PARALLEL' : ''};`;
+
+		return query;
 	}
 
 	public execute() {}
 
 	public live() {}
 }
- 
