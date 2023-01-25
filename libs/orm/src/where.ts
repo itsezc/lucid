@@ -44,8 +44,10 @@ type ObjectOps<T> = Partial<{
 		T[P] extends number ? TNumberWhereOps
 		: T[P] extends Decimal ? TNumberWhereOps
 		: T[P] extends Float ? TNumberWhereOps
+		: T[P] extends Date ? TDateTimeWhereOps
 		: T[P] extends DateTime ? TDateTimeWhereOps
 		: T[P] extends string ? TStringWhereOps
+		: T[P] extends Array<infer U> ? ObjectOps<U>
 		: T[P] extends object ? ObjectOps<T[P]>
 		: T[P] extends boolean ? boolean
 		: never
