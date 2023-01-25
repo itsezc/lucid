@@ -237,3 +237,6 @@ Account.delete()
 	.returnDiff()
 	.timeout('1s')
 	.parallel();
+
+Account.update()
+	.parallel();

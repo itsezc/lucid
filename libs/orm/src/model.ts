@@ -5,6 +5,7 @@ import {
 	TSurrealEventProps,
 } from './';
 import { DeleteBuilder } from './builders/delete_builder';
+import { UpdateBuilder } from './builders/update_builder';
 import { SQLBuilder, TSelectExpression } from './sql_builder';
 import type { ITable } from './table';
 import { toSnakeCase } from './util';
@@ -55,11 +56,18 @@ export class Model {
 			.select(fields);
 	}
 
+	public static update<SubModel extends Model>(
+		this: { new (props?: ITable<Model>): SubModel },
+		from?: string
+	) {
+		return new UpdateBuilder<SubModel>({ from_table: from || new this().getTableName() });
+	}
+
 	public static delete<SubModel extends Model>(
 		this: { new (props?: ITable<Model>): SubModel },
-		
+		from?: string
 	) {
-		return new DeleteBuilder<SubModel>({ from_table: new this().getTableName() });
+		return new DeleteBuilder<SubModel>({ from_table: from || new this().getTableName() });
 	}
 
 	public static events<SubModel extends Model>(

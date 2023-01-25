@@ -78,7 +78,7 @@ export class SQLBuilder<SubModel extends Model> {
 	public where(condition: string | TSubModelWhere<SubModel>): SQLBuilder<SubModel> {
 		if (typeof condition === 'string') this.query_where = condition;
 		else this.query_where = WhereToSQL(condition);
-		
+
 		return this;
 	}
 
