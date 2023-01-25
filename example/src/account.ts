@@ -46,11 +46,12 @@ export class Account extends Model {
 		issue?: Issue;
 	};
 
+	//DEFINE FIELD metadata.marketing TYPE boolean ASSERT exists
+	//DEFINE FIELD metadata.cookies TYPE boolean ASSERT nothing
+
 	@Field({ flexible: true })
 	otherMetadata?: {};
 
-	//DEFINE FIELD metadata.marketing TYPE boolean ASSERT exists
-	//DEFINE FIELD metadata.cookies TYPE boolean ASSERT nothing
 
 	logins?: {
 		when: DateTime;
@@ -176,7 +177,7 @@ export class Account extends Model {
 // 		}
 // 	])
 
-Account.query()
+Account.select()
 	.where({
 		username: '',
 		years_active: 8,
@@ -186,12 +187,15 @@ Account.query()
 		},
 		metadata: {
 			realAge: 18,
-			cookies: true,
 			issue: {
 				title: {
 					endsWith: ''
 				}
 			}
+		},
+		logins: {
+			when: new Date(),
+			verified: false
 		},
 		OR: {
 			birthday: new Date(),

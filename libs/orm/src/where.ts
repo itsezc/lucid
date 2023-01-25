@@ -40,16 +40,15 @@ type TDateTimeWhereOps = TDateTimeOps | DateTime;
 type TStringWhereOps = TStringOps | string;
 
 type ObjectOps<T> = Partial<{
-	[P in keyof T]: 
-		T[P] extends number ? TNumberWhereOps
-		: T[P] extends Decimal ? TNumberWhereOps
+	[P in keyof T]:  T[P] extends Decimal ? TNumberWhereOps
 		: T[P] extends Float ? TNumberWhereOps
 		: T[P] extends Date ? TDateTimeWhereOps
 		: T[P] extends DateTime ? TDateTimeWhereOps
-		: T[P] extends string ? TStringWhereOps
 		: T[P] extends Array<infer U> ? ObjectOps<U>
 		: T[P] extends object ? ObjectOps<T[P]>
 		: T[P] extends boolean ? boolean
+		: T[P] extends string ? TStringWhereOps
+		: T[P] extends number ? TNumberWhereOps
 		: never
 }>;
 
