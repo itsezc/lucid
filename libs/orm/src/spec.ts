@@ -1,4 +1,9 @@
-import { Model } from './';
+import { 
+	type ISurrealScope, 
+	type TSurrealPermissionOperation,
+	Model
+} from '.';
+import { SQLBuilder } from './sql_builder';
 
 interface ISurrealResult {}
 
@@ -9,8 +14,24 @@ interface ISurrealDBInfoResult {
 	error?: Error;
 }
 
-export class TableManager<SubModel extends Model> {
-	constructor(protected model: SubModel) {}
+export class TableSpec<SubModelType extends typeof Model> {
+	constructor(
+		protected model: SubModelType, 
+		private instance = new model()
+	) {}
+
+	public async canOperateWithPermission<
+		T extends ISurrealScope, 
+		X extends InstanceType<SubModelType>
+	>(
+		args: {
+			scope?: T,
+			model?: ReturnType<T['siginup']>,
+			query?: SQLBuilder<X>
+		},
+	): Promise<boolean> {
+		return false;
+	}
 
 	/**
 	 * tags: @testing

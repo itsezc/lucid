@@ -41,11 +41,6 @@ export class Model {
 		return toSnakeCase(this.constructor.name);
 	}
 
-	// @todo
-	public static async find() {
-		return this;
-	}
-
 	// public static create<SubModel extends Model>(this: {
 	// 	new (props?: ITable<Model>): SubModel;
 	// }) {
@@ -68,12 +63,7 @@ export class Model {
 
 		return new SurrealEventManager(model, args);
 	}
-
-	// @todo
-	public static async findOne(x: TModelProperties<Model>): Promise<false> {
-		return false;
-	}
-
+	
 	public async save(): Promise<boolean> {
 		// try {
 		// 	//await db.create(this.getTableName(), {});

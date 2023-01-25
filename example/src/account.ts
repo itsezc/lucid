@@ -1,7 +1,7 @@
-import { Table, Model, Field, Decimal, Float, DateTime, sql } from '@surreal-tools/orm';
+import { Table, Model, Field, Decimal, Float, DateTime, TableSpec } from '@surreal-tools/orm';
 import { Issue } from './issue';
 import { IssueLabel } from './issue_label';
-import { AdminScope } from './scopes';
+import { AccountScope, AdminScope } from './scopes';
 
 @Table<Account>({
 	permissions: () => ({
@@ -59,7 +59,6 @@ export class Account extends Model {
 
 	years_active?: number;
 }
-
 
 // Account.events([
 // 	{
@@ -213,3 +212,11 @@ console.log('Account Model:',
 		.timeout('1m')
 		.build()
 	);
+
+const spec = new TableSpec(Account);
+
+spec.canOperateWithPermission({
+	scope: AccountScope,
+	model: new Account({}),
+	query: Account.select()
+});

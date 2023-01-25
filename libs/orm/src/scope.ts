@@ -7,14 +7,9 @@ export type DefaultSessionVars = {
 	$pass: string;
 };
 
-export interface ISurrealScope<Vars = DefaultSessionVars> {
+export interface ISurrealScope<AuthContext extends Model = Model, Vars = DefaultSessionVars> {
 	name: string;
 	timeout: TScopeSessionTimeout;
-	// table: typeof Model;
-	signin: (vars: Vars) => void;
-	siginup: (vars: Vars) => void;
+	signin: (vars: Vars) => AuthContext;
+	siginup: (vars: Vars) => AuthContext;
 }
-
-export const Scope = (scope: ISurrealScope) => {
-	return `$scope = ${scope}`;
-};

@@ -5,9 +5,9 @@ type TPermissionsCallback<SubModel extends Model = Model> = {
 	$auth: IContextAuth;
 };
 
-type TPermissionCommand = 'CREATE' | 'UPDATE' | 'DELETE' | 'SELECT';
+export type TSurrealPermissionOperation = 'CREATE' | 'UPDATE' | 'DELETE' | 'SELECT';
 
-type TPermissionMultiple = [TPermissionCommand, string];
+type TPermissionMultiple = [TSurrealPermissionOperation, string];
 
 export type TPermissions<SubModel extends Model = Model> = (
 	model: SubModel,

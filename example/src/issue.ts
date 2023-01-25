@@ -10,7 +10,6 @@ import { AccountScope, AdminScope } from './scopes';
 	permissions: ({ id, title }, { $auth }) => ({
 		create: AccountScope && id === $auth.id,
 		delete: 'id === $auth.id',
-		//Nested types are ParenestizedExpression, BinaryExpression
 		update: AdminScope || (AccountScope && id === $auth.id || AdminScope && id === $auth.id),
 		select: AdminScope || (id == $auth.id && title != null && (AdminScope) && AccountScope)
 	}),
