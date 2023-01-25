@@ -52,7 +52,6 @@ export class Account extends Model {
 	@Field({ flexible: true })
 	otherMetadata?: {};
 
-
 	logins?: {
 		when: DateTime;
 		verified?: boolean;
@@ -177,32 +176,40 @@ export class Account extends Model {
 // 		}
 // 	])
 
-Account.select()
-	.where({
-		username: '',
-		years_active: 8,
-		verified: true,
-		birthday: {
-			gt: new Date()
-		},
-		metadata: {
-			realAge: 18,
-			issue: {
-				title: {
-					endsWith: ''
+console.log('Account Model:', 
+	Account.select()
+		.where({
+			username: '',
+			years_active: 8,
+			verified: true,
+			money: 40.51,
+			birthday: {
+				gt: new Date()
+			},
+			metadata: {
+				realAge: 18,
+				issue: {
+					title: {
+						endsWith: ''
+					}
+				}
+			},
+			logins: {
+				when: new Date(),
+				verified: false
+			},
+			OR: {
+				birthday: new Date(),
+				metadata: {
+					realAge: 16,
+					marketing: false,
+				},
+				OR: {
+					money: 50000
 				}
 			}
-		},
-		logins: {
-			when: new Date(),
-			verified: false
-		},
-		OR: {
-			birthday: new Date(),
-			metadata: {
-				realAge: 16,
-				marketing: false,
-			}
-		}
-	})
-	.build();
+		})
+		.limit(10)
+		.timeout('1m')
+		.build()
+	);

@@ -56,11 +56,7 @@ export class Model {
 		this: { new (props?: ITable<Model>): SubModel },
 		fields: TSelectExpression<SubModel> = '*',
 	) {
-		const model = new this();
-
-		return new SQLBuilder<SubModel>({
-				from_table: model.getTableName()
-			})
+		return new SQLBuilder<SubModel>({ from_table: new this().getTableName() })
 			.select(fields);
 	}
 

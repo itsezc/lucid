@@ -10,7 +10,7 @@ export type DefaultSessionVars = {
 export interface ISurrealScope<Vars = DefaultSessionVars> {
 	name: string;
 	timeout: TScopeSessionTimeout;
-	table: typeof Model;
+	// table: typeof Model;
 	signin: (vars: Vars) => void;
 	siginup: (vars: Vars) => void;
 }

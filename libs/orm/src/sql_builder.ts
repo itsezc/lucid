@@ -1,4 +1,4 @@
-import { Model, SQL, TSubModelWhere } from './';
+import { Model, TSubModelWhere, WhereToSQL } from './';
 import { TTimeout } from './internal';
 import { joinRangeFields } from './util';
 
@@ -50,7 +50,7 @@ export class SQLBuilder<SubModel extends Model> {
 		string, 
 		'ASC' | 'DESC', 
 		'COLLATE' | 'NUMERIC' | undefined
-	][] = [];
+	][];
 
 	private query_fetch_fields: string[];
 
@@ -62,7 +62,6 @@ export class SQLBuilder<SubModel extends Model> {
 
 	constructor(props: ISQLBuilderProps<SubModel>) {
 		this.query_table = props.from_table;
-		// this.query_range = joinRangeFields(props.args?.range);
 	}
 
 	public select(
@@ -81,6 +80,7 @@ export class SQLBuilder<SubModel extends Model> {
 
 	public where(condition: string | TSubModelWhere<SubModel>): SQLBuilder<SubModel> {
 		if (typeof condition === 'string') this.query_where = condition;
+		else this.query_where = WhereToSQL(condition);
 		
 		return this;
 	}
@@ -173,51 +173,47 @@ export class SQLBuilder<SubModel extends Model> {
 	}
 
 	public timeout(timeout: TTimeout): SQLBuilder<SubModel> {
+		this.query_timeout = timeout;
 		return this;
 	}
 
 	public build(): string {
 		let query = 'SELECT';
 
-		if (this.subquery) query.concat(' ', this.subquery.join(''), '->', this.query_table);
-		else query.concat(' ', this.select_fields);
 
-		query.concat('FROM ', this.query_table);
+		if (this.subquery) query = query.concat(' ', this.subquery.join(''), '->', this.query_table);
+		else query = query.concat(' ', this.select_fields);
 
-		if (this.query_range) query.concat(':', this.query_range);
+		query = query.concat(' ', 'FROM ', this.query_table);
+
+		if (this.query_range) query = query.concat(':', this.query_range);
 	
-		if (this.query_where) query.concat(' ', 'WHERE ', this.query_where);
+		if (this.query_where) query = query.concat(' ', 'WHERE ', this.query_where);
 
-		if (this.query_split) query.concat(' ', this.query_split);
-		if (this.query_fetch_fields) query.concat(' ', this.query_fetch_fields.join(', '));
+		if (this.query_split) query = query.concat(' ', 'SPLIT ', this.query_split);
+		if (this.query_fetch_fields) query = query.concat(' ', this.query_fetch_fields.join(', '));
 
 		// @todo - OrderBy calculation
-		if (this.query_orderBy) query.concat();
-		else if (this.query_orderByRand) query.concat(' ', 'ORDER BY RAND()');
+		if (this.query_orderBy) query = query.concat();
+		if (this.query_orderByRand) query = query.concat(' ', 'ORDER BY RAND()');
 
 		// @todo - GroupBy calculation
-		if (this.query_groupByFields) query.concat(' ', 'GROUP BY ', this.query_groupByFields.join(', '));
-		else if (this.query_groupBy) query.concat(' ', 'GROUP BY ', this.query_select_fields_projections.join(', '));
+		if (this.query_groupByFields) query = query.concat(' ', 'GROUP BY ', this.query_groupByFields.join(', '));
+		if (this.query_groupBy) query = query.concat(' ', 'GROUP BY ', this.query_select_fields_projections.join(', '));
 
-		if (this.query_limit) query.concat(' ', this.query_limit.toString());
-		if (this.query_start) query.concat(' ', this.query_start.toString());
-		if (this.query_timeout) query.concat(' ', 'TIMEOUT ', this.query_timeout);
-		if (this.query_parallel) query.concat(' ', 'PARALLEL');
+		if (this.query_limit) query = query.concat(' ', 'LIMIT ', this.query_limit.toString());
+		if (this.query_start) query = query.concat(' ', 'START ', this.query_start.toString());
+		if (this.query_timeout) query = query.concat(' ', 'TIMEOUT ', this.query_timeout);
+		if (this.query_parallel) query = query.concat(' ', 'PARALLEL');
 
-		// return `SELECT ${is_subquery ? subquery : this.select_fields} FROM 
-		// 	${this.query_table}${this.query_range ? `:${this.query_range}` : ''}
-		// 	${this.query_split ?? ''}
-		// 	${this.query_fetch_fields.length > 0 ? this.query_fetch_fields.join() : ''}
-		// 	${this.query_orderBy ? '' : this.query_orderByRand ? 'ORDER BY RAND()' : ''}
-		// 	${this.query_limit ?? ''}
-		// 	${this.query_start ?? ''}
-		// 	${this.query_timeout ? `TIMEOUT ${this.query_timeout}` : ''};
-		// 	${this.query_parallel ? 'PARALLEL' : ''};`;
+		query += ';';
 
 		return query;
 	}
 
-	public execute() {}
+	public execute(): SubModel[] {
+		return [];
+	}
 
 	public live() {}
 }
