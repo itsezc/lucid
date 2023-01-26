@@ -1,7 +1,10 @@
 export * from './field';
 export * from './permissions';
 export * from './model';
+
 export * from './table';
+export * from './spec';
+
 export * from './scope';
 
 export * from './where';

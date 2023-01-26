@@ -27,7 +27,7 @@ type GeoObject = {
 		| 'Polygon'
 		| 'MultiPolygon';
 	coordinates:
-		| GeoLine
+		| GeoPoint
 		| GeoMultiPoint
 		| GeoLine
 		| GeoMultiLine

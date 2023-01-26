@@ -1,7 +1,7 @@
-import { Table, Model, Field, Decimal, Float, DateTime, sql } from '@surreal-tools/orm';
+import { Table, Model, Field, Decimal, Float, DateTime, TableSpec } from '@surreal-tools/orm';
 import { Issue } from './issue';
 import { IssueLabel } from './issue_label';
-import { AdminScope } from './scopes';
+import { AccountScope, AdminScope } from './scopes';
 
 @Table<Account>({
 	permissions: () => ({
@@ -40,15 +40,17 @@ export class Account extends Model {
 	birthday?: DateTime;
 
 	metadata?: {
+		realAge: number;
 		marketing: boolean;
 		cookies?: boolean;
+		issue?: Issue;
 	};
-
-	@Field({ flexible: true })
-	otherMetadata?: {};
 
 	//DEFINE FIELD metadata.marketing TYPE boolean ASSERT exists
 	//DEFINE FIELD metadata.cookies TYPE boolean ASSERT nothing
+
+	@Field({ flexible: true })
+	otherMetadata?: {};
 
 	logins?: {
 		when: DateTime;
@@ -57,7 +59,6 @@ export class Account extends Model {
 
 	years_active?: number;
 }
-
 
 // Account.events([
 // 	{
@@ -173,3 +174,78 @@ export class Account extends Model {
 // 			as: 'self_hosted'
 // 		}
 // 	])
+
+console.log('Account Model:', 
+	Account.select()
+		.where({
+			username: '',
+			years_active: 8,
+			verified: true,
+			money: 40.51,
+			birthday: {
+				gt: new Date()
+			},
+			metadata: {
+				realAge: 18,
+				issue: {
+					title: {
+						endsWith: ''
+					}
+				}
+			},
+			logins: {
+				when: new Date(),
+				verified: false
+			},
+			OR: {
+				birthday: new Date(),
+				metadata: {
+					realAge: 16,
+					marketing: false,
+				},
+				OR: {
+					money: 50000
+				}
+			}
+		})
+		.limit(10)
+		.timeout('1m')
+		.build()
+	);
+
+const spec = new TableSpec(Account);
+
+spec.canOperateWithPermission({
+	scope: AccountScope,
+	model: new Account({}),
+	query: Account.select()
+});
+
+Account.create({
+	username: '',
+	passKey: ''
+});
+
+Account.delete()
+	.where({
+		username: {
+			contains: ''
+		}
+	})
+	.returnAfter()
+	.returnBefore()
+	.returnDiff()
+	.timeout('1s')
+	.parallel();
+
+Account.update()
+	.content({
+		username: '',
+		verified: true,
+		logins: [{
+			verified: true
+		}],
+		metadata: {
+		}
+	})
+	.parallel();

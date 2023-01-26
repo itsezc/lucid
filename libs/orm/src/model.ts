@@ -1,11 +1,12 @@
 import {
 	SurrealEvent,
 	SurrealEventManager,
-	TQueryArgs,
 	TSurrealDataType,
 	TSurrealEventProps,
 } from './';
-import { SQLBuilder } from './sql_builder';
+import { DeleteBuilder } from './builders/delete_builder';
+import { UpdateBuilder } from './builders/update_builder';
+import { SQLBuilder, TSelectExpression } from './sql_builder';
 import type { ITable } from './table';
 import { toSnakeCase } from './util';
 
@@ -42,27 +43,31 @@ export class Model {
 		return toSnakeCase(this.constructor.name);
 	}
 
-	// @todo
-	public static async find() {
-		return this;
+	public static create<SubModel extends Model>(
+		this: { new (props?: ITable<Model>): SubModel; }, 
+		args: Partial<{ [P in keyof SubModel]: SubModel[P]}>
+	) {}
+
+	public static select<SubModel extends Model>(
+		this: { new (props?: ITable<Model>): SubModel },
+		fields: TSelectExpression<SubModel> = '*',
+	) {
+		return new SQLBuilder<SubModel>({ from_table: new this().getTableName() })
+			.select(fields);
 	}
 
-	// public static create<SubModel extends Model>(this: {
-	// 	new (props?: ITable<Model>): SubModel;
-	// }) {
-	// 	return new SQLBuilder();
-	// }
-
-	public static query<SubModel extends Model>(
+	public static update<SubModel extends Model>(
 		this: { new (props?: ITable<Model>): SubModel },
-		args?: TQueryArgs<SubModel>,
+		from?: string
 	) {
-		const model = new this();
+		return new UpdateBuilder<SubModel>({ from_table: from || new this().getTableName() });
+	}
 
-		return new SQLBuilder<SubModel>({
-			from_table: model.getTableName(),
-			args,
-		});
+	public static delete<SubModel extends Model>(
+		this: { new (props?: ITable<Model>): SubModel },
+		from?: string
+	) {
+		return new DeleteBuilder<SubModel>({ from_table: from || new this().getTableName() });
 	}
 
 	public static events<SubModel extends Model>(
@@ -73,18 +78,13 @@ export class Model {
 
 		return new SurrealEventManager(model, args);
 	}
-
-	// @todo
-	public static async findOne(x: TModelProperties<Model>): Promise<false> {
-		return false;
-	}
-
+	
 	public async save(): Promise<boolean> {
-		try {
-			//await db.create(this.getTableName(), {});
-		} catch (error) {
-			return false;
-		}
+		// try {
+		// 	//await db.create(this.getTableName(), {});
+		// } catch (error) {
+		// 	return false;
+		// }
 
 		return true;
 	}

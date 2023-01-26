@@ -1,15 +1,16 @@
-import { Model, SQL, TQueryArgs } from './';
-import { joinFields } from './util';
+import { Model, TSubModelWhere, WhereToSQL } from './';
+import { TTimeout } from './internal';
+import { joinRangeFields } from './util';
 
-interface ISQLBuilderProps<SubModel extends Model> {
+export interface ISQLBuilderProps<SubModel extends Model> {
 	from_table: string;
-	args?: TQueryArgs<SubModel>;
 }
 
 type TComparisonOperator = '<'| '<=' | '=' | '>' | '>=';
-type TMappedModelProperty<T extends Model> = { [P in keyof T]: T[keyof T]};
 
-type TSelectionExpression<SubModel extends Model> = 
+export type TMappedModelProperty<T extends Model> = Partial<{ [P in keyof T]: T[keyof T] }>;
+
+export type TSelectExpression<SubModel extends Model> =
 	'*' 
 	| (keyof SubModel)[] 
 	| TSelectExpressionAlias<SubModel>
@@ -18,47 +19,51 @@ type TSelectionExpression<SubModel extends Model> =
 	| ['*', TSelectExpressionAlias<SubModel>][];
 
 type TSelectExpressionAlias<T extends Model> = { 
-	$?: [keyof T, TComparisonOperator, T[keyof T]] | keyof T, 
-	$$?: string | { [P in keyof T]?: T[keyof T]}, 
-	as?: string, 
+	$?: [keyof T, TComparisonOperator, T[keyof T]] | keyof T,
+	$$?: string | { [P in keyof T]?: T[keyof T] },
+	as?: string,
 	where?: string
 };
 
 export class SQLBuilder<SubModel extends Model> {
+	private select_fields = '*';
+	
 	private query_table: string;
-	private range: string;
-	private select_fields = '';
+	private query_range: string;
 
-	private subquery: string[] = [];
-	private where_condition: string;
+	private subquery: string[];
+	private query_where: string;
 	private count_condition: string;
 
 	private query_select_fields: string[] = [];
+	private query_select_fields_projections: string[];
+
+	private query_timeout: TTimeout;
 
 	private query_parallel = false;
-	private query_split: string | null = null;
+	private query_split: string;
 
 	private query_orderByRand = false;
 	private query_orderBy: [
 		string, 
 		'ASC' | 'DESC', 
 		'COLLATE' | 'NUMERIC' | undefined
-	][] = [];
+	][];
 
-	private query_fetch_fields: string[] = [];
+	private query_fetch_fields: string[];
 
 	private query_groupBy = false;
+	private query_groupByFields: (keyof SubModel)[];
 
-	private query_limit: number = null;
-	private query_start: number = null;
+	private query_limit: number;
+	private query_start: number;
 
 	constructor(props: ISQLBuilderProps<SubModel>) {
 		this.query_table = props.from_table;
-		this.range = joinFields(props.args?.range);
 	}
 
 	public select(
-		fields: TSelectionExpression<SubModel>
+		fields: TSelectExpression<SubModel>
 	): SQLBuilder<SubModel> {
 		// If fields are fields of table
 		if(Array.isArray(fields)) this.select_fields = fields.join(', ');
@@ -66,10 +71,15 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
-	public where(condition: string): SQLBuilder<SubModel> {
-		if (typeof condition === 'string')
-			this.where_condition = condition;
-		
+	public range(range: string[][] | number[]): SQLBuilder<SubModel> {
+		this.query_range = joinRangeFields(range);
+		return this;
+	}
+
+	public where(condition: string | TSubModelWhere<SubModel>): SQLBuilder<SubModel> {
+		if (typeof condition === 'string') this.query_where = condition;
+		else this.query_where = WhereToSQL(condition);
+
 		return this;
 	}
 
@@ -78,10 +88,8 @@ export class SQLBuilder<SubModel extends Model> {
 		operator: TComparisonOperator,
 		value: number
 	): SQLBuilder<SubModel> {
-		if (typeof condition === 'string')
-			this.count_condition = condition;
-		else
-			this.count_condition = `${condition.build()} ${operator} ${value}`;
+		if (typeof condition === 'string') this.count_condition = condition;
+		else this.count_condition = `${condition.build()} ${operator} ${value}`;
 
 		return this;
 	}
@@ -124,7 +132,8 @@ export class SQLBuilder<SubModel extends Model> {
 	/**
 	 * SurrealDB supports data aggregation and grouping, with support for multiple fields, nested fields, and aggregate functions. In SurrealDB, every field which appears in the field projections of the select statement (and which is not an aggregate function), must also be present in the `GROUP BY` clause.
 	 */
-	public groupBy(): SQLBuilder<SubModel> {
+	public groupBy(fields?: (keyof SubModel)[]): SQLBuilder<SubModel> {
+		if (fields) this.query_groupByFields = fields;
 		this.query_groupBy = true;
 		return this;
 	}
@@ -137,6 +146,10 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
+	/**
+	 * To limit the number of records returned, using the `LIMIT` clause.
+	 *	@param limit - Records limit
+	 */
 	public limit(limit: number): SQLBuilder<SubModel> {
 		this.query_limit = limit;
 		return this;
@@ -157,20 +170,48 @@ export class SQLBuilder<SubModel extends Model> {
 		return this;
 	}
 
-	// @todo FROM is optional i.e. 
-	// `SELECT * FROM person WHERE ->knows->person->(knows WHERE influencer = true) TIMEOUT 5s;`
-	public build() {
-		const is_subquery = this.subquery.length > 0;
-		const subquery = `${this.subquery.join('')}->${this.query_table}`;
-
-		return `SELECT 
-			${is_subquery ? '' : this.select_fields}${subquery} FROM 
-			${this.query_table}${this.range ? `:${this.range}` : ''
-		};`;
+	public timeout(timeout: TTimeout): SQLBuilder<SubModel> {
+		this.query_timeout = timeout;
+		return this;
 	}
 
-	public execute() {}
+	public build(): string {
+		let query = 'SELECT';
+
+
+		if (this.subquery) query = query.concat(' ', this.subquery.join(''), '->', this.query_table);
+		else query = query.concat(' ', this.select_fields);
+
+		query = query.concat(' ', 'FROM ', this.query_table);
+
+		if (this.query_range) query = query.concat(':', this.query_range);
+	
+		if (this.query_where) query = query.concat(' ', 'WHERE ', this.query_where);
+
+		if (this.query_split) query = query.concat(' ', 'SPLIT ', this.query_split);
+		if (this.query_fetch_fields) query = query.concat(' ', this.query_fetch_fields.join(', '));
+
+		// @todo - OrderBy calculation
+		if (this.query_orderBy) query = query.concat();
+		if (this.query_orderByRand) query = query.concat(' ', 'ORDER BY RAND()');
+
+		// @todo - GroupBy calculation
+		if (this.query_groupByFields) query = query.concat(' ', 'GROUP BY ', this.query_groupByFields.join(', '));
+		if (this.query_groupBy) query = query.concat(' ', 'GROUP BY ', this.query_select_fields_projections.join(', '));
+
+		if (this.query_limit) query = query.concat(' ', 'LIMIT ', this.query_limit.toString());
+		if (this.query_start) query = query.concat(' ', 'START ', this.query_start.toString());
+		if (this.query_timeout) query = query.concat(' ', 'TIMEOUT ', this.query_timeout);
+		if (this.query_parallel) query = query.concat(' ', 'PARALLEL');
+
+		query += ';';
+
+		return query;
+	}
+
+	public execute(): SubModel[] {
+		return [];
+	}
 
 	public live() {}
 }
- 
