@@ -14,16 +14,14 @@ interface ISurrealDBInfoResult {
 	error?: Error;
 }
 
-
-export class TableSpec<SubModelType extends typeof Model> {
+export class ModelSpec<SubModelType extends typeof Model> {
 	constructor(
 		protected model: SubModelType, 
 		private instance = new model()
 	) {}
 
 	public async canOperateWithPermission<
-		T extends ISurrealScope<SubModelType>, 
-		X extends InstanceType<SubModelType>
+		T extends ISurrealScope<InstanceType<SubModelType>>
 	>(
 		args: {
 			scope?: T,

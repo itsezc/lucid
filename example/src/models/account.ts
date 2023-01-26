@@ -1,4 +1,4 @@
-import { Table, Model, Field, Decimal, Float, DateTime, TableSpec } from '@surreal-tools/orm';
+import { Table, Model, Field, Decimal, Float, DateTime, ModelSpec } from '@surreal-tools/orm';
 import { Issue } from './issue';
 import { IssueLabel } from './issue_label';
 import { AccountScope, AdminScope } from './scopes';
@@ -239,3 +239,10 @@ Account.update()
 		}
 	})
 	.parallel();
+
+
+new ModelSpec(Account)
+	.canOperateWithPermission({
+		scope: AdminScope,
+		query: Account.select()
+	});
