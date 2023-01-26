@@ -8,7 +8,7 @@ export interface IBuilderProps {
 
 export interface IBuilder<SubModel extends Model> {
 	build(): string;
-	execute(): Model | Model[];
+	execute(): SubModel | SubModel[];
 }
 
 export type TMappedModelProperty<T extends Model> = { [P in keyof T]: T[keyof T] };
