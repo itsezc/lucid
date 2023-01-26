@@ -1,6 +1,6 @@
 {
 	"name": "@surreal-tools/schema-generator",
-	"version": "0.5.0",
+	"version": "0.1.0",
 	"main": "dist/entry.js",
 	"type": "commonjs",
 	"devDependencies": {
