@@ -96,14 +96,10 @@ export function WhereToSQL<SubModel extends Model>(
 				const isCompObj = !isOR && Object.getOwnPropertyNames((value as object)).some(v => operators.includes(v));
 				
 				const isInlineObjArr = !isOR && Array.isArray(value);
-				
-				// const isInlineObj = !isOR && !isRecord && !isInlineObjArr && !isCompObj && (options.object || typeof value === 'object');
-
+			
 				const isInlineObj = !isOR && !isRecord && !isInlineObjArr && !isCompObj;
 
-
-
-				console.log({key, isOR, isCompObj, isInlineObj, isInlineObjArr, isRecord });
+				// console.log({key, isOR, isCompObj, isInlineObj, isInlineObjArr, isRecord });
 
 				const parsedValue = value.gt ? `${key} > '${cleanValue(value.gt)}'`
 					: value.gte ? `${key} >= '${cleanValue(value.gte)}'`
@@ -112,7 +108,7 @@ export function WhereToSQL<SubModel extends Model>(
 					: value.eq ? `${key} = '${cleanValue(value.eq)}'`
 					: value.contains ? `${key} ∋ '${cleanValue(value.contains)}'`
 					: value.endsWith ? SurrealString.endsWith(key, value.endsWith)
-					: isOR ? `OR (${WhereToSQL(value, { OR: true })})`
+					: isOR ? ` OR (${WhereToSQL(value, { OR: true })})`
 					: isCompObj ? `${key} = ${WhereToSQL(value, { object: true })}`
 					: isInlineObjArr ? WhereToSQL(value, { object: true, overrides: `${key}.*` })
 					: WhereToSQL(value, { object: true, prefix: key });
@@ -125,7 +121,13 @@ export function WhereToSQL<SubModel extends Model>(
 				break;
 		}
 
-		if (index !== entries.length - 1) sql += ', ';
+		if (index !== entries.length - 1 && entries[index + 1][0] !== 'OR') sql += ' AND ';
+
+		// if (entries[index + 1][0] !== 'OR') {
+		// 	sql += ' '
+		// } else if (index !== entries.length - 1) {
+		// 	sql += ' AND '
+		// };
 	});
 
 	// let conditions = [];
