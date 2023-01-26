@@ -10,11 +10,16 @@ const client = new SurrealWS(
 );
 
 (async() => {
-	await client.connect();
-	await client.signin<TDefaultSessionVars, {}>({ 
-		$email: 'abc', 
-		$pass: 'xyz'
+	await client.signin<TDefaultSessionVars>({ 
+		$email: 'chiru', 
+		$pass: 'hi'
 	});
+
+	// await client.signup<TDefaultSessionVars>({ 
+	// 	$email: 'chiru', 
+	// 	$pass: 'hi'
+	// });
+
 	console.log(client.token);
 })();
 

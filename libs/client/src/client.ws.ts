@@ -14,13 +14,83 @@ export default class SurrealWS implements ISurrealConnector
     private heartbeat?: NodeJS.Timeout;
     private socket?: WebSocket;
     private requestMap?: Map<string, [(value: unknown) => void, (value: unknown) => void]>;
+    public connected: Promise<unknown>;
+
+    public test: string;
     
     constructor(
         public host: string,
         private NS: string,
         private DB: string,
         private SC?: string,
-    ) {}
+    ) {
+        const endpoint = new URL('rpc', host.replace('http', 'ws').replace('https  ', 'wss'));
+
+        //Keep alive.
+        this.heartbeat = setInterval(() => this.send('ping'), 30_000);
+
+        this.socket = new WebSocket(endpoint.toString());
+
+        this.test = 'test'
+        this.requestMap = new Map();
+
+        this.connected = new Promise((resolve) => {
+            this.socket?.addEventListener('open', async (event) => {
+                resolve(true);
+            });
+        });
+
+        this.init();
+    }
+
+    public init() {
+        if (this.socket) {
+            this.socket.addEventListener('open', async (event) => {
+                if (this.token) await this.send('authenticate', [this.token]);
+
+                if (this.NS && this.DB) await this.send('use', [this.NS, this.DB]);  
+            });
+            
+            this.socket.addEventListener('message', (event) => {
+                const { id, result, method, error } = JSON.parse(event.data);
+
+                //Not sure what this does.
+                if (method === 'notify') return;
+
+                if (!this.requestMap?.has(id)) {
+                    console.warn('Received a message with no associated request!');
+                    console.warn({ id, result, method, error });
+                }
+                else {
+                    const [resolve, reject] = this.requestMap.get(id) || [];
+                    this.requestMap.delete(id);
+            
+                    error ? reject!(error) : resolve!(result);
+                }
+            });
+
+            this.socket.addEventListener('close', (event) => {
+                console.warn("Recieved a close from the websocket!", event);
+
+                this.connected = new Promise((resolve) => {
+                    this.socket?.addEventListener('open', async (event) => {
+                        resolve(true);
+                    });
+                });
+        
+                //Cancel all pending queries.
+                //TODO: replace this with a query restart.
+                this.requestMap?.forEach(([_, reject]) => reject('Connection closed'));
+            });
+            this.socket.addEventListener('error', (event) => {
+                console.warn("Recieved an error from the websocket!", event);
+            });
+        }
+    }
+
+    async disconnect() {
+        this.socket?.close();
+    }
 
     //Using a token must be done within the query method since this connector is stateless.
     async query<T>(query: string, params?: Record<string, unknown>): Promise<T[]> {
@@ -34,7 +104,9 @@ export default class SurrealWS implements ISurrealConnector
         surrealArgs.DB = this.DB;
         surrealArgs.SC = this.SC;
 
-        const res = await this.send('signup', [surrealArgs]);
+        const res = await this.send('signin', [surrealArgs]);
+
+        this.token = res as string;
     }
 
     async signup<Args extends object, ResponseObj>(args: Args) {
@@ -47,79 +119,25 @@ export default class SurrealWS implements ISurrealConnector
         surrealArgs.SC = this.SC;
 
         const res = await this.send('signup', [surrealArgs]);
-    }
 
-    async connect() {
-        const endpoint = new URL('rpc', this.host.replace('http', 'ws').replace('https  ', 'wss'));
-
-        //Keep alive.
-        this.heartbeat = setInterval(() => this.send('ping'), 30_000);
-
-        this.socket = new WebSocket(endpoint.toString());
-
-        this.socket.addEventListener('open', this.processOpen);
-        this.socket.addEventListener('message', this.processMessage);
-        this.socket.addEventListener('close', this.processClose);
-        this.socket.addEventListener('error', this.processError);
-    }
-
-    //Processes messages from the websocket.
-    private async processMessage(event) {
-        const { id, result, method, error } = JSON.parse(event.data as string);
-
-        //Not sure what this does.
-        if (method === 'notify') {
-            return;
-        }
-
-        if (!this.requestMap?.has(id)) {
-            console.warn('Received a message with no associated request!');
-            console.warn({ id, result, method, error });
-            return;
-        }
-
-        const [resolve, reject] = this.requestMap.get(id) || [];
-        this.requestMap.delete(id);
-
-        error ? reject!(error) : resolve!(result);
-    }
-
-    private async processOpen(event) {
-       if (this.token) await this.send('authenticate', [this.token]);
-
-       if (this.NS && this.DB) await this.send('use', [this.NS, this.DB]);
-    }
-
-    private async processError(event) {
-        console.warn("Recieved an error from the websocket!", event);
-    }
-
-    private async processClose(event) {
-        console.warn("Recieved a close from the websocket!", event);
-
-        //Reject all the pending queries since the connection is closed.
-        //TODO: gracefully try to reconnect multiple times before failing.
-        this.requestMap?.forEach(([_, reject]) => reject('Connection closed'));
+        this.token = res as string;
     }
 
     private async send(method: string, params: any[] = []) {
+        await this.connected;
+        
         const id = uuidv4();
 
+        while (!this.connected) {
+            await new Promise((resolve) => setTimeout(resolve, 200));
+        }
+    
         return new Promise((success, reject) => {
             this.requestMap?.set(id, [success, reject]);
 
             const data = JSON.stringify({ id, method, params });
-
-            console.log({ data });
-
+            
             if (this.socket) this.socket?.send(data);
         });
     }
-}
-
-
-
-
-type Query = {
-
 }
