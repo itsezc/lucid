@@ -6,11 +6,11 @@ import { Project } from './project';
 
 import { AccountScope, AdminScope } from './scopes';
 
+
 @Table<Issue>({
 	permissions: ({ id, title }, { $auth }) => ({
 		create: AccountScope && id === $auth.id,
 		delete: 'id === $auth.id',
-		//Nested types are ParenestizedExpression, BinaryExpression
 		update: AdminScope || (AccountScope && id === $auth.id || AdminScope && id === $auth.id),
 		select: AdminScope || (id == $auth.id && title != null && (AdminScope) && AccountScope)
 	}),
@@ -21,7 +21,6 @@ export class Issue extends Model {
 
 	body!: string;
 
-	//TODO: allow default values without
 	priority!: 'no_priority' | 'urgent' | 'high' | 'medium' | 'low';
 
 	status!: 'backlog' | 'todo' | 'in_progress' | 'done' | 'canceled';
