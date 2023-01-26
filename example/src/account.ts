@@ -175,51 +175,41 @@ export class Account extends Model {
 // 		}
 // 	])
 
-console.log('Account Model:', 
-	Account.select()
-		.where({
-			username: '',
-			years_active: 8,
-			verified: true,
-			money: 40.51,
-			birthday: {
-				gt: new Date()
-			},
-			metadata: {
-				realAge: 18,
-				issue: {
-					title: {
-						endsWith: ''
-					}
-				}
-			},
-			logins: {
-				when: new Date(),
-				verified: false
-			},
-			OR: {
-				birthday: new Date(),
-				metadata: {
-					realAge: 16,
-					marketing: false,
-				},
-				OR: {
-					money: 50000
+Account.select()
+	.where({
+		username: '',
+		years_active: 8,
+		verified: true,
+		money: 40.51,
+		birthday: {
+			gt: new Date(),
+		},
+		metadata: {
+			realAge: 18,
+			issue: {
+				title: {
+					endsWith: ''
 				}
 			}
-		})
-		.limit(10)
-		.timeout('1m')
-		.build()
-	);
-
-const spec = new TableSpec(Account);
-
-spec.canOperateWithPermission({
-	scope: AccountScope,
-	model: new Account({}),
-	query: Account.select()
-});
+		},
+		logins: {
+			when: new Date(),
+			verified: false
+		},
+		OR: {
+			birthday: new Date(),
+			metadata: {
+				realAge: 16,
+				marketing: false,
+			},
+			OR: {
+				money: 50000
+			}
+		}
+	})
+	.limit(10)
+	.timeout('1m')
+	.build()
 
 Account.create({
 	username: '',

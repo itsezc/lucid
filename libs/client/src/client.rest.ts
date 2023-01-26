@@ -1,21 +1,20 @@
-import { ISurrealScope, Model, Table } from '@surreal-tools/orm';
-import ISurrealConnector from './client.interface';
+import { TDefaultSessionVars, ISurrealScope, Model, Table } from '@surreal-tools/orm';
+import { ISurrealConnector, TAuthErrorResponse, TAuthSuccessResponse, TExtractVars } from './client.interface';
 
 type TSurrealResponse<T> = {
     result: T[],
     error: {}[],
 };
 
-type ExtractVars<T extends ISurrealScope<unknown>> = T extends ISurrealScope<infer V> ? Partial<V> : never;
-
 export default class SurrealRest implements ISurrealConnector 
-{
+{    
+    public token: string;
+    
     constructor(
         public host: string,
-        private token: string,
         private NS: string,
         private DB: string,
-        private SC: string,
+        private SC?: string,
     ) {}
 
     //Using a token must be done within the query method since this connector is stateless.
@@ -33,31 +32,51 @@ export default class SurrealRest implements ISurrealConnector
         return res.result;
     }
 
-
-    async signin<S extends ISurrealScope<unknown>>(args: ExtractVars<S>): Promise<boolean> {
+    async signin<S extends ISurrealScope<unknown, TDefaultSessionVars>>(args: TExtractVars<S>) {
+        //Strip out the $ from the request (Surreal does not expect it from the REST api).
+        const surrealArgs = Object.fromEntries(Object.entries(args).map(([key, value]) => [key.replace("$", ""), value]));
+    
         const res = await fetch(`${this.host}/signin`, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
-                NS: this.NS,
-                DB: this.DB,
             },
             body: JSON.stringify({
-                NS: this.NS,
-                DB: this.DB,
-                SC: this.SC,
-                username: 'abc',
-                password: 'def',
-                ...args
+                ns: this.NS,
+                db: this.DB,
+                sc: this.SC,
+                ...surrealArgs
             })
         });
 
-        return false;
+        const responseJson: TAuthSuccessResponse | TAuthErrorResponse = await res.json();
+
+        if (responseJson.code === 200) this.token = responseJson.token;
+        else throw new Error(responseJson.description);
     }
 
-    async signup<S>(args: S | { user?: string | undefined; pass?: string | undefined; DB?: string | undefined; NS?: string | undefined; }): Promise<boolean> {
-        return false;
-    }
+    async signup<Args extends object, ResponseObj>(args: Args) {
 
+        //Strip out the $ from the request (Surreal does not expect it from the REST api).
+        const surrealArgs = Object.fromEntries(Object.entries(args).map(([key, value]) => [key.replace("$", ""), value]));
+    
+        const res = await fetch(`${this.host}/signup`, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+            },
+            body: JSON.stringify({
+                ns: this.NS,
+                db: this.DB,
+                sc: this.SC,
+                ...surrealArgs
+            })
+        });
+
+        const responseJson: TAuthSuccessResponse | TAuthErrorResponse = await res.json();
+
+        if (responseJson.code === 200) this.token = responseJson.token;
+        else throw new Error(responseJson.description);
+    }
 }
 

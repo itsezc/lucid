@@ -1,15 +1,16 @@
 import { Model } from './model';
 
-export type TScopeSessionTimeout = `${string}m` | `${string}h`;
+export type TScopeSessionTimeout = `${string}m` | `${string}h` | `${string}`;
 
-export type DefaultSessionVars = {
+export type TDefaultSessionVars = {
 	$email: string;
 	$pass: string;
 };
 
-export interface ISurrealScope<AuthContext extends Model = Model, Vars = DefaultSessionVars> {
+export interface ISurrealScope<AuthContext, Vars = TDefaultSessionVars> {
 	name: string;
 	timeout: TScopeSessionTimeout;
 	signin: (vars: Vars) => AuthContext;
-	siginup: (vars: Vars) => AuthContext;
+	signup: (vars: Vars) => AuthContext;
 }
+

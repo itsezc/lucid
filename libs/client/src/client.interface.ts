@@ -1,10 +1,14 @@
-import { ISurrealScope } from "@surreal-tools/orm";
+import { ISurrealScope, TDefaultSessionVars } from "@surreal-tools/orm";
 
-export default interface ISurrealConnector {
+export type TExtractVars<T extends ISurrealScope<unknown>> = T extends ISurrealScope<infer V> ? Partial<V> : never;
+export interface ISurrealConnector {
     query<T>(query: string): Promise<Array<T>>;
 
-    signin<S>(args: TSurrealAuthArgs | S): Promise<boolean>;
-    signup<S>(args: TSurrealAuthArgs | S): Promise<boolean>;
+    //Promise<TExtractVars<S>>;
+    //Use that to match return type.
+    
+    signin<S extends ISurrealScope<unknown, TDefaultSessionVars>>(args: TSurrealAuthArgs | S): void;
+    signup<S extends ISurrealScope<unknown, TDefaultSessionVars>>(args: TSurrealAuthArgs | S): void;
 }
 
 type TSurrealAuthArgs = {
@@ -12,4 +16,17 @@ type TSurrealAuthArgs = {
     pass?: string;
     DB?: string;
     NS?: string;
+}
+
+export type TAuthSuccessResponse = {
+    code: 200;
+    details: string;
+    token: string;
+}
+
+export type TAuthErrorResponse = {
+    code: 403;
+    details: string;
+    description: string;
+    information: string;
 }

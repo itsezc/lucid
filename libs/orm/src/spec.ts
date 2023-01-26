@@ -14,6 +14,7 @@ interface ISurrealDBInfoResult {
 	error?: Error;
 }
 
+
 export class TableSpec<SubModelType extends typeof Model> {
 	constructor(
 		protected model: SubModelType, 
@@ -21,12 +22,12 @@ export class TableSpec<SubModelType extends typeof Model> {
 	) {}
 
 	public async canOperateWithPermission<
-		T extends ISurrealScope, 
+		T extends ISurrealScope<SubModelType>, 
 		X extends InstanceType<SubModelType>
 	>(
 		args: {
 			scope?: T,
-			model?: ReturnType<T['siginup']>,
+			model?: ReturnType<T['signup']>,
 			query?: SQLBuilder<InstanceType<SubModelType>>
 		},
 	): Promise<boolean> {
