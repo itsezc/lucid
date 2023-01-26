@@ -10,7 +10,6 @@ Surreal ORM assists you in building type safe apps with SurrealDB, without the n
 2) Write your frontend / backend, import `@org/models` and start using Surreal as a web database
 
 ## Features
-
 - [x] Designed with type safety (w/ TypeScript) and performance in mind, with a very slim runtime (~10 KB)
 - [x] Modeling 
 	- 🟢 Permissions
@@ -19,20 +18,23 @@ Surreal ORM assists you in building type safe apps with SurrealDB, without the n
 	- 🟢 Overrides (`name`, `flexible` etc.)
 	- 🟢 Indexes
 - [x] `Query`, `Create`, `Update` and `Delete` with fully typed Models
-- [x] `RELATE` between Models
-- [x] `sql` function as an escape hatch for edge cases, with optional type safety
-- [x] Build advanced queries with `SELECT`, with type guarantees
+- [x] `RELATE` between Models with type safety
+- [ ] `sql` function as an escape hatch for edge cases, with optional type safety
+- [x] Build advanced queries using `SELECT` with type guarantees
 - [x] Schema generation with CLI and CI / CD pipelines
-- [x] Works on Bun and Cloudflare Workers
+- [x] Works on the Browser, Bun, Cloudflare Workers, Node.js
 - [x] 1:1 Surreal types - `Primitives` (string, int etc.) as well as `GeoJSON` (point, polygon, collection etc.)
 - [x] Exposed operators and functions such as `Time`, `String`, `Array` etc. for utility functions
-- [x] Scopes definitions
+- [x] Scopes
 
 ### WIP
-- [] Migrations - Auto generated and deterministic SQL with seeding
-- [] Live query support
-- [] Aggregrate analytics views
-- [] Futures
+- [ ] Migrations - Auto generated and deterministic SQL with seeding
+- [ ] Live query support
+- [ ] Aggregrate analytics views
+- [ ] Futures
+- [ ] `sql` Syntax hightlighting with type safety
 
 ### Roadmap
-- [] WASM (Rust) migration for Runtime with additional optimizations, for increased performance
+- [ ] WASM/SWC migration for Runtime with additional optimizations
+- [ ] VSCode extension
+- [ ] Permission devtools
