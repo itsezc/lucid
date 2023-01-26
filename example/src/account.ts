@@ -239,4 +239,13 @@ Account.delete()
 	.parallel();
 
 Account.update()
+	.content({
+		username: '',
+		verified: true,
+		logins: [{
+			verified: true
+		}],
+		metadata: {
+		}
+	})
 	.parallel();

@@ -1,6 +1,6 @@
 import { TDIFF, TTimeout } from '../internal';
 import { Model } from '../model';
-import { ISQLBuilderProps } from '../sql_builder';
+import { ISQLBuilderProps, TMappedModelProperty } from '../sql_builder';
 import { TSubModelWhere, WhereToSQL } from '../where';
 
 export class UpdateBuilder<SubModel extends Model> {
@@ -21,6 +21,14 @@ export class UpdateBuilder<SubModel extends Model> {
 		if (typeof condition === 'string') this.query_where = condition;
 		else this.query_where = WhereToSQL(condition);
 
+		return this;
+	}
+
+	public content(fields: TMappedModelProperty<SubModel>) {
+		return this;
+	}
+
+	public merge(fields: TMappedModelProperty<SubModel>) {
 		return this;
 	}
 

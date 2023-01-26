@@ -27,7 +27,7 @@ export class TableSpec<SubModelType extends typeof Model> {
 		args: {
 			scope?: T,
 			model?: ReturnType<T['siginup']>,
-			query?: SQLBuilder<X>
+			query?: SQLBuilder<InstanceType<SubModelType>>
 		},
 	): Promise<boolean> {
 		return false;

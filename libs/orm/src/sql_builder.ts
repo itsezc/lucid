@@ -7,7 +7,8 @@ export interface ISQLBuilderProps<SubModel extends Model> {
 }
 
 type TComparisonOperator = '<'| '<=' | '=' | '>' | '>=';
-type TMappedModelProperty<T extends Model> = { [P in keyof T]: T[keyof T] };
+
+export type TMappedModelProperty<T extends Model> = Partial<{ [P in keyof T]: T[keyof T] }>;
 
 export type TSelectExpression<SubModel extends Model> =
 	'*' 
