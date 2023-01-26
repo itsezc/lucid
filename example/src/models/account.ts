@@ -1,5 +1,6 @@
 import { Table, Model, Field, Decimal, Float, DateTime, ModelSpec } from '@surreal-tools/orm';
 import { Issue } from './issue';
+import { IssueLabel } from './issue_label';
 import { AdminScope } from './scopes';
 
 @Table<Account>({
@@ -72,109 +73,122 @@ export class Account extends Model {
 // ]);
 
 // // SELECT * FROM account WHERE username = 'test';
-// Account.query({
-// 	where: { username: 'string' },
-// }).execute();
+console.log('\n',
+	Account.select()
+		.where({ username: 'chiru'})
+		.build()
+)
 
 // // Select all account records with IDs between the given range
 // // SELECT * FROM account:1..1000;
-// Account.query({
-// 	range: [1, 1000],
-// }).execute();
+console.log('\n', 
+	Account.select()
+		.range([1, 1000])
+		.build()
+)
 
 // // Select all account records with IDs between the given range
 // // SELECT * FROM account:['London', '2022-08-29T08:03:39']..['London', '2022-08-29T08:09:31'];
-// Account.query({
-// 	range: [
-// 		['London', '2022-08-29T08:03:39'],
-// 		['London', '2022-08-29T08:09:31'],
-// 	],
-// }).execute();
+console.log('\n',
+	Account.select()
+		.range([
+			['London', '2022-08-29T08:03:39'],
+			['London', '2022-08-29T08:09:31'],
+		])
+		.build()
+)
 
 // With Select (Select changes type?):
 // SELECT username, verified FROM account WHERE username = 'test';
-// Account.query({ where: { username: 'test' } })
-// 	.select(['username', 'verified'])
-// 	.execute();
+console.log('\n',
+	Account.select(['username', 'verified'])
+		.where({ username: 'chiru' })
+		.build()
+);
 
-// Account.query({ where: { username: 'test' } })
-// 	.select(['username', 'verified'])
-// 	.count(
-// 		Issue.query()
-// 			.in(IssueLabel),
-// 		'<', 5
-// 	)
-// 	.execute();
+// console.log('\n',
+// 	Account.select(['username', 'verified'])
+// 		.where({ username: 'chiru' })
+// 		.count(
+// 			Issue.select()
+// 				.in(IssueLabel),
+// 			'<', 5
+// 		)
+// 		.build()
+// );
 
-// Account.query({ 
-// 		where: { username: 'test' },
-// 		timeout: '10s',
-// 	})
-// 	.select(['username', 'verified'])
-// 	.split('passKey')
-// 	.orderBy('passKey', 'DESC', 'COLLATE')
-// 	.groupBy()
-// 	.parallel()
-// 	.limit(5)
-// 	.execute();
+// console.log('\n',
+// 	Account.select(['username', 'verified'])
+// 		.where({ username: 'test' })
+// 		.split('passKey')
+// 		.orderBy('passKey', 'DESC', 'COLLATE')
+// 		.groupBy()
+// 		.parallel()
+// 		.limit(5)
+// 		.execute()
+// );
 
-// Account.query()
-// 	.select('*')
-// 	.select(['username', 'passKey'])
-// 	.select({
-// 		$: 'birthday',
-// 		as: 'dob'
-// 	})
-// 	.select({ $: ['birthday', '>=', '18'], as: 'date' })
-// 	.select([
-// 		{ $: ['username', '=', 'Arthur fleck'], as: 'joker' },
-// 		{ $: ['birthday', '>=', '18'], as: 'date' }
-// 	])
-// 	.select([
-// 		'*',
-// 		{
-// 			$$: 'tags.*.value',
-// 			as: 'tags'
-// 		}
-// 	])
-// 	.select([
-// 		{
-// 			$: 'username',
-// 			where: 'active = true'
-// 		}
-// 	])
-// 	.select([
-// 		{ 
-// 			$$: '->like->friend.name',
-// 			as: 'farenheit'
-// 		}
-// 	])
-// 	.select([
-// 		{ 
-// 			$$: '((celcius * 2) + 30)',
-// 			as: 'farenheit'
-// 		}
-// 	])
-// 	.select([
-// 		{
-// 			$$: {
-// 				username: 'xD'
-// 			},
-// 			as: 'marketing_settings'
-// 		}
-// 	])
-// 	.select([
-// 		'*',
-// 		{
-// 			$$: sql(
-// 				'SELECT * FROM events WHERE host == $parent.id', 
-// 				{ subquery: true }
-// 			),
-// 			as: 'self_hosted'
-// 		}
-// 	])
+// console.log('\n', 
+// 	Account.select()
+// 		.select('*')
+// 		.select(['username', 'passKey'])
+// 		.select({
+// 			$: 'birthday',
+// 			as: 'dob'
+// 		})
+// 		.select({ $: ['birthday', '>=', '18'], as: 'date' })
+// 		.select([
+// 			{ $: ['username', '=', 'Arthur fleck'], as: 'joker' },
+// 			{ $: ['birthday', '>=', '18'], as: 'date' }
+// 		])
+// 		.select([
+// 			'*',
+// 			{
+// 				$$: 'tags.*.value',
+// 				as: 'tags'
+// 			}
+// 		])
+// 		.select([
+// 			{
+// 				$: 'username',
+// 				where: 'active = true'
+// 			}
+// 		])
+// 		.select([
+// 			{ 
+// 				$$: '->like->friend.name',
+// 				as: 'farenheit'
+// 			}
+// 		])
+// 		.select([
+// 			{ 
+// 				$$: '((celcius * 2) + 30)',
+// 				as: 'farenheit'
+// 			}
+// 		])
+// 		.select([
+// 			{
+// 				$$: {
+// 					username: 'xD'
+// 				},
+// 				as: 'marketing_settings'
+// 			}
+// 		])
+// 		.select([
+// 			'*',
+// 			{
+// 				$$: sql(
+// 					'SELECT * FROM events WHERE host == $parent.id', 
+// 					{ subquery: true }
+// 				),
+// 				as: 'self_hosted'
+// 			}
+// 		])
+// 		.build()
+// );
 
 console.log(
+	'\n',
 	Account.select()
 	.where({
 		username: '',
