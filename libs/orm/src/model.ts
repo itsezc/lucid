@@ -27,11 +27,6 @@ interface ISurrealTableProperties {
 	fields?: TSurrealTablePropertiesField[];
 }
 
-export type TModelProperties<SubModel extends Model> = Omit<
-	SubModel,
-	'save' | 'getTableName'
->;
-
 export class Model {
 	protected schemafull = true;
 	protected edge = false;
@@ -57,7 +52,7 @@ export class Model {
 		this: { new (props?: ITable<Model>): SubModel },
 		fields: TSelectExpression<SubModel> = '*',
 	) {
-		return new SelectBuilder<SubModel>({ from_table: new this().getTableName() })
+		return new SelectBuilder<SubModel>({ query_from: new this().getTableName() })
 			.select(fields);
 	}
 

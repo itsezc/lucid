@@ -1,5 +1,5 @@
 import { Model } from '../model';
-import { TSubModelWhere, WhereToSQL } from '../where';
+import { TSubModelWhere, WhereToSQL } from '../operations/where';
 import { TDIFF, TTimeout } from '../internal';
 
 export interface IBuilderProps {

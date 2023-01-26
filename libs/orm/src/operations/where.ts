@@ -1,9 +1,5 @@
-import { DateTime, Decimal, Float, Model } from './';
-import { SurrealString } from './utilities/string';
-
-type TModelProperties<SubModel extends Model> = {
-	[P in keyof Omit<SubModel, 'save' | 'getTableName'>]: SubModel[P];
-};
+import { DateTime, Decimal, Float, Model } from '..';
+import { SurrealString } from '../utilities/string';
 
 type TDateTimeOps = {
 	eq?: DateTime,

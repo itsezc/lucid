@@ -7,11 +7,13 @@ export * from './spec';
 
 export * from './scope';
 
-export * from './where';
+export * from './operations/where';
 export * from './event';
 
 export * from './sql';
-export * from './relate';
+export * from './builders/relate';
 
 export * from './types';
 export * from './constants';
+
+export { type TModelProperties } from './internal';
