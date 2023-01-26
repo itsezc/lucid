@@ -1,6 +1,6 @@
 import { type TDefaultSessionVars } from '@surreal-tools/orm';
 import SurrealWS from '@surreal-tools/client/src/client.ws';
-import { AccountScope } from './scopes';
+import { AccountScope } from '../models/scopes';
 
 const client = new SurrealWS(
 	'http://localhost:8000',

@@ -26,9 +26,3 @@ type TRelate<
 	return?: 'NONE' | 'BEFORE' | 'AFTER' | 'DIFF';
 	parallel?: boolean;
 }
-
-export function relate2<
-	T1 extends Model, 
-	T2 extends Model, 
-	EdgeProps extends typeof Model
->(args: TRelate<T1, T2, EdgeProps>) {}
