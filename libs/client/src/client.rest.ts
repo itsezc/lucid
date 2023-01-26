@@ -1,4 +1,3 @@
-
 import { ISurrealScope, Model, Table } from '@surreal-tools/orm';
 import ISurrealConnector from './client.interface';
 
@@ -7,23 +6,9 @@ type TSurrealResponse<T> = {
     error: {}[],
 };
 
-type ExtractVars<T extends ISurrealScope> = T extends ISurrealScope<infer Vars> ? Vars : never;
+type ExtractVars<T extends ISurrealScope<unknown>> = T extends ISurrealScope<infer V> ? Partial<V> : never;
 
-class Account extends Model {}
-
-type ScopeType = { $username: string; $passKey: string; };
-
-const AccountScope: ISurrealScope<ScopeType> = {
-    name: 'account',
-    timeout: '1h',
-    table: Account,
-    signin: () => {},
-    siginup: () => {},
-}
-
-
-export default class SurrealRest
-    implements ISurrealConnector 
+export default class SurrealRest implements ISurrealConnector 
 {
     constructor(
         public host: string,
@@ -49,7 +34,7 @@ export default class SurrealRest
     }
 
 
-    async signin<S extends ISurrealScope>(args: ExtractVars<S>): Promise<string> {
+    async signin<S extends ISurrealScope<unknown>>(args: ExtractVars<S>): Promise<boolean> {
         const res = await fetch(`${this.host}/signin`, {
             method: 'POST',
             headers: {
@@ -67,7 +52,11 @@ export default class SurrealRest
             })
         });
 
-        return res;
+        return false;
+    }
+
+    async signup<S>(args: S | { user?: string | undefined; pass?: string | undefined; DB?: string | undefined; NS?: string | undefined; }): Promise<boolean> {
+        return false;
     }
 
 }
