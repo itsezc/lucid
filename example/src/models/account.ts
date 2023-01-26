@@ -1,7 +1,6 @@
 import { Table, Model, Field, Decimal, Float, DateTime, ModelSpec } from '@surreal-tools/orm';
 import { Issue } from './issue';
-import { IssueLabel } from './issue_label';
-import { AccountScope, AdminScope } from './scopes';
+import { AdminScope } from './scopes';
 
 @Table<Account>({
 	permissions: () => ({
@@ -175,7 +174,8 @@ export class Account extends Model {
 // 		}
 // 	])
 
-Account.select()
+console.log(
+	Account.select()
 	.where({
 		username: '',
 		years_active: 8,
@@ -188,14 +188,17 @@ Account.select()
 			realAge: 18,
 			issue: {
 				title: {
-					endsWith: ''
+					contains: 'demo'
+				},
+				body: {
+					endsWith: 'hello'
 				}
 			}
 		},
-		logins: {
+		logins: [{
 			when: new Date(),
 			verified: false
-		},
+		}],
 		OR: {
 			birthday: new Date(),
 			metadata: {
@@ -210,6 +213,7 @@ Account.select()
 	.limit(10)
 	.timeout('1m')
 	.build()
+);
 
 Account.create({
 	username: '',
@@ -235,8 +239,6 @@ Account.update()
 		logins: [{
 			verified: true
 		}],
-		metadata: {
-		}
 	})
 	.parallel();
 

@@ -1,10 +1,10 @@
-export class SurealString {
+export class SurrealString {
 	public static concat(str: string) {
 		return `string::concat(${str})`;
 	}
 
-	public static endsWith(str: string, str2: string) {
-		return `string::endsWith('${str}', '${str2}')`;
+	public static endsWith(str: string, ends: string) {
+		return `string::endsWith(${str}, '${ends}')`;
 	}
 
 	public static join(str: string) {
