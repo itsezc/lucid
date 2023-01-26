@@ -1,10 +1,6 @@
-import { Model, TSubModelWhere, WhereToSQL } from './';
-import { TTimeout } from './internal';
-import { joinRangeFields } from './util';
-
-export interface ISQLBuilderProps<SubModel extends Model> {
-	from_table: string;
-}
+import { Model } from '..';
+import { joinRangeFields } from '../util';
+import { Builder, IBuilderProps } from './builder';
 
 type TComparisonOperator = '<'| '<=' | '=' | '>' | '>=';
 
@@ -25,22 +21,20 @@ type TSelectExpressionAlias<T extends Model> = {
 	where?: string
 };
 
-export class SQLBuilder<SubModel extends Model> {
+export class SelectBuilder<SubModel extends Model>
+	extends Builder<SubModel> 
+{
 	private select_fields = '*';
 	
 	private query_table: string;
 	private query_range: string;
 
 	private subquery: string[];
-	private query_where: string;
 	private count_condition: string;
 
 	private query_select_fields: string[] = [];
 	private query_select_fields_projections: string[];
 
-	private query_timeout: TTimeout;
-
-	private query_parallel = false;
 	private query_split: string;
 
 	private query_orderByRand = false;
@@ -58,57 +52,50 @@ export class SQLBuilder<SubModel extends Model> {
 	private query_limit: number;
 	private query_start: number;
 
-	constructor(props: ISQLBuilderProps<SubModel>) {
-		this.query_table = props.from_table;
+	constructor(props: IBuilderProps) {
+		super(props);
 	}
 
 	public select(
 		fields: TSelectExpression<SubModel>
-	): SQLBuilder<SubModel> {
+	): SelectBuilder<SubModel> {
 		// If fields are fields of table
 		if(Array.isArray(fields)) this.select_fields = fields.join(', ');
 		
 		return this;
 	}
 
-	public range(range: string[][] | number[]): SQLBuilder<SubModel> {
+	public range(range: string[][] | number[]): SelectBuilder<SubModel> {
 		this.query_range = joinRangeFields(range);
 		return this;
 	}
 
-	public where(condition: string | TSubModelWhere<SubModel>): SQLBuilder<SubModel> {
-		if (typeof condition === 'string') this.query_where = condition;
-		else this.query_where = WhereToSQL(condition);
-
-		return this;
-	}
-
 	public count<T extends Model>(
-		condition: string | SQLBuilder<T>,
+		condition: string | SelectBuilder<T>,
 		operator: TComparisonOperator,
 		value: number
-	): SQLBuilder<SubModel> {
+	): SelectBuilder<SubModel> {
 		if (typeof condition === 'string') this.count_condition = condition;
 		else this.count_condition = `${condition.build()} ${operator} ${value}`;
 
 		return this;
 	}
 
-	public in(model: typeof Model | string): SQLBuilder<SubModel> {
+	public in(model: typeof Model | string): SelectBuilder<SubModel> {
 		if (typeof model === 'string') this.subquery.push(model);
 		else this.subquery.push(`->${new model().getTableName()}`);
 
 		return this;
 	}
 
-	public of(model: typeof Model | string): SQLBuilder<SubModel> {
+	public of(model: typeof Model | string): SelectBuilder<SubModel> {
 		if (typeof model === 'string') this.subquery.push(model);
 		else this.subquery.push(`<-${new model().getTableName()}`);
 
 		return this;
 	}
 
-	public from(record: string): SQLBuilder<SubModel> {
+	public from(record: string): SelectBuilder<SubModel> {
 		this.query_table = record;
 		return this;
 	}
@@ -117,13 +104,13 @@ export class SQLBuilder<SubModel extends Model> {
 		key: keyof SubModel, 
 		order: 'ASC' | 'DESC', 
 		extra?: 'COLLATE' | 'NUMERIC'
-	): SQLBuilder<SubModel> {
+	): SelectBuilder<SubModel> {
 		this.query_orderBy.push([key.toString(), order, extra]);
 		return this;
 	}
 
 	// ORDER BY RAND()
-	public orderRandomly(): SQLBuilder<SubModel> {
+	public orderRandomly(): SelectBuilder<SubModel> {
 		this.query_orderByRand = true;
 		this.query_orderBy = [];
 		return this;
@@ -132,7 +119,7 @@ export class SQLBuilder<SubModel extends Model> {
 	/**
 	 * SurrealDB supports data aggregation and grouping, with support for multiple fields, nested fields, and aggregate functions. In SurrealDB, every field which appears in the field projections of the select statement (and which is not an aggregate function), must also be present in the `GROUP BY` clause.
 	 */
-	public groupBy(fields?: (keyof SubModel)[]): SQLBuilder<SubModel> {
+	public groupBy(fields?: (keyof SubModel)[]): SelectBuilder<SubModel> {
 		if (fields) this.query_groupByFields = fields;
 		this.query_groupBy = true;
 		return this;
@@ -141,7 +128,7 @@ export class SQLBuilder<SubModel extends Model> {
 	/**
 	 * As SurrealDB supports arrays and nested fields within arrays, it is possible to split the result on a specific field name, returning each value in an array as a separate value, along with the record content itself. This is useful in data analysis contexts.
 	 */
-	public split(field: keyof SubModel): SQLBuilder<SubModel> {
+	public split(field: keyof SubModel): SelectBuilder<SubModel> {
 		this.query_split = field.toString();
 		return this;
 	}
@@ -150,34 +137,23 @@ export class SQLBuilder<SubModel extends Model> {
 	 * To limit the number of records returned, using the `LIMIT` clause.
 	 *	@param limit - Records limit
 	 */
-	public limit(limit: number): SQLBuilder<SubModel> {
+	public limit(limit: number): SelectBuilder<SubModel> {
 		this.query_limit = limit;
 		return this;
 	}
 
-	public start(start: number): SQLBuilder<SubModel> {
+	public start(start: number): SelectBuilder<SubModel> {
 		this.query_start = start
 		return this;
 	}
 
-	public parallel(): SQLBuilder<SubModel> {
-		this.query_parallel = true;
-		return this;
-	}
-
-	public fetch(fields: (keyof SubModel)[]): SQLBuilder<SubModel> {
+	public fetch(fields: (keyof SubModel)[]): SelectBuilder<SubModel> {
 		this.query_fetch_fields = fields.map(field => field.toString());
-		return this;
-	}
-
-	public timeout(timeout: TTimeout): SQLBuilder<SubModel> {
-		this.query_timeout = timeout;
 		return this;
 	}
 
 	public build(): string {
 		let query = 'SELECT';
-
 
 		if (this.subquery) query = query.concat(' ', this.subquery.join(''), '->', this.query_table);
 		else query = query.concat(' ', this.select_fields);

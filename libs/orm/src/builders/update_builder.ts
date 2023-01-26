@@ -1,59 +1,44 @@
-import { TDIFF, TTimeout } from '../internal';
 import { Model } from '../model';
-import { ISQLBuilderProps, TMappedModelProperty } from '../sql_builder';
-import { TSubModelWhere, WhereToSQL } from '../where';
+import { TMappedModelProperty } from './select_builder';
+import { ReturnableBuilder, IBuilderProps, IBuilder } from './builder';
 
-export class UpdateBuilder<SubModel extends Model> {
-	private query_where: string;
+export class UpdateBuilder<SubModel extends Model>
+	extends ReturnableBuilder<SubModel> implements IBuilder<SubModel> 
+{
+	protected query_content: object;
+	protected query_merge: object;
 
-	private query_table: string;
-
-	private query_timeout: TTimeout;
-	private query_return: TDIFF = 'NONE';
-
-	private query_parallel = false;
-
-	constructor(props: ISQLBuilderProps<SubModel>) {
-		this.query_table = props.from_table;
+	constructor(props: IBuilderProps) {
+		super(props);
 	}
 
-	public where(condition: string | TSubModelWhere<SubModel>) {
-		if (typeof condition === 'string') this.query_where = condition;
-		else this.query_where = WhereToSQL(condition);
-
+	public set(fields: TMappedModelProperty<SubModel>) {
 		return this;
 	}
 
 	public content(fields: TMappedModelProperty<SubModel>) {
+		this.query_content = fields;
 		return this;
 	}
 
 	public merge(fields: TMappedModelProperty<SubModel>) {
+		this.query_merge = fields;
 		return this;
 	}
 
-	public timeout(timeout: TTimeout) {
-		this.query_timeout = timeout;
-		return this;
-	}
+	public build() {
+		let query = `UPDATE ${this.query_from}`;
 
-	public returnDiff() {
-		this.query_return = 'DIFF';
-		return this;
-	}
+		if (this.query_merge) query = query.concat(' ', 'MERGE ', JSON.stringify(this.query_merge));
 
-	public returnBefore() {
-		this.query_return = 'BEFORE';
-		return this;
-	}
+		if (this.query_content) query = query.concat(' ', 'CONTENT ', JSON.stringify(this.query_content));
 
-	public returnAfter() {
-		this.query_return = 'AFTER';
-		return this;
-	}
+		if (this.query_return) query = query.concat(' ', 'RETURN ', this.query_return);
+		if (this.query_timeout) query = query.concat(' ', 'TIMEOUT ', this.query_timeout);
+		if (this.query_parallel) query = query.concat(' ', 'PARALLEL');
 
-	public parallel() {
-		this.query_parallel = true;
-		return this;
+		query = query.concat(';');
+
+		return query;
 	}
 }

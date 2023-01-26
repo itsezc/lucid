@@ -3,7 +3,7 @@ import {
 	type TSurrealPermissionOperation,
 	Model
 } from './';
-import { SQLBuilder } from './sql_builder';
+import { SQLBuilder } from './builders/select_builder';
 
 interface ISurrealResult {}
 

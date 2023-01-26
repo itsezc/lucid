@@ -73,38 +73,38 @@ export class Account extends Model {
 // ]);
 
 // // SELECT * FROM account WHERE username = 'test';
-console.log('\n',
-	Account.select()
-		.where({ username: 'chiru'})
-		.build()
-)
+// console.log('\n',
+// 	Account.select()
+// 		.where({ username: 'chiru'})
+// 		.build()
+// )
 
-// // Select all account records with IDs between the given range
-// // SELECT * FROM account:1..1000;
-console.log('\n', 
-	Account.select()
-		.range([1, 1000])
-		.build()
-)
+// // // Select all account records with IDs between the given range
+// // // SELECT * FROM account:1..1000;
+// console.log('\n', 
+// 	Account.select()
+// 		.range([1, 1000])
+// 		.build()
+// )
 
 // // Select all account records with IDs between the given range
 // // SELECT * FROM account:['London', '2022-08-29T08:03:39']..['London', '2022-08-29T08:09:31'];
-console.log('\n',
-	Account.select()
-		.range([
-			['London', '2022-08-29T08:03:39'],
-			['London', '2022-08-29T08:09:31'],
-		])
-		.build()
-)
+// console.log('\n',
+// 	Account.select()
+// 		.range([
+// 			['London', '2022-08-29T08:03:39'],
+// 			['London', '2022-08-29T08:09:31'],
+// 		])
+// 		.build()
+// )
 
-// With Select (Select changes type?):
-// SELECT username, verified FROM account WHERE username = 'test';
-console.log('\n',
-	Account.select(['username', 'verified'])
-		.where({ username: 'chiru' })
-		.build()
-);
+// // With Select (Select changes type?):
+// // SELECT username, verified FROM account WHERE username = 'test';
+// console.log('\n',
+// 	Account.select(['username', 'verified'])
+// 		.where({ username: 'chiru' })
+// 		.build()
+// );
 
 // console.log('\n',
 // 	Account.select(['username', 'verified'])
@@ -187,80 +187,83 @@ console.log('\n',
 // 		.build()
 // );
 
+// console.log('\n',
+// 	Account.select()
+// 	.where({
+// 		username: '',
+// 		years_active: 8,
+// 		verified: true,
+// 		money: 40.51,
+// 		birthday: {
+// 			gt: new Date(),
+// 		},
+// 		metadata: {
+// 			realAge: 18,
+// 			issue: {
+// 				$: {
+// 					title: {
+// 						contains: 'demo'
+// 					},
+// 					body: {
+// 						endsWith: 'hello'
+// 					}
+// 				}
+// 			}
+// 		},
+// 		logins: [{
+// 			when: new Date(),
+// 			verified: false
+// 		}],
+// 		OR: {
+// 			birthday: new Date(),
+// 			metadata: {
+// 				realAge: 16,
+// 				marketing: false,
+// 			},
+// 			OR: {
+// 				money: 50000
+// 			}
+// 		}
+// 	})
+// 	.limit(10)
+// 	.timeout('1m')
+// 	.build()
+// );
+
+// Account.create({
+// 	username: '',
+// 	passKey: ''
+// });
+
+// console.log('\n',
+// 	Account.delete()
+// 		.where({
+// 			username: {
+// 				contains: 'chiru'
+// 			}
+// 		})
+// 		.returnDiff()
+// 		.timeout('1s')
+// 		.parallel()
+// 		.build()
+// )
+
 console.log(
-	'\n',
-	Account.select()
-	.where({
-		username: '',
-		years_active: 8,
-		verified: true,
-		money: 40.51,
-		birthday: {
-			gt: new Date(),
-		},
-		metadata: {
-			realAge: 18,
-			issue: {
-				$: {
-					title: {
-						contains: 'demo'
-					},
-					body: {
-						endsWith: 'hello'
-					}
-				}
-			}
-		},
-		logins: [{
-			when: new Date(),
-			verified: false
-		}],
-		OR: {
-			birthday: new Date(),
-			metadata: {
-				realAge: 16,
-				marketing: false,
-			},
-			OR: {
-				money: 50000
-			}
-		}
-	})
-	.limit(10)
-	.timeout('1m')
-	.build()
+	Account.update()
+		.content({
+			username: '',
+			verified: true,
+			logins: [{
+				verified: true
+			}],
+		})
+		.returnDiff()
+		.parallel()
+		.build()
 );
 
-Account.create({
-	username: '',
-	passKey: ''
-});
-
-Account.delete()
-	.where({
-		username: {
-			contains: ''
-		}
-	})
-	.returnAfter()
-	.returnBefore()
-	.returnDiff()
-	.timeout('1s')
-	.parallel();
-
-Account.update()
-	.content({
-		username: '',
-		verified: true,
-		logins: [{
-			verified: true
-		}],
-	})
-	.parallel();
-
-
-new ModelSpec(Account)
-	.canOperateWithPermission({
-		scope: AdminScope,
-		query: Account.select()
-	});
+// new ModelSpec(Account)
+// 	.canOperateWithPermission({
+// 		scope: AdminScope,
+// 		query: Account.select()
+// 	});

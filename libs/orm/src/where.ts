@@ -6,25 +6,25 @@ type TModelProperties<SubModel extends Model> = {
 };
 
 type TDateTimeOps = {
-	eq?: DateTime, 
-	gt?: DateTime, 
-	gte?: DateTime, 
-	lt?: DateTime, 
+	eq?: DateTime,
+	gt?: DateTime,
+	gte?: DateTime,
+	lt?: DateTime,
 	lte?: DateTime
 }
 
 type TNumberOps = {
-	eq?: number, 
-	gt?: number, 
-	gte?: number, 
-	lt?: number, 
+	eq?: number,
+	gt?: number,
+	gte?: number,
+	lt?: number,
 	lte?: number
 };
 
 type TStringOps = {
-	eq?: string, 
-	contains?: string, 
-	startsWith?: string, 
+	eq?: string,
+	contains?: string,
+	startsWith?: string,
 	endsWith?: string
 };
 
@@ -99,7 +99,7 @@ export function WhereToSQL<SubModel extends Model>(
 			
 				const isInlineObj = !isOR && !isRecord && !isInlineObjArr && !isCompObj;
 
-				// console.log({key, isOR, isCompObj, isInlineObj, isInlineObjArr, isRecord });
+				// console.log({ key, isOR, isCompObj, isInlineObj, isInlineObjArr, isRecord });
 
 				const parsedValue = value.gt ? `${key} > '${cleanValue(value.gt)}'`
 					: value.gte ? `${key} >= '${cleanValue(value.gte)}'`
@@ -121,45 +121,9 @@ export function WhereToSQL<SubModel extends Model>(
 				break;
 		}
 
-		if (index !== entries.length - 1 && entries[index + 1][0] !== 'OR') sql += ' AND ';
-
-		// if (entries[index + 1][0] !== 'OR') {
-		// 	sql += ' '
-		// } else if (index !== entries.length - 1) {
-		// 	sql += ' AND '
-		// };
+		if (index !== entries.length - 1 && entries[index + 1][0] !== 'OR')
+			sql += ' AND ';
 	});
-
-	// let conditions = [];
-	// let orStatements: string[] = [];
-
-	// function processValue(key: string, value: unknown) {
-    //     if (value instanceof Date) {
-    //         return `${key} = '${value.toISOString()}'`;
-    //     } else if (typeof value === 'object') {
-	// 		const parsedValue = value.gt ? `${key} > '${cleanValue(value.gt)}'`
-	// 			: value.contains ? `${key} ∋ '${cleanValue(value.contains)}'`
-	// 			: value.endsWith ? SurrealString.endsWith(key, value.endsWith)
-	// 			: `${key} = ${processValue(key, value)}`;
-
-    //         return `${parsedValue}`;
-    //     } else {
-    //         return `${key} = ${value}`;
-    //     }
-    // }
-
-    // for (const key in where) {
-    //     if (key === 'OR') orStatements.push(`(${WhereToSQL(where[key])})`);
-    //     else {
-	// 		conditions.push(processValue(key, where[key]))
-    //     }
-    // }
-    
-	// sql += conditions.join(', ');
-
-    // if (orStatements.length > 0) {
-    //     sql += ` OR ${orStatements.join(' OR ')}`;
-    // }
 
 	return sql;
 }

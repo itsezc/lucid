@@ -1,51 +1,24 @@
-import { TTimeout, TDIFF } from '../internal';
 import { Model } from '../model';
-import { ISQLBuilderProps } from '../sql_builder';
-import { TSubModelWhere, WhereToSQL } from '../where';
 
-export class DeleteBuilder<SubModel extends Model> {
-	private query_where: string;
+import { IBuilder, IBuilderProps, ReturnableBuilder } from './builder';
 
-	private query_table: string;
-	
-	private query_timeout: TTimeout;
-	private query_return: TDIFF = 'NONE';
-
-	private query_parallel = false;
-
-	constructor(props: ISQLBuilderProps<SubModel>) {
-		this.query_table = props.from_table;
+export class DeleteBuilder<SubModel extends Model> 
+	extends ReturnableBuilder<SubModel> implements IBuilder<SubModel>
+{
+	constructor(props: IBuilderProps) {
+		super(props);
 	}
 
-	public where(condition: string | TSubModelWhere<SubModel>) {
-		if (typeof condition === 'string') this.query_where = condition;
-		else this.query_where = WhereToSQL(condition);
-		
-		return this;
-	}
+	public build() {
+		let query = `DELETE ${this.query_from}`;
 
-	public timeout(timeout: TTimeout) {
-		this.query_timeout = timeout;
-		return this;
-	}
+		if (this.query_where) query = query.concat(' ', 'WHERE ', this.query_where);
+		if (this.query_return) query = query.concat(' ', 'RETURN ', this.query_return);
+		if (this.query_timeout) query = query.concat(' ', 'TIMEOUT ', this.query_timeout);
+		if (this.query_parallel) query = query.concat(' ', 'PARALLEL');
 
-	public returnDiff() {
-		this.query_return = 'DIFF';
-		return this;
-	}
+		query = query.concat(';');
 
-	public returnBefore() {
-		this.query_return = 'BEFORE';
-		return this;
-	}
-
-	public returnAfter() {
-		this.query_return = 'AFTER';
-		return this;
-	}
-
-	public parallel() {
-		this.query_parallel = true;
-		return this;
+		return query;
 	}
 }
