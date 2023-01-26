@@ -11,6 +11,8 @@ export interface IBuilder<SubModel extends Model> {
 	execute(): Model | Model[];
 }
 
+export type TMappedModelProperty<T extends Model> = { [P in keyof T]: T[keyof T] };
+
 export class Builder<SubModel extends Model> {
 	protected query_from: string;
 	protected query_where: string;

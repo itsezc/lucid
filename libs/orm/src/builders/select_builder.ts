@@ -1,10 +1,8 @@
 import { Model } from '..';
 import { joinRangeFields } from '../util';
-import { Builder, IBuilderProps } from './builder';
+import { Builder, IBuilderProps, TMappedModelProperty } from './builder';
 
 type TComparisonOperator = '<'| '<=' | '=' | '>' | '>=';
-
-export type TMappedModelProperty<T extends Model> = Partial<{ [P in keyof T]: T[keyof T] }>;
 
 export type TSelectExpression<SubModel extends Model> =
 	'*' 

@@ -250,7 +250,10 @@ export class Account extends Model {
 
 console.log(
 	Account.update()
-		.content({
+		.where({
+			username: 'chiru'
+		})
+		.merge({
 			username: '',
 			verified: true,
 			logins: [{
