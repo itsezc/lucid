@@ -112,8 +112,6 @@ export default class SurrealWS implements ISurrealConnector
     async signup<Args extends object, ResponseObj>(args: Args) {
         const surrealArgs = Object.fromEntries(Object.entries(args).map(([key, value]) => [key.replace("$", ""), value]));
 
-        // $email: '', $pass: ''
-        // email: '', pass: ''
         surrealArgs.NS = this.NS;
         surrealArgs.DB = this.DB;
         surrealArgs.SC = this.SC;
@@ -136,7 +134,7 @@ export default class SurrealWS implements ISurrealConnector
             this.requestMap?.set(id, [success, reject]);
 
             const data = JSON.stringify({ id, method, params });
-            
+
             if (this.socket) this.socket?.send(data);
         });
     }
