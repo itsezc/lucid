@@ -17,16 +17,21 @@ export default class SurrealRest implements ISurrealConnector
     //Using a token must be done within the query method since this connector is stateless.
     async query<T>(query: string): Promise<T[]> {
         const res = await fetch(`${this.host}/sql`, {
+            method: 'POST',
             headers: {
                 NS: 'NS' in this.creds ? this.creds.NS : '',
                 DB: 'DB' in this.creds ? this.creds.DB : '',
                 Accept: 'application/json',
-                Authorization: `Bearer ${'token' in this.creds ? this.creds.token : ''}`
+                Authorization: 'token' in this.creds ? 
+                    `Bearer ${'token' in this.creds ? this.creds.token : ''}` : `Basic ${Buffer.from(`${this.creds.user}:${this.creds.pass}`).toString('base64')}`
+
             },
             body: query
-        }) as unknown as TSurrealResponse<T>;
+        });
 
-        return res.result;
+        const json = await res.json();
+
+        return json;
     }
 
     async signin<S extends ISurrealScope<unknown, TDefaultSessionVars>>(args: TExtractVars<S>) {

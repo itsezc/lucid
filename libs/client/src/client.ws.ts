@@ -15,9 +15,7 @@ export default class SurrealWS implements ISurrealConnector
     private heartbeat?: NodeJS.Timeout;
     private socket?: WebSocket;
     private requestMap?: Map<string, [(value: unknown) => void, (value: unknown) => void]>;
-    public connected: Promise<unknown>;
-
-    public test: string;
+    public connected?: Promise<unknown>;
     
     constructor(
         public host: string,
@@ -30,7 +28,6 @@ export default class SurrealWS implements ISurrealConnector
 
         this.socket = new WebSocket(endpoint.toString());
 
-        this.test = 'test'
         this.requestMap = new Map();
 
         this.connected = new Promise((resolve) => {
@@ -45,6 +42,8 @@ export default class SurrealWS implements ISurrealConnector
     public init() {
         if (this.socket) {
             this.socket.addEventListener('open', async (event) => {
+                this.connected = undefined;
+
                 if (this.token) await this.send('authenticate', [this.token]);
 
                 if (this.creds 
@@ -123,7 +122,7 @@ export default class SurrealWS implements ISurrealConnector
         
         const id = uuidv4();
 
-        while (!this.connected) {
+        while (this.connected) {
             await new Promise((resolve) => setTimeout(resolve, 200));
         }
     

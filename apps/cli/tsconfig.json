@@ -4,7 +4,7 @@
 	],
 	"exclude": [],
 	"compilerOptions": {
-		"module": "CommonJS",
+		"module": "ES2022",
 		"outDir": "../../.moon/cache/types/apps/cli",
 		"target": "ESNext",
 		"moduleResolution": "node",
