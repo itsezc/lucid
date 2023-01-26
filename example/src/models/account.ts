@@ -187,11 +187,13 @@ console.log(
 		metadata: {
 			realAge: 18,
 			issue: {
-				title: {
-					contains: 'demo'
-				},
-				body: {
-					endsWith: 'hello'
+				$: {
+					title: {
+						contains: 'demo'
+					},
+					body: {
+						endsWith: 'hello'
+					}
 				}
 			}
 		},

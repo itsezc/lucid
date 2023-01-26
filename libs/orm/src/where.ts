@@ -38,6 +38,7 @@ type ObjectOps<T> = Partial<{
 		: T[P] extends Date ? TDateTimeWhereOps
 		: T[P] extends DateTime ? TDateTimeWhereOps
 		: T[P] extends Array<infer U> ? Array<ObjectOps<U>>
+		: T[P] extends Model ? { $: ObjectOps<T[P]> }
 		: T[P] extends object ? ObjectOps<T[P]>
 		: T[P] extends boolean ? boolean
 		: T[P] extends string ? TStringWhereOps
@@ -49,7 +50,7 @@ export type TSubModelWhere<T extends Model> = ObjectOps<T> & {
 	OR?: TSubModelWhere<T>
 };
 
-const operators = ['gt', 'gte', 'lt', 'lte', 'eq', 'endsWith', 'startsWith'];
+const operators = ['gt', 'gte', 'lt', 'lte', 'eq', 'endsWith', 'startsWith', 'contains'];
 
 export function WhereToSQL<SubModel extends Model>(
 	where: TSubModelWhere<SubModel> | object, 
@@ -71,7 +72,10 @@ export function WhereToSQL<SubModel extends Model>(
 
 	entries.forEach(([key, value], index) => {
 		
-		key = options.overrides ?? (options.prefix ? `${options.prefix}.${key}` : key);
+		key = options.overrides ?? 
+			(options.prefix ? `${options.prefix}.${key}` : key)
+				.replaceAll('$.', '');
+
 		value = cleanValue(value);
 
 		switch (typeof value) {
@@ -87,16 +91,19 @@ export function WhereToSQL<SubModel extends Model>(
 			case 'object':
 				const isOR = key === 'OR';
 
+				const isRecord = Object.getOwnPropertyNames((value as object)).includes('$');
+
 				const isCompObj = !isOR && Object.getOwnPropertyNames((value as object)).some(v => operators.includes(v));
-
-				const isInlineObj = !isCompObj && (options.object || typeof value === 'object');
-
+				
 				const isInlineObjArr = !isOR && Array.isArray(value);
+				
+				// const isInlineObj = !isOR && !isRecord && !isInlineObjArr && !isCompObj && (options.object || typeof value === 'object');
 
-				// const isRecord = !isInlineObj
-				// 	&&  Object.getOwnPropertyNames((value as object)).some(v => operators.includes(v));
+				const isInlineObj = !isOR && !isRecord && !isInlineObjArr && !isCompObj;
 
-				// console.log({key, isOR, isCompObj, isInlineObj });
+
+
+				console.log({key, isOR, isCompObj, isInlineObj, isInlineObjArr, isRecord });
 
 				const parsedValue = value.gt ? `${key} > '${cleanValue(value.gt)}'`
 					: value.gte ? `${key} >= '${cleanValue(value.gte)}'`
