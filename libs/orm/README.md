@@ -32,9 +32,11 @@ Surreal ORM assists you in building type safe apps with SurrealDB, without the n
 - [ ] Live query support
 - [ ] Aggregrate analytics views
 - [ ] Futures
-- [ ] `sql` Syntax hightlighting with type safety
+- [ ] Test suite (for Bun)
+- [ ] Plugins - Bring your own utility macros / functions
 
 ### Roadmap
 - [ ] WASM/SWC migration for Runtime with additional optimizations
+- [ ] `sql` Syntax hightlighting with type safety
 - [ ] VSCode extension
 - [ ] Permission devtools
