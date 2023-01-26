@@ -4,6 +4,8 @@ import { Url } from 'cmd-ts/batteries/url';
 import { writeFileSync } from 'fs';
 import { generateSchema } from '@surreal-tools/schema-generator';
 
+import SurrealRest from '@surreal-tools/client/src/client.rest';
+
 const cmd = command({
     name: 'SQLSG',
     description: 'Generates SurrealQL schemas from typescript source files.',

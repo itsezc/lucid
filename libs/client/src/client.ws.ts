@@ -2,6 +2,7 @@ import { TDefaultSessionVars, ISurrealScope, Model, Table } from '@surreal-tools
 import { ISurrealConnector, TAuthErrorResponse, TAuthSuccessResponse, TExtractVars } from './client.interface';
 
 import { v4 as uuidv4 } from 'uuid';
+import { TCredentialDetails } from './types';
 
 type TSurrealResponse<T> = {
     result: T[],
@@ -20,9 +21,7 @@ export default class SurrealWS implements ISurrealConnector
     
     constructor(
         public host: string,
-        private NS: string,
-        private DB: string,
-        private SC?: string,
+        private creds?: TCredentialDetails
     ) {
         const endpoint = new URL('rpc', host.replace('http', 'ws').replace('https  ', 'wss'));
 
@@ -48,7 +47,12 @@ export default class SurrealWS implements ISurrealConnector
             this.socket.addEventListener('open', async (event) => {
                 if (this.token) await this.send('authenticate', [this.token]);
 
-                if (this.NS && this.DB) await this.send('use', [this.NS, this.DB]);  
+                if (this.creds 
+                    && 'NS' in this.creds
+                    && 'DB' in this.creds
+                ) {
+                    await this.send('use', [this.creds.NS, this.creds.DB]);
+                }
             });
             
             this.socket.addEventListener('message', (event) => {
@@ -77,11 +81,12 @@ export default class SurrealWS implements ISurrealConnector
                         resolve(true);
                     });
                 });
-        
+
                 //Cancel all pending queries.
                 //TODO: replace this with a query restart.
                 this.requestMap?.forEach(([_, reject]) => reject('Connection closed'));
             });
+
             this.socket.addEventListener('error', (event) => {
                 console.warn("Recieved an error from the websocket!", event);
             });
@@ -97,31 +102,23 @@ export default class SurrealWS implements ISurrealConnector
         return await this.send('query', params ? [query, params] : [query]) as T[];
     }
 
-    async signin<S extends ISurrealScope<unknown, TDefaultSessionVars>>(args: TExtractVars<S>) {
-        const surrealArgs = Object.fromEntries(Object.entries(args).map(([key, value]) => [key.replace("$", ""), value]));
+    async signin<S extends ISurrealScope<unknown, TDefaultSessionVars> | {}>(args: S extends ISurrealScope<unknown, TDefaultSessionVars> ? TExtractVars<S> : {}) {
+       let newArgs = { ...this.creds, args };
 
-        surrealArgs.NS = this.NS;
-        surrealArgs.DB = this.DB;
-        surrealArgs.SC = this.SC;
-
-        const res = await this.send('signin', [surrealArgs]);
+        const res = await this.send('signin', [newArgs]);
 
         this.token = res as string;
     }
 
-    async signup<Args extends object, ResponseObj>(args: Args) {
-        const surrealArgs = Object.fromEntries(Object.entries(args).map(([key, value]) => [key.replace("$", ""), value]));
+    async signup<S extends ISurrealScope<unknown, TDefaultSessionVars> | {}>(args: S extends ISurrealScope<unknown, TDefaultSessionVars> ? TExtractVars<S> : {}) {
+        let newArgs = { ...this.creds, args };
 
-        surrealArgs.NS = this.NS;
-        surrealArgs.DB = this.DB;
-        surrealArgs.SC = this.SC;
-
-        const res = await this.send('signup', [surrealArgs]);
+        const res = await this.send('signup', [newArgs]);
 
         this.token = res as string;
     }
 
-    private async send(method: string, params: any[] = []) {
+    private async send(method: string, params: unknown[] = []) {
         await this.connected;
         
         const id = uuidv4();

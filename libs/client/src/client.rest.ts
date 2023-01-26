@@ -1,5 +1,6 @@
 import { TDefaultSessionVars, ISurrealScope, Model, Table } from '@surreal-tools/orm';
 import { ISurrealConnector, TAuthErrorResponse, TAuthSuccessResponse, TExtractVars } from './client.interface';
+import { TCredentialDetails } from './types';
 
 type TSurrealResponse<T> = {
     result: T[],
@@ -7,24 +8,20 @@ type TSurrealResponse<T> = {
 };
 
 export default class SurrealRest implements ISurrealConnector 
-{    
-    public token: string;
-    
+{        
     constructor(
         public host: string,
-        private NS: string,
-        private DB: string,
-        private SC?: string,
+        private creds: TCredentialDetails
     ) {}
 
     //Using a token must be done within the query method since this connector is stateless.
     async query<T>(query: string): Promise<T[]> {
         const res = await fetch(`${this.host}/sql`, {
             headers: {
-                NS: this.NS,
-                DB: this.DB,
+                NS: 'NS' in this.creds ? this.creds.NS : '',
+                DB: 'DB' in this.creds ? this.creds.DB : '',
                 Accept: 'application/json',
-                Authorization: `Bearer ${this.token}`
+                Authorization: `Bearer ${'token' in this.creds ? this.creds.token : ''}`
             },
             body: query
         }) as unknown as TSurrealResponse<T>;
@@ -42,16 +39,20 @@ export default class SurrealRest implements ISurrealConnector
                 Accept: 'application/json',
             },
             body: JSON.stringify({
-                ns: this.NS,
-                db: this.DB,
-                sc: this.SC,
+                ns: 'NS' in this.creds ? this.creds.NS :'',
+                db: 'DB' in this.creds ? this.creds.DB :'',
+                sc: 'SC' in this.creds ? this.creds.SC :'',
                 ...surrealArgs
             })
         });
 
         const responseJson: TAuthSuccessResponse | TAuthErrorResponse = await res.json();
 
-        if (responseJson.code === 200) this.token = responseJson.token;
+        //'NS' in this.creds ? this.creds.NS :''
+
+        if (responseJson.code === 200) {
+            'token' in this.creds ? (this.creds.token = responseJson.token) : undefined;
+        } 
         else throw new Error(responseJson.description);
     }
 
@@ -66,16 +67,18 @@ export default class SurrealRest implements ISurrealConnector
                 Accept: 'application/json',
             },
             body: JSON.stringify({
-                ns: this.NS,
-                db: this.DB,
-                sc: this.SC,
+                ns: 'NS' in this.creds ? this.creds.NS : '',
+                db: 'DB' in this.creds ? this.creds.DB : '',
+                sc: 'SC' in this.creds ? this.creds.SC : '',
                 ...surrealArgs
             })
         });
 
         const responseJson: TAuthSuccessResponse | TAuthErrorResponse = await res.json();
 
-        if (responseJson.code === 200) this.token = responseJson.token;
+        if (responseJson.code === 200) {
+            'token' in this.creds ? (this.creds.token = responseJson.token) : undefined;
+        } 
         else throw new Error(responseJson.description);
     }
 }
