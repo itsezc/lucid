@@ -100,7 +100,7 @@ function parseIdentifier(ident: ts.Identifier): string {
             return `$scope == '${(scopeName[0] as ts.StringLiteral).text}'`;
         }
         //If it is not a scope, it must be a type declaration since the symbol actually resolved to something here.
-        else if (decl && decl.kind == ts.SyntaxKind.ClassDeclaration) {
+        else if (decl && decl.kind === ts.SyntaxKind.ClassDeclaration) {
             const classDecl = decl as ts.ClassDeclaration;
 
             const implicitClassName = toSnakeCase(classDecl?.name?.getText() ?? '');
@@ -121,7 +121,6 @@ function parseIdentifier(ident: ts.Identifier): string {
         return ident.getText();
     }
 
-    return '';
 }
 
 function parsePropAccess(pa: ts.PropertyAccessExpression): string {

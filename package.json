@@ -15,10 +15,12 @@
 	"dependencies": {
 		"@surreal-tools/client": "file:libs/client",
 		"@surreal-tools/schema-generator": "file:libs/schema-generator",
+		"@surreal-tools/orm": "file:libs/orm",
 		"@types/uuid": "^9.0.0",
 		"cmd-ts": "^0.12.0",
 		"isomorphic-fetch": "^3.0.0",
 		"isomorphic-ws": "^5.0.0",
+		"singleton-js": "^1.0.0",
 		"typescript": "^4.9.4",
 		"uuid": "^9.0.0"
 	},

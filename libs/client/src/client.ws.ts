@@ -1,5 +1,5 @@
-import { TDefaultSessionVars, ISurrealScope, Model, Table } from '@surreal-tools/orm';
-import { ISurrealConnector, TAuthErrorResponse, TAuthSuccessResponse, TExtractVars } from './client.interface';
+import { TDefaultSessionVars, ISurrealScope } from '@surreal-tools/orm';
+import { ISurrealConnector, TExtractVars } from './client.interface';
 
 import { v4 as uuidv4 } from 'uuid';
 import { TCredentialDetails } from './types';
@@ -9,7 +9,7 @@ type TSurrealResponse<T> = {
     error: {}[],
 };
 
-export default class SurrealWS implements ISurrealConnector 
+export class SurrealWS implements ISurrealConnector 
 {    
     public token?: string;
     private heartbeat?: NodeJS.Timeout;
