@@ -39,7 +39,7 @@ export class Model {
 		}
 	}
 
-	public getTableName() {
+	public __tableName() {
 		return toSnakeCase(this.constructor.name);
 	}
 
@@ -52,7 +52,7 @@ export class Model {
 		this: { new (props?: ITable<Model>): SubModel },
 		fields: TSelectExpression<SubModel> = '*',
 	) {
-		return new SelectBuilder<SubModel>({ query_from: new this().getTableName() })
+		return new SelectBuilder<SubModel>({ query_from: new this().__tableName() })
 			.select(fields);
 	}
 
@@ -60,14 +60,14 @@ export class Model {
 		this: { new (props?: ITable<Model>): SubModel },
 		from?: string
 	) {
-		return new UpdateBuilder<SubModel>({ query_from: from || new this().getTableName() });
+		return new UpdateBuilder<SubModel>({ query_from: from || new this().__tableName() });
 	}
 
 	public static delete<SubModel extends Model>(
 		this: { new (props?: ITable<Model>): SubModel },
 		from?: string
 	) {
-		return new DeleteBuilder<SubModel>({ query_from: from || new this().getTableName() });
+		return new DeleteBuilder<SubModel>({ query_from: from || new this().__tableName() });
 	}
 
 	public static events<SubModel extends Model>(
@@ -80,8 +80,10 @@ export class Model {
 	}
 	
 	public async save(): Promise<boolean> {
+		console.log(this);
+		
 		// try {
-		// 	//await db.create(this.getTableName(), {});
+		// 	//await db.create(this.__tableName(), {});
 		// } catch (error) {
 		// 	return false;
 		// }
