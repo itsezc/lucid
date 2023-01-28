@@ -15,8 +15,7 @@ const cmd = command({
         outputFile: option({
             type: File,
             long: 'output',
-            short: 'o' ,
-            defaultValue: null
+            short: 'o' 
         }),
         host: multioption(
             { type: array(string), long: 'host', short: 'h' },   
@@ -28,11 +27,11 @@ const cmd = command({
 
         const generatedOutput = generateSchema();
 
-        if (args.output) {
-            writeFileSync(args.output, generatedOutput);
+        if (args.outputFile) {
+            writeFileSync(args.outputFile, generatedOutput);
         }
 
-        if (args.url) {
+        if (args.host) {
             //The schema needs to be applied to the database as a commit.
             
         }
