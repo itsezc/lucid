@@ -41,7 +41,7 @@ export class ModelSpec<SubModelType extends typeof Model> {
 	public async isDefined(): Promise<boolean> {
 		// const info = await db.query<ISurrealDBInfoResult[]>('INFO FOR DB');
 		// if (info[0].error) return false;
-		// if (this.model.getTableName() in info[0].result.tb) return true;
+		// if (this.model.__tableName() in info[0].result.tb) return true;
 		return false;
 	}
 

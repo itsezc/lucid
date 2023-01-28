@@ -16,7 +16,7 @@ class Relation<
 	protected query_content: object;
 
 	constructor(edge: Edge) {
-		super({ query_from: new edge().getTableName()})
+		super({ query_from: new edge().__tableName()})
 	}
 
 	public in(model: T1) {
@@ -37,7 +37,7 @@ class Relation<
 	public build() {
 		let query = 'RELATE ';
 
-		query = query.concat(`${this.modelIn.getTableName()}:${this.modelIn.id}->${this.query_from}->${this.modelOut.getTableName()}:${this.modelOut.id}`);
+		query = query.concat(`${this.modelIn.__tableName()}:${this.modelIn.id}->${this.query_from}->${this.modelOut.__tableName()}:${this.modelOut.id}`);
 
 		if (this.query_content) query = query.concat(' ', 'CONTENT ', Stringify(this.query_content));
 

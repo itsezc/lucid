@@ -83,14 +83,14 @@ export class SelectBuilder<SubModel extends Model>
 
 	public in(model: typeof Model | string): SelectBuilder<SubModel> {
 		if (typeof model === 'string') this.subquery.push(model);
-		else this.subquery.push(`->${new model().getTableName()}`);
+		else this.subquery.push(`->${new model().__tableName()}`);
 
 		return this;
 	}
 
 	public of(model: typeof Model | string): SelectBuilder<SubModel> {
 		if (typeof model === 'string') this.subquery.push(model);
-		else this.subquery.push(`<-${new model().getTableName()}`);
+		else this.subquery.push(`<-${new model().__tableName()}`);
 
 		return this;
 	}
