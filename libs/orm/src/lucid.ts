@@ -9,6 +9,10 @@ class LucidInstance {
 	}
 
 	public client() {
+		if (!this.surreal_client) {
+			throw new Error('You must initialize a Lucid client before you can use it!');
+		}
+
 		return this.surreal_client;
 	}
 

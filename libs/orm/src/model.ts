@@ -83,9 +83,9 @@ export class Model {
 				.execute();
 		} else {
 			let query = `CREATE ${this.__tableName()}`;
-			query = query.concat(' CONTENT ', Stringify(row));
+			query = query.concat(' CONTENT ', Stringify(row), ';');
 
-			await Lucid.client()?.query(query);
+			console.log(await Lucid.client().query(query));
 		}
 
 		return this;

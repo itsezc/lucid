@@ -1,7 +1,8 @@
-import { Table, Model, Field, Decimal, Float, DateTime, ModelSpec } from '@surreal-tools/orm';
+import { Table, Model, Field, Decimal, Float, DateTime, ModelSpec, Lucid } from '@surreal-tools/orm';
 import { Issue } from './issue';
 import { IssueLabel } from './issue_label';
 import { AdminScope } from './scopes';
+import { SurrealRest } from '@surreal-tools/client';
 
 @Table<Account>({
 	permissions: () => ({
@@ -353,4 +354,4 @@ export class Account extends Model {
 const x = new Account();
 x.email = 'email@test.com';
 x.passKey = 'examplePassKey';
-x.save();
+await x.save();

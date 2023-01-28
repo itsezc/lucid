@@ -22,7 +22,7 @@ export class SurrealRest<S extends ISurrealScope<unknown, TDefaultSessionVars>> 
         public host: string,
         private creds: TCredentialDetails
     ) {
-        console.log('REST', this.creds);
+       this.creds = creds;
 
         // if ('token' in this.creds) this.authType = 'token'; // Token auth
         // else if ('NS' in this.creds && 'DB' in this.creds && 'SC' in this.creds) this.authType  = 'scope'; // Scope auth
@@ -40,6 +40,10 @@ export class SurrealRest<S extends ISurrealScope<unknown, TDefaultSessionVars>> 
                 break;
 
             case 'root':
+                if ('user' in this.creds && 'pass' in this.creds) {
+                    Authorization = `Basic ${Buffer.from(`${this.creds.user}:${this.creds.pass}`).toString('base64')}`
+                }
+                break;
             case 'ns':
             case 'db':
                 if ('user' in this.creds && 'pass' in this.creds) {
