@@ -23,7 +23,7 @@ export function parseTable(table: ts.Node): string {
     //Parse each field according
     const fields = tsquery(table, 'PropertyDeclaration').map(property => parseField(property as ts.PropertyDeclaration, tableName ?? ''));
 
-    return `DEFINE TABLE ${tableName} SCHEMAFULL;${decoratorSchema ? '\n': ''}${decoratorSchema ?? ''}${fields.join('')}`;
+    return `DEFINE TABLE ${tableName} SCHEMAFULL${decoratorSchema ? '\n': ''};;;;;${decoratorSchema ?? ''}${fields.join('')};`;
 }
 
 //Parses and returns the decorator for the table.
@@ -47,7 +47,7 @@ function parseTableDecorator(decorator: ts.Node): [string | null, string | null]
     const perms = tsquery(decorator, 'ObjectLiteralExpression > PropertyAssignment:has(Identifier[name="permissions"]) > ArrowFunction > ParenthesizedExpression > ObjectLiteralExpression')[0];
 
     if (perms) {
-        decoratorSchema += `\tPERMISSIONS`;
+        decoratorSchema += "\tPERMISSIONS";
         tsquery(perms, 'PropertyAssignment')?.forEach(prop => { 
             const propAssign = prop as ts.PropertyAssignment;
     

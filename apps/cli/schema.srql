@@ -3,12 +3,12 @@ DEFINE FIELD name ON issue_label TYPE string;
 DEFINE FIELD label ON issue_label TYPE string;
 DEFINE TABLE abc SCHEMAFULL;
 DEFINE FIELD name ON abc TYPE string;
-DEFINE TABLE issue SCHEMAFULL
+DEFINE TABLE issue SCHEMAFULL;
 	PERMISSIONS
-		FOR CREATE WHERE  $scope == 'account' && id == $auth.id,
-		FOR DELETE WHERE id == $auth.id,
-		FOR UPDATE WHERE $scope == 'admin' || ($scope == 'account' && id == $auth.id || $scope == 'admin' && id == $auth.id),
-		FOR SELECT WHERE $scope == 'admin' || (id == $auth.id && title != null && ($scope == 'admin') && $scope == 'account'),
+		FOR CREATE $scope == 'account' && id == $auth.id,
+		FOR DELETE id === $auth.id,
+		FOR UPDATE $scope == 'admin' || ($scope == 'account' && id == $auth.id || $scope == 'admin' && id == $auth.id),
+		FOR SELECT $scope == 'admin' || (id == $auth.id && title != null && ($scope == 'admin') && $scope == 'account'),
 DEFINE FIELD title ON issue TYPE string;
 DEFINE FIELD body ON issue TYPE string;
 DEFINE FIELD priority ON issue TYPE string
@@ -22,17 +22,17 @@ DEFINE FIELD project ON issue TYPE record(abc);
 DEFINE FIELD parent ON issue TYPE record(issue);
 DEFINE FIELD assignee ON issue TYPE record(email_address);
 DEFINE FIELD creator ON issue TYPE record(email_address);
-DEFINE TABLE account SCHEMAFULL
+DEFINE TABLE account SCHEMAFULL;
 	PERMISSIONS
-		FOR CREATE WHERE NONE,
-		FOR SELECT WHERE $scope == 'admin',
+		FOR CREATE NONE,
+		FOR SELECT $scope == 'admin',
 		FOR DELETE FULL,
 		FOR UPDATE FULL,
 DEFINE FIELD username ON account TYPE string;
 DEFINE FIELD email_address ON account TYPE string;
 DEFINE FIELD password ON account TYPE string
 	PERMISSIONS
-		FOR CREATE WHERE NONE,
+		FOR CREATE NONE,
 		FOR SELECT WHERE $scope == 'admin',
 		FOR DELETE FULL,
 		FOR UPDATE WHERE id == $auth.id;

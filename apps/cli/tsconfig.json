@@ -1,10 +1,9 @@
 {
-	"include": [
-		"src/*"
-	],
+	"include": ["./src/**/*"],
 	"exclude": [],
 	"compilerOptions": {
 		"module": "ES2022",
+		"rootDir": "./src",
 		"outDir": "../../.moon/cache/types/apps/cli",
 		"target": "ESNext",
 		"moduleResolution": "node",

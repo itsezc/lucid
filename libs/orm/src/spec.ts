@@ -3,7 +3,7 @@ import {
 	type TSurrealPermissionOperation,
 	Model
 } from './';
-import { SQLBuilder } from './builders/select_builder';
+
 
 interface ISurrealResult {}
 
@@ -26,7 +26,7 @@ export class ModelSpec<SubModelType extends typeof Model> {
 		args: {
 			scope?: T,
 			model?: ReturnType<T['signup']>,
-			query?: SQLBuilder<InstanceType<SubModelType>>
+			query?: SubModelType
 		},
 	): Promise<boolean> {
 		return false;
@@ -56,3 +56,4 @@ export class ModelSpec<SubModelType extends typeof Model> {
 		return false;
 	}
 }
+

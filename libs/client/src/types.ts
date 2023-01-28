@@ -1,32 +1,29 @@
-
-export interface TRootAuth {
+type TSurrealAuth = {
 	user: string;
 	pass: string;
 }
 
-export interface TNamespaceAuth {
-	NS: string;
-	user: string;
-	pass: string;
-}
+export type TRootAuth = TSurrealAuth;
 
-export interface TDatabaseAuth {
+export type TNamespaceAuth = { 
+	NS: string 
+};
+
+export type TDatabaseAuth = {
 	NS: string;
 	DB: string;
-	user: string;
-	pass: string;
-}
+};
 
-export interface TScopeAuth {
+export type TScopeAuth = {
 	NS: string;
 	DB: string;
 	SC: string;
 	[key: string]: unknown;
-}
+};
 
-export interface TTokenAuth {
+export type TTokenAuth = {
 	token: string;
-}
+};
 
 export type TCredentialDetails =
 	| TRootAuth

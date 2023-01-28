@@ -26,7 +26,6 @@ export class SelectBuilder<SubModel extends Model>
 {
 	private select_fields = '*';
 	
-	private query_table: string;
 	private query_range: string;
 
 	private subquery: string[];
@@ -96,7 +95,7 @@ export class SelectBuilder<SubModel extends Model>
 	}
 
 	public from(record: string): SelectBuilder<SubModel> {
-		this.query_table = record;
+		//this.query_table = record;
 		return this;
 	}
 
@@ -155,10 +154,10 @@ export class SelectBuilder<SubModel extends Model>
 	public build(): string {
 		let query = 'SELECT';
 
-		if (this.subquery) query = query.concat(' ', this.subquery.join(''), '->', this.query_table);
+		if (this.subquery) query = query.concat(' ', this.subquery.join(''), '->', this.query_from);
 		else query = query.concat(' ', this.select_fields);
 
-		query = query.concat(' ', 'FROM ', this.query_table);
+		query = query.concat(' ', 'FROM ', this.query_from);
 
 		if (this.query_range) query = query.concat(':', this.query_range);
 	
@@ -185,8 +184,8 @@ export class SelectBuilder<SubModel extends Model>
 		return query;
 	}
 
-	public execute(): SubModel[] {
-		return Lucid.client().query(this.build());
+	public async execute(): Promise<SubModel[]> {
+		return await Lucid.client().query(this.build());
 	}
 
 	public live() {}

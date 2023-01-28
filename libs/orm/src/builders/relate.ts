@@ -18,6 +18,9 @@ class Relation<
 	constructor(edge: Edge) {
 		super({ query_from: new edge().getTableName()})
 	}
+	execute(): EdgeInstance | EdgeInstance[] {
+		throw new Error('Method not implemented.');
+	}
 
 	public in(model: T1) {
 		this.modelIn = model;
@@ -48,6 +51,7 @@ class Relation<
 		query = query.concat(';');
 		return query;
 	}
+
 }
 
 export function relate<Edge extends typeof Model>(edge: Edge): Relation<Edge, Model, Model> {
