@@ -10,8 +10,10 @@ export function parseTable(table: ts.Node): string {
     const decorator = tsquery(table, 'Decorator:has(Identifier[name="Table"])')[0];
 
 
-    //Generate name if it does not exist in the decorator.
-    const implicitTableName = toSnakeCase(tsquery(table.parent, 'ClassDeclaration > Identifier')[0]?.getText());
+    const dec = table as ts.ClassDeclaration;
+    const ident = dec.name;
+
+    const implicitTableName = toSnakeCase(ident?.getText());
 
 
     let [decoratorSchema, tableName] = parseTableDecorator(decorator);
@@ -23,14 +25,23 @@ export function parseTable(table: ts.Node): string {
     //Parse each field according
     const fields = tsquery(table, 'PropertyDeclaration').map(property => parseField(property as ts.PropertyDeclaration, tableName ?? ''));
 
-    return `DEFINE TABLE ${tableName} SCHEMAFULL${decoratorSchema ? '\n': ''};;;;;${decoratorSchema ?? ''}${fields.join('')};`;
+    //return `DEFINE TABLE ${tableName} SCHEMAFULL${decoratorSchema ? '\n': ''}${decoratorSchema ?? ''}${fields.join('')};`;
+    
+    let schema =`DEFINE TABLE ${tableName} SCHEMAFULL${decoratorSchema ? '\n': ''}${decoratorSchema ?? ''}`;
+
+    if (decoratorSchema) {
+        schema = schema.slice(0, -1);
+    }
+
+    schema += ';'
+
+    return schema + fields.join('');
 }
 
 //Parses and returns the decorator for the table.
 function parseTableDecorator(decorator: ts.Node): [string | null, string | null] {
     let decoratorSchema = '';
 
-    //Get the TableName assigned in the decorator, if it exists.
     const decoratorBody = tsquery(decorator, 'CallExpression > ObjectLiteralExpression')[0];
 
     if(!decoratorBody) {
@@ -61,7 +72,7 @@ function parseTableDecorator(decorator: ts.Node): [string | null, string | null]
                 decoratorSchema += 'NONE';
             }
             else {
-                decoratorSchema += parseExpression(propValue);
+                decoratorSchema += `WHERE ${parseExpression(propValue)}`;
             }
 
             decoratorSchema += ',';

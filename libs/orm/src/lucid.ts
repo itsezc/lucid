@@ -1,8 +1,8 @@
 import { ISurrealConnector } from '@surreal-tools/client/src/client.interface';
 
 class LucidInstance {
-	private scope: string;
-	private surreal_client: ISurrealConnector;
+	private scope?: string;
+	private surreal_client?: ISurrealConnector;
 
 	public init(surreal_client: ISurrealConnector) {
 		this.surreal_client = surreal_client;

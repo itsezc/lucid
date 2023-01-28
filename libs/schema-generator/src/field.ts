@@ -21,43 +21,45 @@ export function parseField(field: ts.PropertyDeclaration | ts.PropertySignature,
     //The assertion implicitly made in a union type.
     let unionAssertion;
 
-    if (type == 'union') {
+    if (type === 'union') {
         type = 'string';
-        unionAssertion = "\n\t ASSERT " + parseExpression(field.type ?? null) + ';';
+        unionAssertion = `\n\t ASSERT ${parseExpression(field.type ?? null)};`;
     }
 
-    let fieldSchema = `\nDEFINE FIELD ${subscriptName}${name} ON ${tableName}${rootName} TYPE ${type}`;
+    let fieldSchema = `\nDEFINE FIELD ${rootName}${subscriptName}${name} ON ${tableName} TYPE ${type}`;
     fieldSchema += parseFieldDecorator(tsquery(field, 'Decorator:has(Identifier[name="Field"])')[0]);
     
-    if (type == 'object') {
+    if (type === 'object') {
         //We must recursively parse the contents of this object into their own schemas.
         //return fieldSchema + '' + tsquery(field, 'TypeLiteral > PropertySignature').map((prop) => parseField(prop as ts.PropertySignature, tableName, name + '.'));
         const props = tsquery(field, 'TypeLiteral > PropertySignature');
 
+        fieldSchema += ';';
+
         props.forEach(prop => {
-            fieldSchema += parseField(prop as ts.PropertySignature, tableName, `.${name}`);
+            fieldSchema += parseField(prop as ts.PropertySignature, tableName, `${name}.`);
         });
     }
 
-    if (type == 'array') {
+    if (type === 'array') {
         //The array type must also be recursively parsed, but very carefully.
         const arr = tsquery(field, 'ArrayType')[0] as ts.ArrayTypeNode;
 
-        if (arr.elementType.kind == ts.SyntaxKind.TypeReference) {
+        if (arr.elementType.kind === ts.SyntaxKind.TypeReference) {
             //Constrain array children to this type.
             const refType = parseExpression(arr.elementType);
 
-            fieldSchema += `\nDEFINE FIELD ${name}.* ON ${tableName}${rootName} TYPE ${refType};`;
+            fieldSchema += `;\nDEFINE FIELD ${name}.* ON ${tableName}${rootName} TYPE ${refType};`;
         }
-        else if (arr.elementType.kind == ts.SyntaxKind.TypeLiteral) {
+        else if (arr.elementType.kind === ts.SyntaxKind.TypeLiteral) {
             //A anonymous object is being used as the array type.
 
             //We must insert an additional schema for the array object itself.
-            fieldSchema += `\nDEFINE FIELD ${name}.*${rootName ? '.' + rootName : ''} ON ${tableName} TYPE object;`;
+            fieldSchema += `;\nDEFINE FIELD ${name}.*${rootName ? `.${rootName}` : ''} ON ${tableName} TYPE object;`;
 
             const props = tsquery(arr.elementType, 'TypeLiteral > PropertySignature');
             props.forEach(prop => {
-                fieldSchema += parseField(prop as ts.PropertySignature, tableName, '', name + '.*.');
+                fieldSchema += parseField(prop as ts.PropertySignature, tableName, '', `${name}.*.`);
             });
         }
         else {
@@ -65,13 +67,15 @@ export function parseField(field: ts.PropertyDeclaration | ts.PropertySignature,
         }
     }
 
+
     //Append the union assert.
     fieldSchema += unionAssertion ?? '';
 
     //Append a semicolon where neccessary.
-    if (!unionAssertion && !fieldSchema.endsWith(';')) {
+    if (!(unionAssertion || fieldSchema.endsWith(';'))) {
         fieldSchema += ';';
     }
+
     return fieldSchema;
 }
 
@@ -109,10 +113,11 @@ function parseFieldDecorator(decorator?: ts.Node): string {
 
                 const parsedExpr = parseExpression(prop.initializer);
 
-                if(decoratorSchema == '') {
+                if(decoratorSchema === '') {
                     decoratorSchema += '\n\tPERMISSIONS';
                 }
-        
+
+           
                 decoratorSchema += `\n\t\tFOR ${prop.name.getText().toUpperCase()} ${parsedExpr.includes('FULL') || parsedExpr.includes('NONE') ? parsedExpr: `WHERE ${parsedExpr}`},`;
             });
         }

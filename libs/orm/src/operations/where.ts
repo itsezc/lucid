@@ -128,7 +128,3 @@ function cleanValue(value: Date | unknown) {
 	if (value instanceof Date) return value.toISOString();
 	return value;
 }
-
-function escaped(str: string) {
-	return str.replaceAll('\'', '').replaceAll('"', '');
-}

@@ -1,6 +1,9 @@
 
 # Improvements:
 
+
+Improve 'Lucid' may not be defined error. Poor DX.
+
 Inject this. context into permission callback for typescript safety.
     Fix parser to parse this. appropiately 
 

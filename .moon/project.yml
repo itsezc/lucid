@@ -80,3 +80,10 @@ tasks:
         '--outDir',
         'dist'
     ]
+
+  start:
+    platform: 'system'
+    inputs: ['src/**/*']
+    command: 'bun run src/index.ts'
+    deps: 
+      - 'schema-generator:build'

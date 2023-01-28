@@ -10,7 +10,7 @@ import { AccountScope, AdminScope } from './scopes';
 @Table<Issue>({
 	permissions: ({ id, title }, { $auth }) => ({
 		create: AccountScope && id === $auth.id,
-		delete: 'id === $auth.id',
+		delete: 'id == $auth.id',
 		update: AdminScope || (AccountScope && id === $auth.id || AdminScope && id === $auth.id),
 		select: AdminScope || (id == $auth.id && title != null && (AdminScope) && AccountScope)
 	}),

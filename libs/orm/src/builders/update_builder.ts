@@ -4,8 +4,8 @@ import { ReturnableBuilder, IBuilderProps, IBuilder, TMappedModelProperty } from
 export class UpdateBuilder<SubModel extends Model>
 	extends ReturnableBuilder<SubModel> implements IBuilder<SubModel> 
 {
-	protected query_content: object;
-	protected query_merge: object;
+	protected query_content?: object;
+	protected query_merge?: object;
 
 	constructor(props: IBuilderProps) {
 		super(props);

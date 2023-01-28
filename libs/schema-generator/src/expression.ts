@@ -56,9 +56,9 @@ function parseBinaryExpression(expr: ts.BinaryExpression): string {
 }
 
 function parseUnionType(expr: ts.UnionTypeNode): string {
-    return '$value IN [' + expr.types.map(lt => {
+    return `$value IN [${expr.types.map(lt => {
         return `'${parseExpression(tsquery(lt, 'LiteralType > StringLiteral')[0])}'`;
-    }).join(',') + ']';
+    }).join(',')}]`;
 }
 
 function parseParentesizedExpression(expr: ts.ParenthesizedExpression): string {

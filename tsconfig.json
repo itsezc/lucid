@@ -1,15 +1,30 @@
 {
-	"compilerOptions": {
-		"target": "ES2022",
-		"module": "commonjs",
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"strict": true,
-		"skipLibCheck": true
-	},
-	"references": [
-		{
-			"path": "apps/cli"
-		}
-	]
+    "compilerOptions": {
+        "lib": [
+            "ES2022",
+            "DOM"
+        ],
+        "target": "ES2022",
+        "module": "ES2022",
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "experimentalDecorators": true,
+        "moduleResolution": "node",
+        "strict": true,
+        "skipLibCheck": true
+    },
+    "references": [
+        {
+            "path": "apps/cli"
+        },
+        {
+            "path": "libs/client"
+        },
+        {
+            "path": "libs/orm"
+        },
+        {
+            "path": "libs/schema-generator"
+        }
+    ]
 }

@@ -1,8 +1,8 @@
 {
     "include": [
-        "src/**/*"
+        "**/*"
     ],
-    "exclude": [],
+    "references": [],
     "compilerOptions": {
         "lib": [
             "ESNext",
@@ -12,6 +12,6 @@
         "target": "ESNext",
         "moduleResolution": "node",
         "experimentalDecorators": true,
-        "outDir": "../../.moon/cache/types/libs/orm"
+        "outDir": "../../.moon/cache/types/libs/client"
     }
 }

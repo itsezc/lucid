@@ -3,12 +3,12 @@ DEFINE FIELD name ON issue_label TYPE string;
 DEFINE FIELD label ON issue_label TYPE string;
 DEFINE TABLE abc SCHEMAFULL;
 DEFINE FIELD name ON abc TYPE string;
-DEFINE TABLE issue SCHEMAFULL;
+DEFINE TABLE issue SCHEMAFULL
 	PERMISSIONS
-		FOR CREATE $scope == 'account' && id == $auth.id,
-		FOR DELETE id === $auth.id,
-		FOR UPDATE $scope == 'admin' || ($scope == 'account' && id == $auth.id || $scope == 'admin' && id == $auth.id),
-		FOR SELECT $scope == 'admin' || (id == $auth.id && title != null && ($scope == 'admin') && $scope == 'account'),
+		FOR CREATE WHERE $scope == 'account' && id == $auth.id,
+		FOR DELETE WHERE id == $auth.id,
+		FOR UPDATE WHERE $scope == 'admin' || ($scope == 'account' && id == $auth.id || $scope == 'admin' && id == $auth.id),
+		FOR SELECT WHERE $scope == 'admin' || (id == $auth.id && title != null && ($scope == 'admin') && $scope == 'account');
 DEFINE FIELD title ON issue TYPE string;
 DEFINE FIELD body ON issue TYPE string;
 DEFINE FIELD priority ON issue TYPE string
@@ -16,18 +16,18 @@ DEFINE FIELD priority ON issue TYPE string
 DEFINE FIELD status ON issue TYPE string
 	 ASSERT $value IN ['backlog','todo','in_progress','done','canceled'];
 DEFINE FIELD due ON issue TYPE datetime;
-DEFINE FIELD labels ON issue TYPE array
+DEFINE FIELD labels ON issue TYPE array;
 DEFINE FIELD labels.* ON issue TYPE record(issue_label);
 DEFINE FIELD project ON issue TYPE record(abc);
 DEFINE FIELD parent ON issue TYPE record(issue);
 DEFINE FIELD assignee ON issue TYPE record(email_address);
 DEFINE FIELD creator ON issue TYPE record(email_address);
-DEFINE TABLE account SCHEMAFULL;
+DEFINE TABLE account SCHEMAFULL
 	PERMISSIONS
 		FOR CREATE NONE,
-		FOR SELECT $scope == 'admin',
+		FOR SELECT WHERE $scope == 'admin',
 		FOR DELETE FULL,
-		FOR UPDATE FULL,
+		FOR UPDATE FULL;
 DEFINE FIELD username ON account TYPE string;
 DEFINE FIELD email_address ON account TYPE string;
 DEFINE FIELD password ON account TYPE string
@@ -41,14 +41,22 @@ DEFINE FIELD verified ON account TYPE bool;
 DEFINE FIELD money ON account TYPE decimal;
 DEFINE FIELD float_example ON account TYPE float;
 DEFINE FIELD birthday ON account TYPE datetime;
-DEFINE FIELD metadata ON account TYPE object
-DEFINE FIELD real_age ON account.metadata TYPE int;
-DEFINE FIELD marketing ON account.metadata TYPE bool;
-DEFINE FIELD cookies ON account.metadata TYPE bool;
-DEFINE FIELD issue ON account.metadata TYPE record(issue);
+DEFINE FIELD metadata ON account TYPE object;
+DEFINE FIELD metadata.real_age ON account TYPE int;
+DEFINE FIELD metadata.marketing ON account TYPE bool;
+DEFINE FIELD metadata.cookies ON account TYPE bool;
+DEFINE FIELD metadata.issue ON account TYPE record(issue);
 DEFINE FIELD other_metadata ON account TYPE object;
-DEFINE FIELD logins ON account TYPE array
+DEFINE FIELD logins ON account TYPE array;
 DEFINE FIELD logins.* ON account TYPE object;
 DEFINE FIELD logins.*.when ON account TYPE datetime;
 DEFINE FIELD logins.*.verified ON account TYPE bool;
 DEFINE FIELD years_active ON account TYPE int;
+DEFINE TABLE organization SCHEMAFULL;
+DEFINE FIELD name ON organization TYPE string;
+DEFINE TABLE org_member_of SCHEMAFULL;
+DEFINE FIELD in ON org_member_of TYPE record(email_address);
+DEFINE FIELD out ON org_member_of TYPE record(organization);
+DEFINE TABLE subsidary_of SCHEMAFULL;
+DEFINE FIELD in ON subsidary_of TYPE record(organization);
+DEFINE FIELD out ON subsidary_of TYPE record(organization);

@@ -16,7 +16,7 @@ Lucid.init(
 
 (async() => {
 
-	console.log(await Lucid.client().query('INFO FOR NS'));
+	console.log(await Lucid.client()?.query('INFO FOR NS'));
 
 	// console.log(
 	// 	await Account.select()

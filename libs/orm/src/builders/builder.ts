@@ -14,9 +14,9 @@ export interface IBuilder<SubModel extends Model> {
 export type TMappedModelProperty<T extends Model> = { [P in keyof T]: T[keyof T] };
 
 export class Builder<SubModel extends Model> {
-	protected query_from: string;
-	protected query_where: string;
-	protected query_timeout: TTimeout;
+	protected query_from?: string;
+	protected query_where?: string;
+	protected query_timeout?: TTimeout;
 	protected query_parallel = false;
 
 	constructor(props: IBuilderProps) {

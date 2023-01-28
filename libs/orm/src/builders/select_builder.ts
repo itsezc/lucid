@@ -26,30 +26,30 @@ export class SelectBuilder<SubModel extends Model>
 {
 	private select_fields = '*';
 	
-	private query_range: string;
+	private query_range?: string;
 
-	private subquery: string[];
-	private count_condition: string;
+	private subquery?: string[];
+	private count_condition?: string;
 
 	private query_select_fields: string[] = [];
-	private query_select_fields_projections: string[];
+	private query_select_fields_projections?: string[];
 
-	private query_split: string;
+	private query_split?: string;
 
 	private query_orderByRand = false;
-	private query_orderBy: [
+	private query_orderBy?: [
 		string, 
 		'ASC' | 'DESC', 
 		'COLLATE' | 'NUMERIC' | undefined
 	][];
 
-	private query_fetch_fields: string[];
+	private query_fetch_fields?: string[];
 
 	private query_groupBy = false;
-	private query_groupByFields: (keyof SubModel)[];
+	private query_groupByFields?: (keyof SubModel)[];
 
-	private query_limit: number;
-	private query_start: number;
+	private query_limit?: number;
+	private query_start?: number;
 
 	constructor(props: IBuilderProps) {
 		super(props);
@@ -81,15 +81,15 @@ export class SelectBuilder<SubModel extends Model>
 	}
 
 	public in(model: typeof Model | string): SelectBuilder<SubModel> {
-		if (typeof model === 'string') this.subquery.push(model);
-		else this.subquery.push(`->${new model().__tableName()}`);
+		if (typeof model === 'string') this.subquery?.push(model);
+		else this.subquery?.push(`->${new model().__tableName()}`);
 
 		return this;
 	}
 
 	public of(model: typeof Model | string): SelectBuilder<SubModel> {
-		if (typeof model === 'string') this.subquery.push(model);
-		else this.subquery.push(`<-${new model().__tableName()}`);
+		if (typeof model === 'string') this.subquery?.push(model);
+		else this.subquery?.push(`<-${new model().__tableName()}`);
 
 		return this;
 	}
@@ -104,7 +104,7 @@ export class SelectBuilder<SubModel extends Model>
 		order: 'ASC' | 'DESC', 
 		extra?: 'COLLATE' | 'NUMERIC'
 	): SelectBuilder<SubModel> {
-		this.query_orderBy.push([key.toString(), order, extra]);
+		this.query_orderBy?.push([key.toString(), order, extra]);
 		return this;
 	}
 
@@ -154,10 +154,10 @@ export class SelectBuilder<SubModel extends Model>
 	public build(): string {
 		let query = 'SELECT';
 
-		if (this.subquery) query = query.concat(' ', this.subquery.join(''), '->', this.query_from);
+		if (this.subquery && this.query_from) query = query.concat(' ', this.subquery.join(''), '->', this.query_from);
 		else query = query.concat(' ', this.select_fields);
 
-		query = query.concat(' ', 'FROM ', this.query_from);
+		if (this.query_from) query = query.concat(' ', 'FROM ', this.query_from);
 
 		if (this.query_range) query = query.concat(':', this.query_range);
 	
@@ -172,7 +172,8 @@ export class SelectBuilder<SubModel extends Model>
 
 		// @todo - GroupBy calculation
 		if (this.query_groupByFields) query = query.concat(' ', 'GROUP BY ', this.query_groupByFields.join(', '));
-		if (this.query_groupBy) query = query.concat(' ', 'GROUP BY ', this.query_select_fields_projections.join(', '));
+
+		if (this.query_groupBy && this.query_select_fields_projections) query = query.concat(' ', 'GROUP BY ', this.query_select_fields_projections.join(', '));
 
 		if (this.query_limit) query = query.concat(' ', 'LIMIT ', this.query_limit.toString());
 		if (this.query_start) query = query.concat(' ', 'START ', this.query_start.toString());
@@ -185,7 +186,7 @@ export class SelectBuilder<SubModel extends Model>
 	}
 
 	public async execute(): Promise<SubModel[]> {
-		return await Lucid.client().query(this.build());
+		return await Lucid.client()?.query(this.build()) as SubModel[];
 	}
 
 	public live() {}

@@ -1,6 +1,5 @@
 import { TDefaultSessionVars, ISurrealScope } from '@surreal-tools/orm';
 import { ISurrealConnector, TExtractVars } from './client.interface';
-
 import { v4 as uuidv4 } from 'uuid';
 import { TCredentialDetails } from './types';
 

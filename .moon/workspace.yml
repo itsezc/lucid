@@ -10,6 +10,7 @@ $schema: 'https://moonrepo.dev/schemas/workspace.json'
 # and cannot reference projects located outside the workspace boundary.
 projects:
   - 'apps/*'
+  - 'libs/*'
   - 'packages/*'
 
 

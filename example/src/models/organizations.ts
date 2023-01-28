@@ -6,21 +6,21 @@ export class Organization extends Model {
 	name?: string;
 }
 
-@Table({ edge: true })
+@Table({ name: 'org_member_of' })
 export class MemberOf extends Model {
 	@Field({ name: 'in' })
-	inside: Account
+	inside!: Account
 
-	out: Organization
+	out!: Organization
 }
 
-@Table({ edge: true })
+@Table()
 export class SubsidaryOf extends Model {
 	@Field({ name: 'in' })
-	inside: Organization
+	inside!: Organization
 
 	@Field<SubsidaryOf>({
 		assert: ({ inside }, $value) => $value !== inside
 	})
-	out: Organization
+	out!: Organization
 }

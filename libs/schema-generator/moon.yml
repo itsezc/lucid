@@ -2,6 +2,6 @@ type: "library"
 language: "typescript"
 
 project:
-    name: "orm"
-    description: "Surreal ORM"
+    name: "schema-generator"
+    description: "Surreal schema generator"
     maintainers: ["chiru.b", "drew.r"]

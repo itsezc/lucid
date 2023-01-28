@@ -2,8 +2,11 @@
 	"include": ["./src/**/*"],
 	"compilerOptions": {
 		"rootDir": "./src",
-		"module": "ESNext",
-		"target": "ESNext",
+		"lib": [
+            "ES2022"
+        ],
+        "module": "ES2022",
+        "target": "ESNext",
 		"moduleResolution": "node",
 		"experimentalDecorators": true,
         "resolveJsonModule": true,

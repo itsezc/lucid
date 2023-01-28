@@ -11,9 +11,9 @@ class Relation<
 > extends ReturnableBuilder<EdgeInstance> 
 	implements IBuilder<EdgeInstance>
 {
-	protected modelIn: T1;
-	protected modelOut: T2;
-	protected query_content: object;
+	protected modelIn?: T1;
+	protected modelOut?: T2;
+	protected query_content?: object;
 
 	constructor(edge: Edge) {
 		super({ query_from: new edge().__tableName()})
@@ -40,7 +40,7 @@ class Relation<
 	public build() {
 		let query = 'RELATE ';
 
-		query = query.concat(`${this.modelIn.__tableName()}:${this.modelIn.id}->${this.query_from}->${this.modelOut.__tableName()}:${this.modelOut.id}`);
+		query = query.concat(`${this.modelIn?.__tableName()}:${this.modelIn?.id}->${this.query_from}->${this.modelOut?.__tableName()}:${this.modelOut?.id}`);
 
 		if (this.query_content) query = query.concat(' ', 'CONTENT ', Stringify(this.query_content));
 
