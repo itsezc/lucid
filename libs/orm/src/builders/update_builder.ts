@@ -10,6 +10,9 @@ export class UpdateBuilder<SubModel extends Model>
 	constructor(props: IBuilderProps) {
 		super(props);
 	}
+	execute(): SubModel | SubModel[] {
+		throw new Error('Method not implemented.');
+	}
 
 	public set(fields: TMappedModelProperty<SubModel>) {
 		return this;

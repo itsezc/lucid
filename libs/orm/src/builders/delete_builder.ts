@@ -1,6 +1,8 @@
+import Lucid from '../lucid';
 import { Model } from '../model';
 
 import { IBuilder, IBuilderProps, ReturnableBuilder } from './builder';
+
 
 export class DeleteBuilder<SubModel extends Model> 
 	extends ReturnableBuilder<SubModel> implements IBuilder<SubModel>
@@ -21,4 +23,10 @@ export class DeleteBuilder<SubModel extends Model>
 
 		return query;
 	}
+
+
+	execute(): SubModel | SubModel[] {
+		throw new Error('Method not implemented.');
+	}
+	
 }

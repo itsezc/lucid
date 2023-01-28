@@ -48,7 +48,7 @@ export function generateSchema(): string {
     }
 
     //The resulting schema in its entirety.
-    const resultSchema = program.getSourceFiles().map(sf => parseSourceFile(sf)).filter(n => n != '').join('\n');
+    const resultSchema = program.getSourceFiles().map(sf => parseSourceFile(sf)).filter(n => n !== '').join('\n');
     return resultSchema;
 }
 

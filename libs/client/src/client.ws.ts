@@ -10,17 +10,27 @@ type TSurrealResponse<T> = {
 };
 
 export class SurrealWS implements ISurrealConnector 
-{    
-    public token?: string;
+{
     private heartbeat?: NodeJS.Timeout;
     private socket?: WebSocket;
     private requestMap?: Map<string, [(value: unknown) => void, (value: unknown) => void]>;
     public connected?: Promise<unknown>;
+
+    private authType: 'root' | 'ns' | 'db' | 'scope' | 'token' = 'root';
     
     constructor(
         public host: string,
-        private creds?: TCredentialDetails
+        private creds: TCredentialDetails
     ) {
+        this.creds = creds;
+        console.log('WS', this.creds);
+
+        // if ('token' in this.creds) this.authType = 'token'; // Token auth
+        // else if ('NS' in this.creds && 'DB' in this.creds && 'SC' in this.creds) this.authType  = 'scope'; // Scope auth
+        // else if ('NS' in this.creds && 'DB' in this.creds) this.authType = 'db'; // DB auth
+        // else if ('NS' in this.creds) this.authType = 'ns'; // NS auth
+        
+    
         const endpoint = new URL('rpc', host.replace('http', 'ws').replace('https  ', 'wss'));
 
         //Keep alive.
@@ -32,6 +42,23 @@ export class SurrealWS implements ISurrealConnector
 
         this.connected = new Promise((resolve) => {
             this.socket?.addEventListener('open', async (event) => {
+                this.connected = undefined;
+
+                if (this.creds 
+                    && 'NS' in this.creds
+                    && 'DB' in this.creds
+                ) {
+                    await this.send('use', [this.creds.NS, this.creds.DB]);
+                }
+
+                if ('user' in this.creds && 'pass' in this.creds) {
+                    await this.send('signin', [{ ...this.creds, NS: undefined, DB: undefined }]);
+                }
+
+                if ('token' in this.creds) {
+                    await this.send('authenticate', [this.creds.token]);
+                }
+
                 resolve(true);
             });
         });
@@ -41,19 +68,6 @@ export class SurrealWS implements ISurrealConnector
 
     public init() {
         if (this.socket) {
-            this.socket.addEventListener('open', async (event) => {
-                this.connected = undefined;
-
-                if (this.token) await this.send('authenticate', [this.token]);
-
-                if (this.creds 
-                    && 'NS' in this.creds
-                    && 'DB' in this.creds
-                ) {
-                    await this.send('use', [this.creds.NS, this.creds.DB]);
-                }
-            });
-            
             this.socket.addEventListener('message', (event) => {
                 const { id, result, method, error } = JSON.parse(event.data);
 
@@ -106,7 +120,8 @@ export class SurrealWS implements ISurrealConnector
 
         const res = await this.send('signin', [newArgs]);
 
-        this.token = res as string;
+        this.authType = 'token';
+        this.creds = { token: res as string };
     }
 
     async signup<S extends ISurrealScope<unknown, TDefaultSessionVars> | {}>(args: S extends ISurrealScope<unknown, TDefaultSessionVars> ? TExtractVars<S> : {}) {
@@ -114,17 +129,14 @@ export class SurrealWS implements ISurrealConnector
 
         const res = await this.send('signup', [newArgs]);
 
-        this.token = res as string;
+        this.authType = 'token';
+        this.creds = { token: res as string };
     }
 
     private async send(method: string, params: unknown[] = []) {
         await this.connected;
         
         const id = uuidv4();
-
-        while (this.connected) {
-            await new Promise((resolve) => setTimeout(resolve, 200));
-        }
     
         return new Promise((success, reject) => {
             this.requestMap?.set(id, [success, reject]);
