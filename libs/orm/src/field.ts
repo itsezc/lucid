@@ -56,26 +56,9 @@ interface ITableFieldProps<SubModel extends Model, Descriptor> {
 
 export function Field<
 	SubModel extends Model = Model,
-	Key extends string | symbol = string | symbol,
+	Key = string | symbol,
 	SurrealType extends TSurrealDataType = 'string',
 	Descriptor extends TypedPropertyDescriptor<SurrealType>['value'] = SurrealType,
 >(props?: ITableFieldProps<SubModel, Descriptor>) {
-	return function (target: SubModel, propertyKey: Key) {
-		let value: ITableFieldProps<SubModel, Descriptor> = {
-			...props,
-		};
-
-		const getter = function () {
-			return value;
-		};
-
-		const setter = function (newVal: ITableFieldProps<SubModel, Descriptor>) {
-			value = newVal;
-		};
-
-		Object.defineProperty(target, propertyKey, {
-			get: getter,
-			set: setter,
-		});
-	};
+	return function (target: SubModel, propertyKey: Key) {};
 }

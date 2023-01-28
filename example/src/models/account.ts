@@ -349,3 +349,8 @@ export class Account extends Model {
 
 	// SELECT ->purchased->product<-purchased<-person->(purchased WHERE created_at > time::now() - 3w)->product FROM person:chiru;
  */
+
+const x = new Account();
+x.email = 'email@test.com';
+x.passKey = 'examplePassKey';
+x.save();

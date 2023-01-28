@@ -1,8 +1,7 @@
 import {
-	SurrealEvent,
 	SurrealEventManager,
-	TSurrealDataType,
 	TSurrealEventProps,
+	Lucid
 } from './';
 
 import { 
@@ -13,19 +12,7 @@ import {
 } from './builders';
 
 import type { ITable } from './table';
-import { toSnakeCase } from './util';
-
-type TSurrealTablePropertiesField = {
-	field: string;
-	type: TSurrealDataType;
-	permissions?: string;
-	index?: boolean | 'unique';
-};
-
-interface ISurrealTableProperties {
-	permissions?: string;
-	fields?: TSurrealTablePropertiesField[];
-}
+import { Stringify, toSnakeCase } from './util';
 
 export class Model {
 	protected schemafull = true;
@@ -33,7 +20,7 @@ export class Model {
 
 	public id!: string;
 
-	constructor(protected props?: ITable<Model>) {
+	constructor(props?: ITable<Model>) {
 		if (props) {
 			this.edge = props.edge ?? false;
 		}
@@ -79,15 +66,29 @@ export class Model {
 		return new SurrealEventManager(model, args);
 	}
 	
-	public async save(): Promise<boolean> {
-		console.log(this);
-		
-		// try {
-		// 	//await db.create(this.__tableName(), {});
-		// } catch (error) {
-		// 	return false;
-		// }
+	public async save() {
+		const row = {
+			...this,
+			schemafull: undefined,
+			edge: undefined,
+		};
 
-		return true;
+		// rome-ignore lint/performance/noDelete: Surreal expects empty properties not undefined
+		Object.keys(row).forEach(key => row[key] === undefined && delete row[key]);
+		
+		if (this.id) {
+			// @ts-ignore
+			this.constructor.update(`${this.__tableName()}:${this.id}`)
+				.merge(row)
+				.execute();
+		} else {
+			let query = `CREATE ${this.__tableName()}`;
+			query = query.concat(' CONTENT ', Stringify(row));
+			console.log(query);
+
+			await Lucid.client().query(query);
+		}
+
+		return this;
 	}
 }
