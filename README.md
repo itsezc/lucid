@@ -1,6 +1,6 @@
 # Lucid
 
-Maintainers
+### Maintainers
 
 - Chiru B. (@itsezc)
 - Drew R. (@DrewRidley)
