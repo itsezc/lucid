@@ -16,4 +16,6 @@ export * from './builders/relate';
 export * from './types';
 export * from './constants';
 
+export * from './lucid';
+
 export { type TModelProperties } from './internal';

@@ -7,7 +7,7 @@ type TSurrealResponse<T> = {
     error: {}[],
 };
 
-export default class SurrealRest implements ISurrealConnector 
+export class SurrealRest implements ISurrealConnector 
 {        
     constructor(
         public host: string,

@@ -9,6 +9,7 @@
 		"target": "ESNext",
 		"moduleResolution": "node",
 		"experimentalDecorators": true,
-		"sourceMap": false
+		"sourceMap": false,
+		"composite": true
 	}
 }

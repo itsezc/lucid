@@ -2,6 +2,8 @@ import { Model } from '..';
 import { joinRangeFields } from '../util';
 import { Builder, IBuilderProps, TMappedModelProperty } from './builder';
 
+import { Lucid } from '../lucid';
+
 type TComparisonOperator = '<'| '<=' | '=' | '>' | '>=';
 
 export type TSelectExpression<SubModel extends Model> =
@@ -184,7 +186,7 @@ export class SelectBuilder<SubModel extends Model>
 	}
 
 	public execute(): SubModel[] {
-		return [];
+		return Lucid.client().query(this.build());
 	}
 
 	public live() {}

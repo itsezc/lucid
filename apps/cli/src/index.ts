@@ -3,8 +3,7 @@ import { Directory, File } from 'cmd-ts/batteries/fs';
 import { Url } from 'cmd-ts/batteries/url';
 import { writeFileSync } from 'fs';
 import { generateSchema } from '@surreal-tools/schema-generator';
-
-import SurrealRest from '@surreal-tools/client/src/client.rest';
+import { SurrealRest } from '@surreal-tools/client';
 
 const cmd = command({
     name: 'SQLSG',
@@ -24,7 +23,6 @@ const cmd = command({
     handler: (args) => {
         //Go into the directory of this project.
         process.chdir(args.project);
-
         const generatedOutput = generateSchema();
 
         if (args.output) {
@@ -33,7 +31,6 @@ const cmd = command({
 
         if (args.url) {
             //The schema needs to be applied to the database as a commit.
-            
         }
     }
 });
