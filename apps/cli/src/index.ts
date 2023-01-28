@@ -1,4 +1,4 @@
-import { command, run, positional, optional, option } from 'cmd-ts';
+import { command, run, number, positional, optional, option, multioption, array, string } from 'cmd-ts';
 import { Directory, File } from 'cmd-ts/batteries/fs';
 import { Url } from 'cmd-ts/batteries/url';
 import { writeFileSync } from 'fs';
@@ -11,14 +11,15 @@ const cmd = command({
     version: '0.0.1',
     args: {
         project: positional({ type: Directory, displayName: 'The project to generate a schema for.'}),
-        output: positional({
-            type: optional(File),
-            displayName: 'The file to output the schema to.'
+        outputFile: option({
+            type: File,
+            long: 'output',
+            short: 'o' ,
+            defaultValue: null
         }),
-        url: positional({
-            type: optional(Url),
-            displayName: 'The database URL. If left blank, schema will not be applied to the database.'
-        })
+        host: multioption(
+            { type: array(string), long: 'host', short: 'h' },   
+        )
     },
     handler: (args) => {
         //Go into the directory of this project.
