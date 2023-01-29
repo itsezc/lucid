@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 import { parseTable } from './table';
 import { tsquery } from '@phenomnomnominal/tsquery';
 import { writeFileSync} from 'fs';
+import { parseScope } from './scope';
 
 const cfgFile = ts.findConfigFile(process.cwd(), ts.sys.fileExists, 'tsconfig.json');
 
@@ -57,7 +58,9 @@ export function generateSchema(): string {
 function parseSourceFile(src: ts.SourceFile): string {
     //Pick out all ClassDeclarations with the 'Table' decorator.
     const tableDeclarations = tsquery(src, 'ClassDeclaration:has(Identifier[name="Table"])');
+    const scopeDeclarations = tsquery(src , 'VariableDeclaration:has(Identifier[name="ISurrealScope"])');
 
     //Since every Table results in at least one query, we do not need to filter out empty strings.
-    return tableDeclarations.map(td => parseTable(td)).join('\n');
+    return tableDeclarations.map(td => parseTable(td)).join('\n')
+    + scopeDeclarations.map(sd => parseScope(sd as ts.VariableDeclaration)).join('\n');
 }

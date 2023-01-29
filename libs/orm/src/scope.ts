@@ -10,7 +10,7 @@ export type TDefaultSessionVars = {
 export interface ISurrealScope<AuthContext, Vars = TDefaultSessionVars> {
 	name: string;
 	timeout: TScopeSessionTimeout;
-	signin: (vars: Vars) => AuthContext;
-	signup: (vars: Vars) => AuthContext;
+	signin: (vars: Vars) => string;
+	signup: (vars: Vars) => Promise<AuthContext>;
 }
 
