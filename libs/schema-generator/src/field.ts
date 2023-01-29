@@ -110,7 +110,7 @@ function parseFieldDecorator(decorator?: ts.Node, defaultValue?: ts.Expression):
     let decoratorSchema = '';
 
     if(defaultValue) {
-        decoratorSchema += `\n\tVALUE $value OR ${defaultValue.getText()}`;
+        decoratorSchema += `\n\t VALUE $value OR ${defaultValue.getText()}`;
     }
 
     if (decorator) {

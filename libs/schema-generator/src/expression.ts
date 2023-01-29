@@ -15,6 +15,7 @@ export function parseExpression(expr: ts.Node | ts.TypeNode | null): string {
     return parseExpressionInternal(expr)
         .replaceAll('GeoPoint', 'geometry(point)')
         .replaceAll('GeoPolygon', 'geometry(polygon)')
+        .replaceAll('GeoCollection', 'geometry(collection)')
         .replaceAll('Float', 'float')
         .replaceAll('Decimal', 'decimal')
         .replaceAll('number', 'int')
