@@ -353,17 +353,18 @@ export class Account extends Model {
 	// SELECT ->purchased->product<-purchased<-person->(purchased WHERE created_at > time::now() - 3w)->product FROM person:chiru;
  */
 
-Account.select()
-	.where({
-		location: {
-			inside: {
-				type: 'Point',
-				coordinates: [21, 21]
-			}
-		}
-	})
+// console.log('\n',
+// 	Account.select()
+// 		.where({
+// 			username: {
+// 				endsWith: 'ends',
+// 				startsWith: 'starts'
+// 			}
+// 		})
+// 		.build()
+// );
 
-const x = new Account();
-x.email = 'email@test.com';
-x.passKey = 'examplePassKey';
-await x.save();
+// const x = new Account();
+// x.email = 'email@test.com';
+// x.passKey = 'examplePassKey';
+// await x.save();

@@ -1,4 +1,5 @@
 import { DateTime, Decimal, Float, GeoLine, GeoMultiLine, GeoMultiPoint, GeoMultiPolygon, GeoPoint, GeoPolygon, Model } from '..';
+import { Stringify } from '../util';
 import { SurrealString } from '../utilities/string';
 
 type TDateTimeOps = {
@@ -125,12 +126,13 @@ export function WhereToSQL<SubModel extends Model>(
 	const entries = Object.entries(where);
 
 	entries.forEach(([key, value], index) => {
-		
 		key = options.overrides ?? 
 			(options.prefix ? `${options.prefix}.${key}` : key)
 				.replaceAll('$.', '');
 
 		value = cleanValue(value);
+		
+	
 
 		switch (typeof value) {
 			case 'string':
@@ -144,31 +146,43 @@ export function WhereToSQL<SubModel extends Model>(
 
 			case 'object':
 				const isOR = key === 'OR';
-
 				const isRecord = Object.getOwnPropertyNames((value as object)).includes('$');
-
 				const isCompObj = !isOR && Object.getOwnPropertyNames((value as object)).some(v => operators.includes(v));
-				
 				const isInlineObjArr = !isOR && Array.isArray(value);
-			
-				const isInlineObj = !isOR && !isRecord && !isInlineObjArr && !isCompObj;
+				const isInlineObj = !(isOR || isRecord || isInlineObjArr || isCompObj);
+
+				// Check if multiple conditions apply to the object
+				const valueKeys = Object.keys(value);
+				const hasMultiple = valueKeys.length > 1;
+				const isLastMultiple = index === value.length - 1;
+		
+				console.log(hasMultiple, key, isLastMultiple);
 
 				// console.log({ key, isOR, isCompObj, isInlineObj, isInlineObjArr, isRecord });
 
-				const parsedValue = value.gt ? `${key} > '${cleanValue(value.gt)}'`
-					: value.gte ? `${key} >= '${cleanValue(value.gte)}'`
-					: value.lt ? `${key} < '${cleanValue(value.lt)}'`
-					: value.lte ? `${key} <= '${cleanValue(value.lte)}'`
-					: value.eq ? `${key} = '${cleanValue(value.eq)}'`
-					: value.contains ? `${key} ∋ '${cleanValue(value.contains)}'`
-					: value.endsWith ? SurrealString.endsWith(key, value.endsWith)
-					: isOR ? ` OR (${WhereToSQL(value, { OR: true })})`
-					: isCompObj ? `${key} = ${WhereToSQL(value, { object: true })}`
-					: isInlineObjArr ? WhereToSQL(value, { object: true, overrides: `${key}.*` })
-					: WhereToSQL(value, { object: true, prefix: key });
-
-				sql += `${parsedValue}`
-			
+				// Is inline or inline comparison object
+				if (!(isOR
+					|| isCompObj
+					|| isInlineObjArr))
+				{
+					if (value.eq) sql += `${key} = ${cleanValue(value.eq)}`;
+					if (value.gt) sql += `${key} > ${cleanValue(value.gt)}`;
+					if (value.lt) sql += `${key} < ${cleanValue(value.lt)}`;
+					if (value.lte) sql += `${key} <= ${cleanValue(value.lte)}`;
+					if (value.gte) sql += `${key} >= ${cleanValue(value.gte)}`;
+					if (value.inside) sql += `${key} INSIDE ${Stringify(value.inside)}`;
+					if (value.outside) sql += `${key} OUTSIDE ${Stringify(value.outside)}`;
+					if (value.contains) sql += `${key} ∋ '${cleanValue(value.contains)}'`;
+					if (value.endsWith) sql += SurrealString.endsWith(key, value.endsWith);
+					if (value.startsWith) sql += SurrealString.startsWith(key, value.startsWith);
+				} else {
+					const parsedValue = isOR ? ` OR (${WhereToSQL(value, { OR: true })})`
+						: isCompObj ? `${key} = ${WhereToSQL(value, { object: true })}`
+						: isInlineObjArr ? WhereToSQL(value, { object: true, overrides: `${key}.*` })
+						: WhereToSQL(value, { object: true, prefix: key });
+	
+					sql += `${parsedValue}`
+				}
 				break;
 				
 			default:

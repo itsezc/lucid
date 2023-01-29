@@ -44,8 +44,8 @@ export class SurrealString {
 		return `string::split(${str})`;
 	}
 
-	public static startsWith(str: string) {
-		return `string::startsWith(${str})`;
+	public static startsWith(str: string, starts: string) {
+		return `string::startsWith(${str}, ${starts})`;
 	}
 
 	public static trim(str: string) {
