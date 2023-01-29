@@ -1,6 +1,32 @@
 DEFINE TABLE issue_label SCHEMAFULL;
 DEFINE FIELD name ON issue_label TYPE string;
 DEFINE FIELD label ON issue_label TYPE string;
+DEFINE SCOPE account SESSION 15m 
+ SIGNUP (
+		IF count( (SELECT * FROM account WHERE verified = true AND username = $username) ) = 0
+			THEN (
+				CREATE account
+					SET
+						username = $username,
+						passKey = $passKey,
+						password = crypto::argon2::generate($password)
+			)
+			END
+		)
+ SIGNIN (SELECT * FROM account WHERE username = $username AND (crypto::argon2::compare(password, $password)));
+DEFINE SCOPE admin SESSION 15m 
+ SIGNUP (
+		IF count( (SELECT * FROM account WHERE verified = true AND username = $username) ) = 0
+			THEN (
+				CREATE account
+					SET
+						username = $username,
+						passKey = $passKey,
+						password = crypto::argon2::generate($password)
+			)
+			END
+		)
+ SIGNIN (SELECT * FROM account WHERE username = $username AND (crypto::argon2::compare(password, $password)));
 DEFINE TABLE abc SCHEMAFULL;
 DEFINE FIELD name ON abc TYPE string;
 DEFINE TABLE issue SCHEMAFULL
@@ -10,12 +36,12 @@ DEFINE TABLE issue SCHEMAFULL
 		FOR UPDATE WHERE $scope == 'admin' || ($scope == 'account' && id == $auth.id || $scope == 'admin' && id == $auth.id),
 		FOR SELECT WHERE $scope == 'admin' || (id == $auth.id && title != null && ($scope == 'admin') && $scope == 'account');
 DEFINE FIELD title ON issue TYPE string
-	VALUE $value OR 'New issue';
+	 VALUE $value OR 'New issue';
 DEFINE FIELD body ON issue TYPE string;
 DEFINE FIELD priority ON issue TYPE string
 	 ASSERT $value IN ['no_priority','urgent','high','medium','low'];
 DEFINE FIELD status ON issue TYPE string
-	VALUE $value OR 'backlog'
+	 VALUE $value OR 'backlog'
 	 ASSERT $value IN ['backlog','todo','in_progress','done','canceled'];
 DEFINE FIELD due ON issue TYPE datetime;
 DEFINE FIELD labels ON issue TYPE array;
