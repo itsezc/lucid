@@ -38,6 +38,8 @@ export class Issue extends Model {
 	creator?: Account;
 
 	tags?: string[];
+	tags2?: number[];
+	tags3?: boolean[];
 
 	points?: GeoPoint[];
 }

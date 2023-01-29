@@ -47,7 +47,10 @@ export function parseField(field: ts.PropertyDeclaration | ts.PropertySignature,
         //The array type must also be recursively parsed, but very carefully.
         const arr = tsquery(field, 'ArrayType')[0] as ts.ArrayTypeNode;
 
-        if (arr.elementType.kind === ts.SyntaxKind.TypeReference || arr.elementType.kind === ts.SyntaxKind.StringKeyword) {
+        if (arr.elementType.kind === ts.SyntaxKind.TypeReference 
+            || arr.elementType.kind === ts.SyntaxKind.StringKeyword
+            || arr.elementType.kind === ts.SyntaxKind.BooleanKeyword 
+            || arr.elementType.kind === ts.SyntaxKind.NumberKeyword) {
             //Constrain array children to this type.
             const refType = parseExpression(arr.elementType);
 
@@ -128,7 +131,6 @@ function parseFieldDecorator(decorator?: ts.Node, defaultValue?: ts.Expression):
 
             switch ((assertStr as ts.StringLiteral).text) {
                 case 'email':
-                    console.log("Found email assertion!");
                     decoratorSchema += 'is::email($value)';
                     break;
                 

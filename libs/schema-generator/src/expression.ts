@@ -15,6 +15,9 @@ export function parseExpression(expr: ts.Node | ts.TypeNode | null): string {
     return parseExpressionInternal(expr)
         .replaceAll('GeoPoint', 'geometry(point)')
         .replaceAll('GeoPolygon', 'geometry(polygon)')
+        .replaceAll('Float', 'float')
+        .replaceAll('Decimal', 'decimal')
+        .replaceAll('number', 'int')
         .replaceAll('boolean', 'bool');
 }
 
@@ -52,6 +55,10 @@ function parseExpressionInternal(expr: ts.Node | ts.TypeNode | null): string {
             return parseCallExpr(expr as ts.CallExpression)
         case ts.SyntaxKind.StringKeyword:
             return 'string';
+        case ts.SyntaxKind.BooleanKeyword:
+            return 'bool';
+        case ts.SyntaxKind.NumberKeyword:
+            return 'int';
         default:
             throw new Error(`Unsupported expression type: ${ts.SyntaxKind[expr.kind]} 
         Please refer to documentation for supported types.`);
@@ -60,7 +67,6 @@ function parseExpressionInternal(expr: ts.Node | ts.TypeNode | null): string {
 
 function parseCallExpr(expr: ts.CallExpression) {
     if (expr.expression.getText() === 'count') {
-        console.log(expr.arguments[0].getText());
         return `count(${expr.arguments[0].getText().replace('SArray.', 'array::')})`
     }
 
