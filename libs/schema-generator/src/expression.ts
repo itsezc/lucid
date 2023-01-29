@@ -6,7 +6,19 @@ import { toSnakeCase } from './util';
 //Takes an expression and parses it into equivalent SurrealQL. 
 //Constraint is to only allow valid types of expressions. other types should throw an error.
 //This is primarily used for parsing permission and assertion expressions.
+
 export function parseExpression(expr: ts.Node | ts.TypeNode | null): string {
+    if (!expr) {
+        return '';
+    }
+
+    return parseExpressionInternal(expr)
+        .replaceAll('GeoPoint', 'geometry(point)')
+        .replaceAll('GeoPolygon', 'geometry(polygon)')
+        .replaceAll('boolean', 'bool');
+}
+
+function parseExpressionInternal(expr: ts.Node | ts.TypeNode | null): string {
     if (!expr) {
         return '';
     }
@@ -38,6 +50,8 @@ export function parseExpression(expr: ts.Node | ts.TypeNode | null): string {
             return 'object';
         case ts.SyntaxKind.CallExpression:
             return parseCallExpr(expr as ts.CallExpression)
+        case ts.SyntaxKind.StringKeyword:
+            return 'string';
         default:
             throw new Error(`Unsupported expression type: ${ts.SyntaxKind[expr.kind]} 
         Please refer to documentation for supported types.`);
@@ -54,8 +68,8 @@ function parseCallExpr(expr: ts.CallExpression) {
 }
 
 function parseBinaryExpression(expr: ts.BinaryExpression): string {
-    const left = parseExpression(expr.left);
-    const right = parseExpression(expr.right);
+    const left = parseExpressionInternal(expr.left);
+    const right = parseExpressionInternal(expr.right);
 
     //Parse left and right sides of the expression and return the result.
 
@@ -68,13 +82,13 @@ function parseBinaryExpression(expr: ts.BinaryExpression): string {
 
 function parseUnionType(expr: ts.UnionTypeNode): string {
     return `$value IN [${expr.types.map(lt => {
-        return `'${parseExpression(tsquery(lt, 'LiteralType > StringLiteral')[0])}'`;
+        return `'${parseExpressionInternal(tsquery(lt, 'LiteralType > StringLiteral')[0])}'`;
     }).join(',')}]`;
 }
 
 function parseParentesizedExpression(expr: ts.ParenthesizedExpression): string {
     //Recursively parse the inner-expression.
-    return `(${parseExpression(expr.expression)})`;
+    return `(${parseExpressionInternal(expr.expression)})`;
 }
 
 function parseIdentifier(ident: ts.Identifier): string {

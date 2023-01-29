@@ -1,4 +1,4 @@
-import { DateTime, Field, Model, Table, count, SArray } from '@surreal-tools/orm';
+import { DateTime, Field, Model, Table, count, SArray, GeoPoint } from '@surreal-tools/orm';
 
 import { Account } from './account';
 import { IssueLabel } from './issue_label';
@@ -36,4 +36,8 @@ export class Issue extends Model {
 	assignee?: Account;
 
 	creator?: Account;
+
+	tags?: string[];
+
+	points?: GeoPoint[];
 }

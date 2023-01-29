@@ -43,10 +43,11 @@ export function parseField(field: ts.PropertyDeclaration | ts.PropertySignature,
     }
 
     if (type === 'array') {
+
         //The array type must also be recursively parsed, but very carefully.
         const arr = tsquery(field, 'ArrayType')[0] as ts.ArrayTypeNode;
 
-        if (arr.elementType.kind === ts.SyntaxKind.TypeReference) {
+        if (arr.elementType.kind === ts.SyntaxKind.TypeReference || arr.elementType.kind === ts.SyntaxKind.StringKeyword) {
             //Constrain array children to this type.
             const refType = parseExpression(arr.elementType);
 
