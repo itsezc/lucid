@@ -20,7 +20,6 @@ export function parseField(field: ts.PropertyDeclaration | ts.PropertySignature,
     const optional = field.questionToken;
 
 
-    //The assertion implicitly made in a union type.
     let unionAssertion;
 
     if (type === 'union') {
@@ -104,14 +103,15 @@ function getFieldType(field: ts.PropertyDeclaration | ts.PropertySignature): str
 }
 
 function parseFieldDecorator(decorator?: ts.Node, defaultValue?: ts.Expression): string {
+    let decoratorSchema = '';
+
+    if(defaultValue) {
+        decoratorSchema += `\n\tVALUE $value OR ${defaultValue.getText()}`;
+    }
+
     if (decorator) {
         const perms = tsquery(decorator, 'CallExpression > ObjectLiteralExpression > PropertyAssignment:has(Identifier[name="permissions"]) > ArrowFunction > ParenthesizedExpression > ObjectLiteralExpression')[0];
 
-        let decoratorSchema = '';
-
-        if(defaultValue) {
-            decoratorSchema += `\n\tVALUE $value OR ${defaultValue.getText()}`;
-        }
 
         const assertStr = tsquery(decorator, 'CallExpression > ObjectLiteralExpression > PropertyAssignment:has(Identifier[name="assert"]) > StringLiteral')[0];
 
@@ -189,13 +189,9 @@ function parseFieldDecorator(decorator?: ts.Node, defaultValue?: ts.Expression):
             });
         }
 
-
-    
-
-
         //Remove trailing comma from string generated (it is replaced w/ a semicolon).
         return decoratorSchema;
     }
 
-    return '';
+    return decoratorSchema;
 }
