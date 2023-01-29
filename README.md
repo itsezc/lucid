@@ -1,3 +1,6 @@
-# Surreal Editor
+# Lucid
 
-Manage your SurrealDB with a GUI
+### Maintainers
+
+- Chiru B. (@itsezc)
+- Drew R. (@DrewRidley)

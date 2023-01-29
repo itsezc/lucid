@@ -1,0 +1,14 @@
+{
+	"name": "@surreal-tools/cli",
+	"version": "0.1.0",
+	"main": "./mjs/index.mjs",
+	"type": "commonjs",
+	"dependencies": {
+		"typescript": "5.0.0-dev.20230122"
+	},
+	"files": [
+		"lib/**/*.{js,map}",
+		"mjs/**/*.{mjs,map}",
+		"src/**/*.{ts,tsx,json}"
+	]
+}

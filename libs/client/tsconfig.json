@@ -1,0 +1,17 @@
+{
+	"include": [
+		"**/*"
+	],
+	"references": [],
+	"compilerOptions": {
+		"lib": [
+			"ESNext",
+			"DOM"
+		],
+		"module": "ESNext",
+		"target": "ESNext",
+		"moduleResolution": "node",
+		"experimentalDecorators": true,
+		"outDir": "../../.moon/cache/types/libs/client"
+	}
+}
