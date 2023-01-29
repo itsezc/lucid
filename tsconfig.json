@@ -11,10 +11,7 @@
         "experimentalDecorators": true,
         "moduleResolution": "node",
         "strict": true,
-        "skipLibCheck": true,
-        "types": [
-            "bun-types"
-        ]
+        "skipLibCheck": true
     },
     "references": [
         {

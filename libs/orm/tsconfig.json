@@ -6,9 +6,6 @@
 		],
 		"module": "ESNext",
 		"target": "ESNext",
-		"types": [
-			"bun-types"
-		],
 		"baseUrl": ".",
 		"paths": {
 			"@/src/*": [

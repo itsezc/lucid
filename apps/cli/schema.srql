@@ -41,6 +41,7 @@ DEFINE FIELD verified ON account TYPE bool;
 DEFINE FIELD money ON account TYPE decimal;
 DEFINE FIELD float_example ON account TYPE float;
 DEFINE FIELD birthday ON account TYPE datetime;
+DEFINE FIELD location ON account TYPE geopoint;
 DEFINE FIELD metadata ON account TYPE object;
 DEFINE FIELD metadata.real_age ON account TYPE int;
 DEFINE FIELD metadata.marketing ON account TYPE bool;

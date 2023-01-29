@@ -1,17 +1,14 @@
 {
-	"include": [
-		"**/*"
-	],
-	"exclude": [],
-	"compilerOptions": {
-		"types": [
-			"bun-types"
-		],
-		"module": "ESNext",
-		"target": "ESNext",
-		"outDir": "../../.moon/cache/types/libs/schema-generator",
-		"moduleResolution": "node",
-		"experimentalDecorators": true,
-		"sourceMap": false
-	}
+    "include": [
+        "**/*"
+    ],
+    "exclude": [],
+    "compilerOptions": {
+        "module": "CommonJS",
+        "target": "ESNext",
+        "outDir": "../../.moon/cache/types/libs/schema-generator",
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "sourceMap": false
+    }
 }

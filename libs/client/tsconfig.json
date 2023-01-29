@@ -10,9 +10,6 @@
 		],
 		"module": "ESNext",
 		"target": "ESNext",
-		"types": [
-			"bun-types"
-		],
 		"moduleResolution": "node",
 		"experimentalDecorators": true,
 		"outDir": "../../.moon/cache/types/libs/client"
