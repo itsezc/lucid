@@ -2,7 +2,7 @@
 
 Surreal ORM assists you in building type safe apps with SurrealDB, without the need for a backend (although, you could have one), it is platform and framework agnostic meaning it can run anywhere: React, React Native, Svelte, Tauri, Tauri Mobile, Cloudflare Workers, Bun and more.
 
-*This project is in beta and a WIP, it targets the Surreal nightly and therefore extends the relevant feature set. While we are in ALPHA the API is likely to change frequently - although we try our best not to - we suggest reading the CHANGELOGs and examples for the best understanding. The primary target runtimes are the browser, Bun and Cloudflare workers.*
+*This project is in alpha and WIP, it targets the Surreal nightly and therefore extends the relevant feature set. While we are in ALPHA the API is likely to change frequently - although we try our best not to - we suggest reading the CHANGELOGs and examples for the best understanding. The primary target runtimes are the browser, Bun and Cloudflare workers.*
 
 ### Design goal
 

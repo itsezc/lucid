@@ -1,4 +1,4 @@
-import { DateTime, Decimal, Float, Model } from '..';
+import { DateTime, Decimal, Float, GeoLine, GeoMultiLine, GeoMultiPoint, GeoMultiPolygon, GeoPoint, GeoPolygon, Model } from '..';
 import { SurrealString } from '../utilities/string';
 
 type TDateTimeOps = {
@@ -24,15 +24,73 @@ type TStringOps = {
 	endsWith?: string
 };
 
+type TGeoPoint = {
+	type: 'Point',
+	coordinates: [number, number]
+};
+
+type TGeoLineString = {
+	type: 'LineString',
+	coordinates: number[][]
+};
+
+type TGeoPolygon = {
+	type: 'Polygon',
+	coordinates: number[][][]
+};
+
+type TGeoMultiPoint = {
+	type: 'MultiPoint',
+	coordinates: number[][]
+};
+
+type TMultiLineString = {
+	type: 'MultiLinestring',
+	coordinates: number[][][]
+};
+
+type TMultiPolygon = {
+	type: 'MultiPolygon',
+	coordinates: number[][][][]
+};
+
+type TGeometryCollection = {
+	type: 'GeometryCollection',
+	geometries: TGeoPoint | TGeoLineString | TGeoPolygon | TGeoMultiPoint | TMultiLineString | TMultiPolygon[];
+}
+
+type TUtilGeoType = TGeoPoint 
+	| TGeoLineString 
+	| TGeoPolygon 
+	| TGeoMultiPoint 
+	| TMultiLineString 
+	| TMultiPolygon;
+
+type TGeoOps = {
+	inside?: TUtilGeoType;
+	notInside?: TUtilGeoType;
+	outside?: TUtilGeoType;
+	intersects?: TUtilGeoType;
+};
+
 type TNumberWhereOps = TNumberOps | number;
 type TDateTimeWhereOps = TDateTimeOps | DateTime;
 type TStringWhereOps = TStringOps | string;
+
+type TGeoWhereOps = TGeoOps | GeoPoint;
 
 type ObjectOps<T> = Partial<{
 	[P in keyof T]: T[P] extends Decimal ? TNumberWhereOps
 		: T[P] extends Float ? TNumberWhereOps
 		: T[P] extends Date ? TDateTimeWhereOps
 		: T[P] extends DateTime ? TDateTimeWhereOps
+		: T[P] extends 
+			GeoPoint
+			| TGeoLineString
+			| GeoPolygon
+			| GeoMultiPoint
+			| GeoMultiLine
+			| GeoMultiPolygon ? TGeoWhereOps
 		: T[P] extends Array<infer U> ? Array<ObjectOps<U>>
 		: T[P] extends Model ? { $: ObjectOps<T[P]> }
 		: T[P] extends object ? ObjectOps<T[P]>

@@ -1,4 +1,4 @@
-import { Table, Model, Field, Decimal, Float, DateTime, ModelSpec, Lucid } from '@surreal-tools/orm';
+import { Table, Model, Field, Decimal, Float, DateTime, GeoPoint } from '@surreal-tools/orm';
 import { Issue } from './issue';
 import { IssueLabel } from './issue_label';
 import { AdminScope } from './scopes';
@@ -39,6 +39,8 @@ export class Account extends Model {
 	floatExample?: Float;
 
 	birthday?: DateTime;
+
+	location?: GeoPoint;
 
 	metadata?: {
 		realAge: number;
@@ -350,6 +352,16 @@ export class Account extends Model {
 
 	// SELECT ->purchased->product<-purchased<-person->(purchased WHERE created_at > time::now() - 3w)->product FROM person:chiru;
  */
+
+Account.select()
+	.where({
+		location: {
+			inside: {
+				type: 'Point',
+				coordinates: [21, 21]
+			}
+		}
+	})
 
 const x = new Account();
 x.email = 'email@test.com';
