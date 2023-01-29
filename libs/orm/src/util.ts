@@ -39,7 +39,7 @@ export function escapeString(text?: string): string | void {
 	return;
 }
 
-export function Stringify(obj_from_json: object): string {
+export function stringifyToSQL(obj_from_json: object): string {
     if (typeof obj_from_json !== "object" || Array.isArray(obj_from_json)){
         // not an object, stringify using native function
         return JSON.stringify(obj_from_json, null, 4);
@@ -49,7 +49,7 @@ export function Stringify(obj_from_json: object): string {
     let props = Object
         .keys(obj_from_json)
 		// @ts-ignore
-        .map(key => `${key}: ${Stringify(obj_from_json[key])}`)
+        .map(key => `${key}: ${stringifyToSQL(obj_from_json[key])}`)
         .join(', ');
 
     return `{ ${props} }`;

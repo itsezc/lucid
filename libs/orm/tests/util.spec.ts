@@ -1,8 +1,8 @@
 import { test, expect, describe, it } from 'bun:test';
-import { Stringify, escapeString, toSnakeCase } from '@/src/util';
+import { stringifyToSQL, escapeString, toSnakeCase } from '@/src/util';
 
 test('Stringify generates valid SQL object', () => {
-	expect(Stringify({ 'email': 'chiru@example.com', passKey: 'passKey' }))
+	expect(stringifyToSQL({ 'email': 'chiru@example.com', passKey: 'passKey' }))
 		.toBe('{ email: "chiru@example.com", passKey: "passKey" }');
 });
 

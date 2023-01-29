@@ -12,7 +12,7 @@ import {
 } from './builders';
 
 import type { ITable } from './table';
-import { Stringify, toSnakeCase } from './util';
+import { stringifyToSQL, toSnakeCase } from './util';
 
 export class Model {
 	protected schemafull = true;
@@ -83,7 +83,7 @@ export class Model {
 				.execute();
 		} else {
 			let query = `CREATE ${this.__tableName()}`;
-			query = query.concat(' CONTENT ', Stringify(row), ';');
+			query = query.concat(' CONTENT ', stringifyToSQL(row), ';');
 
 			console.log(await Lucid.client().query(query));
 		}

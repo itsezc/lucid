@@ -1,5 +1,5 @@
 import { DateTime, Decimal, Float, GeoLine, GeoMultiLine, GeoMultiPoint, GeoMultiPolygon, GeoPoint, GeoPolygon, Model } from '..';
-import { Stringify } from '../util';
+import { stringifyToSQL } from '../util';
 import { SurrealString } from '../utilities/string';
 
 type TDateTimeOps = {
@@ -170,8 +170,8 @@ export function WhereToSQL<SubModel extends Model>(
 					if (value.lt) sql += `${key} < ${cleanValue(value.lt)}`;
 					if (value.lte) sql += `${key} <= ${cleanValue(value.lte)}`;
 					if (value.gte) sql += `${key} >= ${cleanValue(value.gte)}`;
-					if (value.inside) sql += `${key} INSIDE ${Stringify(value.inside)}`;
-					if (value.outside) sql += `${key} OUTSIDE ${Stringify(value.outside)}`;
+					if (value.inside) sql += `${key} INSIDE ${stringifyToSQL(value.inside)}`;
+					if (value.outside) sql += `${key} OUTSIDE ${stringifyToSQL(value.outside)}`;
 					if (value.contains) sql += `${key} ∋ '${cleanValue(value.contains)}'`;
 					if (value.endsWith) sql += SurrealString.endsWith(key, value.endsWith);
 					if (value.startsWith) sql += SurrealString.startsWith(key, value.startsWith);

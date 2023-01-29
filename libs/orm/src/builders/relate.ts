@@ -1,7 +1,7 @@
 import { Model } from '../model';
 import { TModelContent, TOmitInternalMethods } from '../internal';
 import { IBuilder, ReturnableBuilder } from './builder';
-import { Stringify } from '../util';
+import { stringifyToSQL } from '../util';
 
 class Relation<
 	Edge extends typeof Model = typeof Model,
@@ -42,7 +42,7 @@ class Relation<
 
 		query = query.concat(`${this.modelIn?.__tableName()}:${this.modelIn?.id}->${this.query_from}->${this.modelOut?.__tableName()}:${this.modelOut?.id}`);
 
-		if (this.query_content) query = query.concat(' ', 'CONTENT ', Stringify(this.query_content));
+		if (this.query_content) query = query.concat(' ', 'CONTENT ', stringifyToSQL(this.query_content));
 
 		if (this.query_return) query = query.concat(' ', 'RETURN ', this.query_return);
 		if (this.query_timeout) query = query.concat(' ', 'TIMEOUT ', this.query_timeout);
