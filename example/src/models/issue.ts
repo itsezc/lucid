@@ -17,13 +17,13 @@ import { AccountScope, AdminScope } from './scopes';
 })
 export class Issue extends Model {
 	@Field({ index: true })
-	title!: string;
+	title: string = 'New issue';
 
 	body!: string;
 
 	priority!: 'no_priority' | 'urgent' | 'high' | 'medium' | 'low';
 
-	status!: 'backlog' | 'todo' | 'in_progress' | 'done' | 'canceled';
+	status: 'backlog' | 'todo' | 'in_progress' | 'done' | 'canceled' = 'backlog';
 
 	due?: DateTime;
 

@@ -12,11 +12,13 @@ export function parseField(field: ts.PropertyDeclaration | ts.PropertySignature,
     let type = getFieldType(field)
         .toLowerCase()
         .replaceAll('boolean', 'bool')
-        .replaceAll('number', 'int');
+        .replaceAll('number', 'int')
+        .replaceAll('geopoint', 'geometry(point)');
 
     //TODO: fortify this to respect type constraint.
     const required = (field as ts.PropertyDeclaration).exclamationToken;
     const optional = field.questionToken;
+
 
     //The assertion implicitly made in a union type.
     let unionAssertion;
@@ -27,7 +29,7 @@ export function parseField(field: ts.PropertyDeclaration | ts.PropertySignature,
     }
 
     let fieldSchema = `\nDEFINE FIELD ${rootName}${subscriptName}${name} ON ${tableName} TYPE ${type}`;
-    fieldSchema += parseFieldDecorator(tsquery(field, 'Decorator:has(Identifier[name="Field"])')[0]);
+    fieldSchema += parseFieldDecorator(tsquery(field, 'Decorator:has(Identifier[name="Field"])')[0], field.initializer);
     
     if (type === 'object') {
         //We must recursively parse the contents of this object into their own schemas.
@@ -101,11 +103,78 @@ function getFieldType(field: ts.PropertyDeclaration | ts.PropertySignature): str
     }
 }
 
-function parseFieldDecorator(decorator?: ts.Node): string {
+function parseFieldDecorator(decorator?: ts.Node, defaultValue?: ts.Expression): string {
     if (decorator) {
         const perms = tsquery(decorator, 'CallExpression > ObjectLiteralExpression > PropertyAssignment:has(Identifier[name="permissions"]) > ArrowFunction > ParenthesizedExpression > ObjectLiteralExpression')[0];
 
         let decoratorSchema = '';
+
+        if(defaultValue) {
+            decoratorSchema += `\n\tVALUE $value OR ${defaultValue.getText()}`;
+        }
+
+        const assertStr = tsquery(decorator, 'CallExpression > ObjectLiteralExpression > PropertyAssignment:has(Identifier[name="assert"]) > StringLiteral')[0];
+
+        const assertComplex = tsquery(decorator, 'CallExpression > ObjectLiteralExpression > PropertyAssignment:has(Identifier[name="assert"]) > ArrowFunction ')[0] as ts.ArrowFunction;
+
+        if (assertComplex) {
+            decoratorSchema += '\n\tASSERT ';
+            decoratorSchema += parseExpression(assertComplex.body);
+        }
+
+        else if (assertStr as ts.StringLiteral) {
+            decoratorSchema += '\n\tASSERT ';
+
+            switch ((assertStr as ts.StringLiteral).text) {
+                case 'email':
+                    console.log("Found email assertion!");
+                    decoratorSchema += 'is::email($value)';
+                    break;
+                
+                case 'alphanum':
+                    decoratorSchema += 'is::alphanum($value)';
+                    break;
+    
+                case 'alpha':
+                    decoratorSchema += 'is::alpha($value)';
+                    break;
+    
+                case 'ascii':
+                    decoratorSchema += 'is::ascii($value)';
+                    break;
+    
+                case 'domain':
+                    decoratorSchema += 'is::domain($value)';
+                    break;
+                    
+                case 'hexadecimal':
+                    decoratorSchema += 'is::hexadecimal($value)';
+                    break;
+    
+                case 'latitude':
+                    decoratorSchema += 'is::latitude($value)';
+                    break;
+    
+                case 'longitude':
+                    decoratorSchema += 'is::longitude($value)';
+                    break;
+    
+                case 'numeric':
+                    decoratorSchema += 'is::numeric($value)';
+                    break;
+    
+                case 'semver':
+                    decoratorSchema += 'is::semver($value)';
+                    break;
+    
+                case 'uuid':
+                    decoratorSchema += 'is::uuid($value)';
+                    break;
+    
+                default:
+                    break;
+            }
+        }
 
         if (perms) {
             tsquery(perms, 'PropertyAssignment').forEach((untypedProp) => {
@@ -113,17 +182,19 @@ function parseFieldDecorator(decorator?: ts.Node): string {
 
                 const parsedExpr = parseExpression(prop.initializer);
 
-                if(decoratorSchema === '') {
-                    decoratorSchema += '\n\tPERMISSIONS';
-                }
+                decoratorSchema += '\n\tPERMISSIONS';
 
-           
                 decoratorSchema += `\n\t\tFOR ${prop.name.getText().toUpperCase()} ${parsedExpr.includes('FULL') || parsedExpr.includes('NONE') ? parsedExpr: `WHERE ${parsedExpr}`},`;
+                decoratorSchema = decoratorSchema.slice(0, -1);
             });
         }
 
+
+    
+
+
         //Remove trailing comma from string generated (it is replaced w/ a semicolon).
-        return decoratorSchema.slice(0, -1);
+        return decoratorSchema;
     }
 
     return '';

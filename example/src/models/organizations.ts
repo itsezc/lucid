@@ -20,7 +20,10 @@ export class SubsidaryOf extends Model {
 	inside!: Organization
 
 	@Field<SubsidaryOf>({
-		assert: ({ inside }, $value) => $value !== inside
+		assert: ({ inside }, $value) => $value !== inside,
+		permissions: ({ inside, out }) => ({
+			select: inside !== out
+		})
 	})
 	out!: Organization
 }

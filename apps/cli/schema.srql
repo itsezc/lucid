@@ -9,7 +9,8 @@ DEFINE TABLE issue SCHEMAFULL
 		FOR DELETE WHERE id == $auth.id,
 		FOR UPDATE WHERE $scope == 'admin' || ($scope == 'account' && id == $auth.id || $scope == 'admin' && id == $auth.id),
 		FOR SELECT WHERE $scope == 'admin' || (id == $auth.id && title != null && ($scope == 'admin') && $scope == 'account');
-DEFINE FIELD title ON issue TYPE string;
+DEFINE FIELD title ON issue TYPE string
+	VALUE $value OR 'New issue';
 DEFINE FIELD body ON issue TYPE string;
 DEFINE FIELD priority ON issue TYPE string
 	 ASSERT $value IN ['no_priority','urgent','high','medium','low'];
@@ -29,19 +30,23 @@ DEFINE TABLE account SCHEMAFULL
 		FOR DELETE FULL,
 		FOR UPDATE FULL;
 DEFINE FIELD username ON account TYPE string;
-DEFINE FIELD email_address ON account TYPE string;
+DEFINE FIELD email_address ON account TYPE string
+	ASSERT is::email($value);
 DEFINE FIELD password ON account TYPE string
 	PERMISSIONS
-		FOR CREATE NONE,
-		FOR SELECT WHERE $scope == 'admin',
-		FOR DELETE FULL,
+		FOR CREATE NONE
+	PERMISSIONS
+		FOR SELECT WHERE $scope == 'admin'
+	PERMISSIONS
+		FOR DELETE FULL
+	PERMISSIONS
 		FOR UPDATE WHERE id == $auth.id;
 DEFINE FIELD pass_key ON account TYPE string;
 DEFINE FIELD verified ON account TYPE bool;
 DEFINE FIELD money ON account TYPE decimal;
 DEFINE FIELD float_example ON account TYPE float;
 DEFINE FIELD birthday ON account TYPE datetime;
-DEFINE FIELD location ON account TYPE geopoint;
+DEFINE FIELD location ON account TYPE geometry(point);
 DEFINE FIELD metadata ON account TYPE object;
 DEFINE FIELD metadata.real_age ON account TYPE int;
 DEFINE FIELD metadata.marketing ON account TYPE bool;
@@ -60,4 +65,7 @@ DEFINE FIELD in ON org_member_of TYPE record(email_address);
 DEFINE FIELD out ON org_member_of TYPE record(organization);
 DEFINE TABLE subsidary_of SCHEMAFULL;
 DEFINE FIELD in ON subsidary_of TYPE record(organization);
-DEFINE FIELD out ON subsidary_of TYPE record(organization);
+DEFINE FIELD out ON subsidary_of TYPE record(organization)
+	ASSERT $value != in
+	PERMISSIONS
+		FOR SELECT WHERE in != out;

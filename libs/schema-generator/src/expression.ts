@@ -89,6 +89,7 @@ function parseIdentifier(ident: ts.Identifier): string {
             decl = sym?.getDeclarations()[0];
         }
 
+
         //Whether or not this declaration inherits from ISurrealScope.
         const isScope = decl ? tsquery(decl, 'TypeReference > Identifier[name="ISurrealScope"]').length > 0 : null;
 
@@ -111,14 +112,31 @@ function parseIdentifier(ident: ts.Identifier): string {
 
             return `record(${className})`;
         }   
-        else {
-            return ident.getText();
+
+        let classDec = sym.getDeclarations()[0].parent;
+        let iterations = 0;
+
+        while (iterations < 11 && classDec?.kind !== ts.SyntaxKind.ClassDeclaration) {
+            iterations++;
+            classDec = classDec?.parent;
         }
+
+        const indexedSym = tsquery(classDec, `PropertyDeclaration > Identifier[name="${ident.text}"]`)[0];
+
+        if (indexedSym) {
+            const propDec = indexedSym.parent;
+            
+            const decName = tsquery(propDec, 'Decorator > CallExpression > ObjectLiteralExpression > PropertyAssignment:has(Identifier[name="name"]) > StringLiteral')[0];
+
+            return (decName as ts.StringLiteral).text;
+        }
+
+        return ident.text;
     }
     catch (ex) {
         //If the symbol cannot be located, its likely to just be an inline reference. Return it directly.
 
-        return ident.getText();
+        return ident.text;
     }
 
 }
