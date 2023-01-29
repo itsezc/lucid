@@ -36,10 +36,21 @@ export function parseExpression(expr: ts.Node | ts.TypeNode | null): string {
             return parseExpression((expr as ts.TypeReferenceNode).typeName);
         case ts.SyntaxKind.ObjectLiteralExpression:
             return 'object';
+        case ts.SyntaxKind.CallExpression:
+            return parseCallExpr(expr as ts.CallExpression)
         default:
             throw new Error(`Unsupported expression type: ${ts.SyntaxKind[expr.kind]} 
         Please refer to documentation for supported types.`);
     }
+}
+
+function parseCallExpr(expr: ts.CallExpression) {
+    if (expr.expression.getText() === 'count') {
+        console.log(expr.arguments[0].getText());
+        return `count(${expr.arguments[0].getText().replace('SArray.', 'array::')})`
+    }
+
+    return '';
 }
 
 function parseBinaryExpression(expr: ts.BinaryExpression): string {

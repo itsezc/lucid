@@ -1,4 +1,4 @@
-export class SurrealString {
+export class SString {
 	public static concat(str: string) {
 		return `string::concat(${str})`;
 	}

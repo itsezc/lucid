@@ -5,7 +5,7 @@ DEFINE TABLE abc SCHEMAFULL;
 DEFINE FIELD name ON abc TYPE string;
 DEFINE TABLE issue SCHEMAFULL
 	PERMISSIONS
-		FOR CREATE WHERE $scope == 'account' && id == $auth.id,
+		FOR CREATE WHERE $scope == 'account' && count(array::intersect(labels, ['admin', 'manager'])) > 0,
 		FOR DELETE WHERE id == $auth.id,
 		FOR UPDATE WHERE $scope == 'admin' || ($scope == 'account' && id == $auth.id || $scope == 'admin' && id == $auth.id),
 		FOR SELECT WHERE $scope == 'admin' || (id == $auth.id && title != null && ($scope == 'admin') && $scope == 'account');
@@ -15,6 +15,7 @@ DEFINE FIELD body ON issue TYPE string;
 DEFINE FIELD priority ON issue TYPE string
 	 ASSERT $value IN ['no_priority','urgent','high','medium','low'];
 DEFINE FIELD status ON issue TYPE string
+	VALUE $value OR 'backlog'
 	 ASSERT $value IN ['backlog','todo','in_progress','done','canceled'];
 DEFINE FIELD due ON issue TYPE datetime;
 DEFINE FIELD labels ON issue TYPE array;

@@ -18,4 +18,7 @@ export * from './constants';
 
 export * from './lucid';
 
+export * from './operations/count';
+export * from './utilities/array';
+
 export { type TModelProperties } from './internal';

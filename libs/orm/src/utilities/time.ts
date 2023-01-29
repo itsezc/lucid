@@ -1,4 +1,4 @@
-export class SurrealTime {
+export class STime {
 	public static day(time: string) {
 		return `time::day(${time})`;
 	}

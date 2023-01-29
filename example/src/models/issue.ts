@@ -1,4 +1,4 @@
-import { DateTime, Field, Model, Table } from '@surreal-tools/orm';
+import { DateTime, Field, Model, Table, count, SArray } from '@surreal-tools/orm';
 
 import { Account } from './account';
 import { IssueLabel } from './issue_label';
@@ -8,8 +8,8 @@ import { AccountScope, AdminScope } from './scopes';
 
 
 @Table<Issue>({
-	permissions: ({ id, title }, { $auth }) => ({
-		create: AccountScope && id === $auth.id,
+	permissions: ({ id, title, labels }, { $auth }) => ({
+		create: AccountScope && count(SArray.intersect(labels, ['admin', 'manager'])) > 0,
 		delete: 'id == $auth.id',
 		update: AdminScope || (AccountScope && id === $auth.id || AdminScope && id === $auth.id),
 		select: AdminScope || (id == $auth.id && title != null && (AdminScope) && AccountScope)

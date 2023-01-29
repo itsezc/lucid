@@ -1,0 +1,1 @@
+export function count(...args: unknown[]): number { return 0; }
