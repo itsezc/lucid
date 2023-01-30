@@ -5,3 +5,6 @@ export class IssueLabel extends Model {
 	name!: string;
 	label!: string;
 }
+
+IssueLabel.select()
+	.where()

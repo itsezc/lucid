@@ -356,10 +356,7 @@ export class Account extends Model {
 console.log('\n',
 	Account.select()
 		.where({
-			username: {
-				endsWith: 'ends',
-				startsWith: 'starts'
-			},
+			username: 'test',
 			location: {}
 		})
 		.build()

@@ -1,24 +1,25 @@
 {
-	"compilerOptions": {
-		"lib": [
-			"ESNext",
-			"DOM"
-		],
-		"module": "ESNext",
-		"target": "ESNext",
-		"baseUrl": ".",
-		"paths": {
-			"@/src/*": [
-				"src/*"
-			]
-		},
-		"moduleResolution": "node",
-		"experimentalDecorators": true,
-		"outDir": "../../.moon/cache/types/libs/orm"
-	},
-	"include": [
-		"src/**/*",
-		"tests/**/*"
-	],
-	"exclude": []
+    "compilerOptions": {
+        "lib": [
+            "ESNext",
+            "DOM"
+        ],
+        "declaration": true,
+        "module": "ESNext",
+        "target": "ESNext",
+        "baseUrl": ".",
+        "paths": {
+            "@/src/*": [
+                "src/*"
+            ]
+        },
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "outDir": "../../.moon/cache/types/libs/orm"
+    },
+    "include": [
+        "src/**/*",
+        "tests/**/*"
+    ],
+    "exclude": []
 }

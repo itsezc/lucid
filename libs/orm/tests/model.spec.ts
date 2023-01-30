@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'bun:test';
-import { Model, Table, Field, DateTime } from '@/src/index';
+import { Model, Table, Field, type Types } from '@/src/index';
 
 @Table()
 class Account extends Model {
 	username?: string;
 	password?: string;
-	birthday?: DateTime;
+	birthday?: Types.SDateTime;
 }
 
 describe('Model', () => {
