@@ -16,7 +16,7 @@ export type SDecimal = number;
 
 export type SFloat = number;
 
-export type SDateTimeInput = Date;
+export type SDateTime = Date;
 
 type SGeoObject = {
 	type:

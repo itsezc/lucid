@@ -17,7 +17,8 @@ export * from './lucid';
 
 export * from './operations/count';
 
-export * as Typed from './utilities';
+export * as Types from './utilities';
+export * as Functions from './utilities/functions';
 export * as Constants from './utilities/constants';
 
 export { type TModelProperties } from './internal';
