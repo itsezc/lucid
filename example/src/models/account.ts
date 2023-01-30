@@ -1,4 +1,4 @@
-import { Table, Model, Field, Decimal, Float, DateTime, GeoPoint } from '@surreal-tools/orm';
+import { Table, Model, Field, type Types } from '@surreal-tools/orm';
 import { Issue } from './issue';
 import { IssueLabel } from './issue_label';
 import { AdminScope } from './scopes';
@@ -34,13 +34,13 @@ export class Account extends Model {
 
 	verified?: boolean;
 
-	money?: Decimal;
+	money?: Types.SDecimal;
 
-	floatExample?: Float;
+	floatExample?: Types.SFloat;
 
-	birthday?: DateTime;
+	birthday?: Types.SDateTime;
 
-	location?: GeoPoint;
+	location?: Types.SGeoPoint;
 
 	metadata?: {
 		realAge: number;
@@ -56,7 +56,7 @@ export class Account extends Model {
 	otherMetadata?: {};
 
 	logins?: {
-		when: DateTime;
+		when: Types.SDateTime;
 		verified?: boolean;
 	}[];
 
@@ -353,16 +353,17 @@ export class Account extends Model {
 	// SELECT ->purchased->product<-purchased<-person->(purchased WHERE created_at > time::now() - 3w)->product FROM person:chiru;
  */
 
-// console.log('\n',
-// 	Account.select()
-// 		.where({
-// 			username: {
-// 				endsWith: 'ends',
-// 				startsWith: 'starts'
-// 			}
-// 		})
-// 		.build()
-// );
+console.log('\n',
+	Account.select()
+		.where({
+			username: {
+				endsWith: 'ends',
+				startsWith: 'starts'
+			},
+			location: {}
+		})
+		.build()
+);
 
 // const x = new Account();
 // x.email = 'email@test.com';

@@ -1,4 +1,4 @@
-import { DateTime, Field, Model, Table, count, SArray, GeoPoint } from '@surreal-tools/orm';
+import { type Types, Field, Model, Table, count, Functions } from '@surreal-tools/orm';
 
 import { Account } from './account';
 import { IssueLabel } from './issue_label';
@@ -6,6 +6,7 @@ import { Project } from './project';
 
 import { AccountScope, AdminScope } from './scopes';
 
+const { SArray } = Functions;
 
 @Table<Issue>({
 	permissions: ({ id, title, labels }, { $auth }) => ({
@@ -25,7 +26,7 @@ export class Issue extends Model {
 
 	status: 'backlog' | 'todo' | 'in_progress' | 'done' | 'canceled' = 'backlog';
 
-	due?: DateTime;
+	due?: Types.SDateTime;
 
 	labels?: IssueLabel[];
 
@@ -41,5 +42,5 @@ export class Issue extends Model {
 	tags2?: number[];
 	tags3?: boolean[];
 
-	points?: GeoPoint[];
+	points?: Types.SGeoPoint[];
 }

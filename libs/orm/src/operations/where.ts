@@ -1,13 +1,13 @@
-import { DateTime, Decimal, Float, GeoLine, GeoMultiLine, GeoMultiPoint, GeoMultiPolygon, GeoPoint, GeoPolygon, Model } from '..';
+import { type Types, Model } from '..';
 import { stringifyToSQL } from '../util';
 import { SString } from '../utilities/string';
 
 type TDateTimeOps = {
-	eq?: DateTime,
-	gt?: DateTime,
-	gte?: DateTime,
-	lt?: DateTime,
-	lte?: DateTime
+	eq?: Types.SDateTime,
+	gt?: Types.SDateTime,
+	gte?: Types.SDateTime,
+	lt?: Types.SDateTime,
+	lte?: Types.SDateTime
 }
 
 type TNumberOps = {
@@ -75,29 +75,28 @@ type TGeoOps = {
 };
 
 type TNumberWhereOps = TNumberOps | number;
-type TDateTimeWhereOps = TDateTimeOps | DateTime;
+type TDateTimeWhereOps = TDateTimeOps | Types.SDateTime;
 type TStringWhereOps = TStringOps | string;
 
-type TGeoWhereOps = TGeoOps | GeoPoint;
+type TGeoWhereOps = TGeoOps | Types.SGeoPoint;
 
 type ObjectOps<T> = Partial<{
-	[P in keyof T]: T[P] extends Decimal ? TNumberWhereOps
-		: T[P] extends Float ? TNumberWhereOps
+	[P in keyof T]: T[P] extends string ? TStringWhereOps
+		: T[P] extends Types.SDecimal ? TNumberWhereOps
+		: T[P] extends Types.SFloat ? TNumberWhereOps
 		: T[P] extends Date ? TDateTimeWhereOps
-		: T[P] extends DateTime ? TDateTimeWhereOps
-		: T[P] extends 
-			GeoPoint
-			| TGeoLineString
-			| GeoPolygon
-			| GeoMultiPoint
-			| GeoMultiLine
-			| GeoMultiPolygon ? TGeoWhereOps
+		: T[P] extends Types.SDateTime ? TDateTimeWhereOps
+		: T[P] extends Types.SGeoPoint
+			| Types.SGeoLine
+			| Types.SGeoPolygon
+			| Types.SGeoMultiPoint
+			| Types.SGeoMultiLine
+			| Types.SGeoMultiPolygon ? TGeoWhereOps
+		: T[P] extends number ? TNumberWhereOps
 		: T[P] extends Array<infer U> ? Array<ObjectOps<U>>
 		: T[P] extends Model ? { $: ObjectOps<T[P]> }
 		: T[P] extends object ? ObjectOps<T[P]>
 		: T[P] extends boolean ? boolean
-		: T[P] extends string ? TStringWhereOps
-		: T[P] extends number ? TNumberWhereOps
 		: never
 }>;
 
