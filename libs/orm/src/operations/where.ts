@@ -79,7 +79,7 @@ export type TDateTimeWhereOps = TDateTimeOps | Types.SDateTime;
 export type TStringWhereOps = TStringOps | string;
 export type TGeoWhereOps = TGeoOps | Types.SGeoPoint;
 
-type ObjectOps<T> = Partial<{
+export type ObjectOps<T> = Partial<{
 	[P in keyof T]: T[P] extends string ? TStringWhereOps
 		: T[P] extends Types.SDecimal ? TNumberWhereOps
 		: T[P] extends Types.SFloat ? TNumberWhereOps
