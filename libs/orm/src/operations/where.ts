@@ -2,7 +2,7 @@ import { type Types, Model } from '..';
 import { stringifyToSQL } from '../util';
 import { SString } from '../utilities/string';
 
-type TDateTimeOps = {
+export type TDateTimeOps = {
 	eq?: Types.SDateTime,
 	gt?: Types.SDateTime,
 	gte?: Types.SDateTime,
@@ -10,7 +10,7 @@ type TDateTimeOps = {
 	lte?: Types.SDateTime
 }
 
-type TNumberOps = {
+export type TNumberOps = {
 	eq?: number,
 	gt?: number,
 	gte?: number,
@@ -18,67 +18,66 @@ type TNumberOps = {
 	lte?: number
 };
 
-type TStringOps = {
+export type TStringOps = {
 	eq?: string,
 	contains?: string,
 	startsWith?: string,
 	endsWith?: string
 };
 
-type TGeoPoint = {
+export type TGeoPoint = {
 	type: 'Point',
 	coordinates: [number, number]
 };
 
-type TGeoLineString = {
+export type TGeoLineString = {
 	type: 'LineString',
 	coordinates: number[][]
 };
 
-type TGeoPolygon = {
+export type TGeoPolygon = {
 	type: 'Polygon',
 	coordinates: number[][][]
 };
 
-type TGeoMultiPoint = {
+export type TGeoMultiPoint = {
 	type: 'MultiPoint',
 	coordinates: number[][]
 };
 
-type TMultiLineString = {
+export type TMultiLineString = {
 	type: 'MultiLinestring',
 	coordinates: number[][][]
 };
 
-type TMultiPolygon = {
+export type TMultiPolygon = {
 	type: 'MultiPolygon',
 	coordinates: number[][][][]
 };
 
-type TGeometryCollection = {
+export type TGeometryCollection = {
 	type: 'GeometryCollection',
 	geometries: TGeoPoint | TGeoLineString | TGeoPolygon | TGeoMultiPoint | TMultiLineString | TMultiPolygon[];
 }
 
-type TUtilGeoType = TGeoPoint 
+export type TUtilGeoType = TGeoPoint 
 	| TGeoLineString 
 	| TGeoPolygon 
 	| TGeoMultiPoint 
 	| TMultiLineString 
 	| TMultiPolygon;
 
-type TGeoOps = {
+export type TGeoOps = {
 	inside?: TUtilGeoType;
 	notInside?: TUtilGeoType;
 	outside?: TUtilGeoType;
 	intersects?: TUtilGeoType;
 };
 
-type TNumberWhereOps = TNumberOps | number;
-type TDateTimeWhereOps = TDateTimeOps | Types.SDateTime;
-type TStringWhereOps = TStringOps | string;
-
-type TGeoWhereOps = TGeoOps | Types.SGeoPoint;
+export type TNumberWhereOps = TNumberOps | number;
+export type TDateTimeWhereOps = TDateTimeOps | Types.SDateTime;
+export type TStringWhereOps = TStringOps | string;
+export type TGeoWhereOps = TGeoOps | Types.SGeoPoint;
 
 type ObjectOps<T> = Partial<{
 	[P in keyof T]: T[P] extends string ? TStringWhereOps
