@@ -16,7 +16,7 @@ export type SDecimal = number;
 
 export type SFloat = number;
 
-export type SDateTime = Date;
+export type SDateTimeInput = Date;
 
 type SGeoObject = {
 	type:
@@ -27,10 +27,10 @@ type SGeoObject = {
 		| 'Polygon'
 		| 'MultiPolygon';
 	coordinates:
-		| GeoPoint
-		| GeoMultiPoint
-		| GeoLine
-		| GeoMultiLine
-		| GeoPolygon
-		| GeoMultiPolygon;
+		| SGeoPoint
+		| SGeoMultiPoint
+		| SGeoLine
+		| SGeoMultiLine
+		| SGeoPolygon
+		| SGeoMultiPolygon;
 };
