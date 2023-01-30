@@ -1,4 +1,4 @@
-export class STime {
+export class SDateTime {
 	public static day(time: string) {
 		return `time::day(${time})`;
 	}

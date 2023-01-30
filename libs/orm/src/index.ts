@@ -1,3 +1,5 @@
+import { fromFn } from 'cmd-ts/dist/cjs/type';
+
 export * from './field';
 export * from './permissions';
 export * from './model';
@@ -19,6 +21,7 @@ export * from './constants';
 export * from './lucid';
 
 export * from './operations/count';
-export * from './utilities/array';
+
+export * as Typed from './utilities';
 
 export { type TModelProperties } from './internal';

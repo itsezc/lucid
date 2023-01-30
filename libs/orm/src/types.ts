@@ -1,24 +1,24 @@
-export type GeoPoint = [number, number];
+export type SGeoPoint = [number, number];
 
-export type GeoMultiPoint = GeoPoint[];
+export type SGeoMultiPoint = SGeoPoint[];
 
-export type GeoLine = GeoPoint[];
+export type SGeoLine = SGeoPoint[];
 
-export type GeoMultiLine = GeoLine[][];
+export type SGeoMultiLine = SGeoLine[][];
 
-export type GeoPolygon = GeoPoint[][];
+export type SGeoPolygon = SGeoPoint[][];
 
-export type GeoMultiPolygon = GeoPolygon[];
+export type SGeoMultiPolygon = SGeoPolygon[];
 
-export type GeoCollection = GeoObject[];
+export type SGeoCollection = SGeoObject[];
 
-export type Decimal = number;
+export type SDecimal = number;
 
-export type Float = number;
+export type SFloat = number;
 
-export type DateTime = Date;
+export type SDateTime = Date;
 
-type GeoObject = {
+type SGeoObject = {
 	type:
 		| 'Point'
 		| 'MultiPoint'
