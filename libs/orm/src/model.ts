@@ -1,8 +1,5 @@
-import {
-	SurrealEventManager,
-	TSurrealEventProps,
-	Lucid
-} from './';
+import { Lucid } from './';
+import { SurrealEventManager, TSurrealEventProps } from './event';
 
 import { 
 	SelectBuilder, 

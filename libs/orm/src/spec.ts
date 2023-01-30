@@ -1,6 +1,5 @@
 import { 
-	type ISurrealScope, 
-	type TSurrealPermissionOperation,
+	type ISurrealScope,
 	Model
 } from './';
 

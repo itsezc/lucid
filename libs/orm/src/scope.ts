@@ -1,5 +1,3 @@
-import { Model } from './model';
-
 export type TScopeSessionTimeout = `${string}m` | `${string}h` | `${string}`;
 
 export type TDefaultSessionVars = {
