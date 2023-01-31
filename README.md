@@ -1,9 +1,18 @@
 # Lucid
 
-Lucid helps build & ship apps that scale infinitely with maximum performance, in record time with amazing DX and flexibility.
+Lucid helps build & ship apps that scale infinitely with maximum performance, in record time with amazing DX and no vendor lock-in.
 
 Backends can be very complex, expensive, and non-performant. Lucid helps solve these problems by providing you with a framework that replaces the need for one; by leveraging SurrealDB, a powerful, all-in-one database engine with a typed abstraction acting as an ORM. This means you don't pay for servers (other than your database), most of the logic is executed on SurrealDB (which is made with Rust and highly performative) and provides full typing so you can focus on your UX and business.
 
+Our target is to build an enterprise ready framework, custom mixins, and a full testing suite, so that you may sleep in peace knowing your app works just the way you expect it to.
+
+## Packages
+
+- [ORM](/tree/master/libs/orm) - Lucid ORM
+- [CLI](/tree/master/apps/cli) - For local development & CI
+- [SurrealDB Client](/tree/master/libs/client) - TS based client for Surreal DB
+
+Internally, Lucid has many packages such as `schema-generator` which handle much of the functionality exposed to you, the developer. We suggest you read the docs to make yourself familiar with the ecosystem.
 
 ### FAQ
 <details>
@@ -22,6 +31,12 @@ Backends can be very complex, expensive, and non-performant. Lucid helps solve t
 	Still, tRPC can be a great solution and we advice you do your own research to make the right decision.
 </details>
 
+
+<details>
+	<summary>Can I use Lucid with React / Vue / Svelte etc.?</summary>
+
+	Lucid is framework agnostic, meaning you can use it with React, Vue, Svelte, Angular or your framework of choice. We intend to provide packages for popular frameworks such as svelte, down the line.
+</details>
 
 ### Maintainers
 
