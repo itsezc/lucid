@@ -94,11 +94,6 @@ export class SelectBuilder<SubModel extends Model>
 		return this;
 	}
 
-	public from(record: string): SelectBuilder<SubModel> {
-		//this.query_table = record;
-		return this;
-	}
-
 	public orderBy(
 		key: keyof SubModel, 
 		order: 'ASC' | 'DESC', 

@@ -32,11 +32,7 @@ export class Model {
 		this: { new (props?: ITable<Model>): SubModel },
 		fields: TSelectExpression<SubModel> = '*',
 	) {
-		const model = new this();
-
-		return new SelectBuilder<SubModel>({
-				model: model,
-			})
+		return new SelectBuilder<SubModel>({ model: new this() })
 			.select(fields);
 	}
 
@@ -44,22 +40,16 @@ export class Model {
 		this: { new (props?: ITable<Model>): SubModel },
 		from?: string
 	) {
-		const model = new this();
-
-		return new UpdateBuilder<SubModel>({ 
-			query_from: from || model.__tableName()
-		});
+		return new UpdateBuilder<SubModel>({ model: new this() })
+			.from(from);
 	}
 
 	public static delete<SubModel extends Model>(
 		this: { new (props?: ITable<Model>): SubModel },
 		from?: string
 	) {
-		const model = new this();
-
-		return new DeleteBuilder<SubModel>({ 
-			query_from: from || model.__tableName()
-		});
+		return new DeleteBuilder<SubModel>({ model: new this() })
+			.from(from);
 	}
 
 	public static events<SubModel extends Model>(

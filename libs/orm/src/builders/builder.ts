@@ -5,6 +5,7 @@ import Lucid from '../lucid';
 
 export interface IBuilderProps<SubModel extends Model> {
 	model: SubModel;
+	query_from?: string;
 }
 
 export interface IBuilder<SubModel extends Model> {
@@ -23,6 +24,7 @@ export class Builder<SubModel extends Model> {
 
 	constructor(props: IBuilderProps<SubModel>) {
 		this.model = props.model;
+		this.query_from = props?.query_from;
 		this.query_from = Lucid.tableMetadata.get(this.model.__tableName(true)).name 
 			|| this.model.__tableName();
 	}
@@ -41,6 +43,11 @@ export class Builder<SubModel extends Model> {
 
 	public parallel() {
 		this.query_parallel = true;
+		return this;
+	}
+
+	public from(record?: string) {
+		if (record) this.query_from = record;
 		return this;
 	}
 }

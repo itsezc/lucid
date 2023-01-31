@@ -7,9 +7,10 @@ export class UpdateBuilder<SubModel extends Model>
 	protected query_content?: object;
 	protected query_merge?: object;
 
-	constructor(props: IBuilderProps) {
+	constructor(props: IBuilderProps<SubModel>) {
 		super(props);
 	}
+
 	execute(): SubModel | SubModel[] {
 		throw new Error('Method not implemented.');
 	}
