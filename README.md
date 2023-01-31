@@ -8,9 +8,9 @@ Our target is to build an enterprise ready framework, custom mixins, and a full 
 
 ## Packages
 
-- [ORM](/tree/master/libs/orm) - Lucid ORM
-- [CLI](/tree/master/apps/cli) - For local development & CI
-- [SurrealDB Client](/tree/master/libs/client) - TS based client for Surreal DB
+- [ORM](https://github.com/itsezc/lucid/tree/master/libs/orm) - Lucid ORM
+- [CLI](https://github.com/itsezc/lucid/tree/master/apps/cli) - For local development & CI
+- [SurrealDB Client](https://github.com/itsezc/lucid/tree/master/libs/client) - TS based client for Surreal DB
 
 Internally, Lucid has many packages such as `schema-generator` which handle much of the functionality exposed to you, the developer. We suggest you read the docs to make yourself familiar with the ecosystem.
 
