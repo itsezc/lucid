@@ -1,14 +1,14 @@
-import { count, sql } from '@surreal-tools/orm';
+import { sql } from '@surreal-tools/orm';
 import { Account } from './account';
-import { TDefaultSessionVars, ISurrealScope } from '@surreal-tools/orm/src/scope';
+import { createScope } from '@surreal-tools/orm/src/scope';
 
-export const AccountScope: ISurrealScope<Account, TDefaultSessionVars & { $passKey: string }> = {
+export const AccountScope = createScope<Account, { $email: string, $password: string, $passKey: string }>({
 	name: 'account',
 	session: '15m',
-	signin: ({ $email, $pass, $passKey }) => {
+	signin: ({ $email, $password, $passKey }) => {
 		return sql('SELECT * FROM account WHERE username = $username AND (crypto::argon2::compare(password, $password))')
 	},
-	signup: ({ $email, $pass, $passKey }) => {
+	signup: ({ $email, $password, $passKey }) => {
 		return sql(`
 		IF count( (SELECT * FROM account WHERE verified = true AND username = $username) ) = 0
 			THEN (
@@ -21,15 +21,15 @@ export const AccountScope: ISurrealScope<Account, TDefaultSessionVars & { $passK
 			END
 		`)
 	},
-};
+});
 
-export const AdminScope: ISurrealScope<Account, TDefaultSessionVars> = {
+export const AdminScope = createScope<Account, { $email: string, $password: string }>({
 	name: 'admin',
 	session: '15m',
-	signin: ({ $email, $pass }) => {
+	signin: ({ $email, $password }) => {
 		return sql('SELECT * FROM account WHERE username = $username AND (crypto::argon2::compare(password, $password))')
 	},
-	signup: ({ $email, $pass }) => {
+	signup: ({ $email, $password }) => {
 		return sql(`
 		IF count( (SELECT * FROM account WHERE verified = true AND username = $username) ) = 0
 			THEN (
@@ -42,4 +42,4 @@ export const AdminScope: ISurrealScope<Account, TDefaultSessionVars> = {
 			END
 		`)
 	},
-};
+});

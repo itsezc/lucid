@@ -1,17 +1,14 @@
 import { Table, Model, Field, type Types } from '@surreal-tools/orm';
 import { Issue } from './issue';
 import { IssueLabel } from './issue_label';
-import { AdminScope } from './scopes';
-import { SurrealRest } from '@surreal-tools/client';
+import { AdminScope, AccountScope } from './scopes';
 
 @Table<Account>({
 	name: 'abc',
-	permissions: () => ({
-		create: false,
-		select: AdminScope,
-		delete: true,
-		update: true
-	}),
+	permissions: ({ username }) => [
+		[['CREATE', 'UPDATE', 'SELECT'], AccountScope.username === username],
+		['DELETE', AdminScope]
+	],
 	auditable: true,
 })
 export class Account extends Model {

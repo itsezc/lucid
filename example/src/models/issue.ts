@@ -12,7 +12,7 @@ const { SArray } = Functions;
 	permissions: ({ id, title, labels }, { $auth }) => ({
 		create: AccountScope && count(SArray.intersect(labels, ['admin', 'manager'])) > 0,
 		delete: 'id == $auth.id',
-		update: AdminScope || (AccountScope && id === $auth.id || AdminScope && id === $auth.id),
+		update: AdminScope || (AccountScope.id  === id || AdminScope.id === id),
 		select: AdminScope || (id == $auth.id && title != null && (AdminScope) && AccountScope)
 	}),
 })
