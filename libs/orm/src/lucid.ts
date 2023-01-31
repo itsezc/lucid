@@ -4,6 +4,8 @@ class LucidInstance {
 	private scope?: string;
 	private surreal_client?: ISurrealConnector;
 
+	public tableMetadata = new Map();
+
 	public init(surreal_client: ISurrealConnector) {
 		this.surreal_client = surreal_client;
 	}

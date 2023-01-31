@@ -1,3 +1,4 @@
+import Lucid from './lucid';
 import { Model } from './model';
 import { TPermissions } from './permissions';
 import { ITable } from './table';
@@ -46,7 +47,7 @@ export type SurrealRecord<SubModel extends Model = Model> = new (
 	props?: ITable<Model>,
 ) => SubModel;
 
-interface ITableFieldProps<SubModel extends Model, Descriptor> {
+interface ITableFieldProps<SubModel extends Model> {
 	name?: string;
 	index?: TSurrealFieldIndex;
 	flexible?: boolean;
@@ -56,9 +57,28 @@ interface ITableFieldProps<SubModel extends Model, Descriptor> {
 
 export function Field<
 	SubModel extends Model = Model,
-	Key = string | symbol,
-	SurrealType extends TSurrealDataType = 'string',
-	Descriptor extends TypedPropertyDescriptor<SurrealType>['value'] = SurrealType,
->(props?: ITableFieldProps<SubModel, Descriptor>) {
-	return function (target: SubModel, propertyKey: Key) {};
+	Key = string | symbol
+>(props?: ITableFieldProps<SubModel>) {
+	return function (target: SubModel, propertyKey: Key) 
+	{
+		if (props?.name) 
+		{
+			const name = target.__tableName(true);
+			const existingMetadata = Lucid.tableMetadata.get(name);
+
+			Lucid.tableMetadata.set(
+				name, 
+				{
+					...existingMetadata,
+					fields: [
+						...(existingMetadata ? existingMetadata.fields : []),
+						{
+							from: propertyKey.toString(),
+							to: props?.name,
+						}
+					]
+				}
+			);
+		}
+	};
 }

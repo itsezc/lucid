@@ -17,26 +17,28 @@ export class Model {
 
 	public id!: string;
 
-	constructor(props?: ITable<Model>) {
+	constructor(props?: ITable<Model>) {		
 		if (props) {
 			this.edge = props.edge ?? false;
 		}
 	}
 
-	public __tableName() {
-		return toSnakeCase(this.constructor.name);
+	public __tableName(original = false) {
+		return original ? this.constructor.name 
+			: toSnakeCase(this.constructor.name);
 	}
-
-	public static create<SubModel extends Model>(
-		this: { new (props?: ITable<Model>): SubModel; }, 
-		args: Partial<{ [P in keyof SubModel]: SubModel[P]}>
-	) {}
 
 	public static select<SubModel extends Model>(
 		this: { new (props?: ITable<Model>): SubModel },
 		fields: TSelectExpression<SubModel> = '*',
 	) {
-		return new SelectBuilder<SubModel>({ query_from: new this().__tableName() })
+		const model = new this();
+
+		console.log('Select ', model);
+
+		return new SelectBuilder<SubModel>({ 
+				query_from: model.__tableName()
+			})
 			.select(fields);
 	}
 
@@ -44,14 +46,22 @@ export class Model {
 		this: { new (props?: ITable<Model>): SubModel },
 		from?: string
 	) {
-		return new UpdateBuilder<SubModel>({ query_from: from || new this().__tableName() });
+		const model = new this();
+
+		return new UpdateBuilder<SubModel>({ 
+			query_from: from || model.__tableName()
+		});
 	}
 
 	public static delete<SubModel extends Model>(
 		this: { new (props?: ITable<Model>): SubModel },
 		from?: string
 	) {
-		return new DeleteBuilder<SubModel>({ query_from: from || new this().__tableName() });
+		const model = new this();
+
+		return new DeleteBuilder<SubModel>({ 
+			query_from: from || model.__tableName()
+		});
 	}
 
 	public static events<SubModel extends Model>(

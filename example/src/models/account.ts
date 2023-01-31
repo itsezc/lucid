@@ -5,6 +5,7 @@ import { AdminScope } from './scopes';
 import { SurrealRest } from '@surreal-tools/client';
 
 @Table<Account>({
+	name: 'abc',
 	permissions: () => ({
 		create: false,
 		select: AdminScope,
@@ -21,6 +22,7 @@ export class Account extends Model {
 	email!: string;
 
 	@Field({
+		name: 'pass',
 		permissions: ({ id }, { $auth }) => ({
 			create: false,
 			select: AdminScope,
@@ -356,8 +358,7 @@ export class Account extends Model {
 console.log('\n',
 	Account.select()
 		.where({
-			username: 'test',
-			location: {}
+			email: 'test'
 		})
 		.build()
 );
