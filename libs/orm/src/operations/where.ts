@@ -1,4 +1,4 @@
-import { type Types, Model } from '..';
+import { type Types, Model, Lucid } from '..';
 import { stringifyToSQL } from '../util';
 import { SString } from '../utilities/string';
 
@@ -106,6 +106,7 @@ export type TSubModelWhere<T extends Model> = ObjectOps<T> & {
 const operators = ['gt', 'gte', 'lt', 'lte', 'eq', 'endsWith', 'startsWith', 'contains'];
 
 export function WhereToSQL<SubModel extends Model>(
+	table: string,
 	where: TSubModelWhere<SubModel> | object, 
 	options: {
 		OR?: boolean,
@@ -128,9 +129,12 @@ export function WhereToSQL<SubModel extends Model>(
 			(options.prefix ? `${options.prefix}.${key}` : key)
 				.replaceAll('$.', '');
 
-		value = cleanValue(value);
-		
-	
+		const metadata = Lucid.tableMetadata.get(table)?.fields || [];
+		const metadataFilter = metadata.filter(x => x.from === key) || [];
+
+		key = metadataFilter.length > 0 ? metadataFilter[0].to : key;
+
+		value = cleanValue(value);	
 
 		switch (typeof value) {
 			case 'string':

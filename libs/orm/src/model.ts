@@ -34,10 +34,8 @@ export class Model {
 	) {
 		const model = new this();
 
-		console.log('Select ', model);
-
-		return new SelectBuilder<SubModel>({ 
-				query_from: model.__tableName()
+		return new SelectBuilder<SubModel>({
+				model: model,
 			})
 			.select(fields);
 	}

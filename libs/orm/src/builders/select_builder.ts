@@ -51,7 +51,7 @@ export class SelectBuilder<SubModel extends Model>
 	private query_limit?: number;
 	private query_start?: number;
 
-	constructor(props: IBuilderProps) {
+	constructor(props: IBuilderProps<SubModel>) {
 		super(props);
 	}
 
@@ -153,6 +153,7 @@ export class SelectBuilder<SubModel extends Model>
 
 	public build(): string {
 		let query = 'SELECT';
+
 
 		if (this.subquery && this.query_from) query = query.concat(' ', this.subquery.join(''), '->', this.query_from);
 		else query = query.concat(' ', this.select_fields);

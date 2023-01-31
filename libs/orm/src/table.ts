@@ -24,8 +24,6 @@ export function Table<SubModel extends Model = Model>(
 					...props
 				}
 			);
-
-			console.log(Lucid.tableMetadata);
 		}
 	};
 }
