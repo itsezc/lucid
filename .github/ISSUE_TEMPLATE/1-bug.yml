@@ -1,0 +1,142 @@
+name: 🐞 Bug Report
+description: File a bug report here
+title: "Bug: "
+labels:
+    - "kind/bug"
+    - "support/needs-triage"
+
+body:
+    - type: markdown
+      attributes:
+          value: |
+              👋🏽 Thanks for reporting this issue to us, here is a preliminary checklist
+
+    - type: checkboxes
+      id: preliminary-checklist
+      attributes:
+          label: Preliminary checklist
+          options:
+              - label: I understand that all communication must be in English
+                required: true
+              - label: I read the [Documentation](https://engineering.foret.ag)
+                required: true
+              - label: I read the [Contributing guide](https://github.com/ForetagInc/.github/blob/master/CONTRIBUTING.md)
+                required: true
+              - label: I agree to follow the [Code of Conduct](https://github.com/ForetagInc/.github/blob/master/CODE_OF_CONDUCT.md)
+                required: true
+              - label: I searched the issues and discussions but couldn't find anything (or linked relevant results below)
+                required: true
+
+    - type: input
+      id: version
+      attributes:
+          label: Version
+          description: Please test using the latest version of the relevant packages to make sure your issue has not already been fixed.
+          placeholder: v1.0.0-alpha
+      validations:
+          required: true
+
+    - type: textarea
+      id: environment
+      attributes:
+          label: Environment
+          description: Environment are you on i.e. Local, Bare Metal or Cloud.
+          placeholder: |
+              i.e. Local - RockyLinux 9 on ARM64 with 8 GB RAM, 4 vCPU
+              Feel free to add any other related hardware / software specs and if the project has different editions or plans (OSS, Cloud, and Enterprise)
+      validations:
+          required: true
+
+    - type: textarea
+      id: background
+      attributes:
+          label: Background
+          description: Explain your problem with the expected behavior.
+          placeholder: Add as much detail in here as possible explaining the problem, the background context (what you are trying to achieve) etc.
+      validations:
+          required: true
+
+    - type: textarea
+      id: current-behavior
+      attributes:
+          label: Current behavior
+          description: A concise description of what you expected to happen.
+          placeholder: Again, add as much detail as possible outlining what goes wrong including any edge cases.
+      validations:
+          required: true
+
+    - type: textarea
+      id: steps
+      attributes:
+          label: Steps To Reproduce
+          description: Steps to reproduce the behavior.
+          placeholder: |
+              Example -
+              1. In this environment...
+              2. With this config...
+              3. Run '...'
+              4. See error...
+      validations:
+          required: true
+
+    - type: textarea
+      id: screenshot
+      attributes:
+          label: Screenshot or Screencast
+          description: Providing relevant Screenshots/ Screencasts would help us to debug the issue quickly.
+          placeholder: Link or paste your media
+      validations:
+          required: false
+
+    - type: textarea
+      id: logs
+      attributes:
+          label: Logs and traces
+          description: Provide any traces or logs that could help here
+          placeholder: Add any content from your ui, console or terminal where necessary
+      validations:
+          required: false
+
+    - type: textarea
+      id: solution
+      attributes:
+          label: Solution
+          description: Any possible solutions or releated information
+          placeholder: When I click the sync button the data should sync
+      validations:
+          required: false
+
+    - type: textarea
+      id: debugging
+      attributes:
+          label: Debugging
+          description: Can you identify the location in the source code where the problem exists
+          placeholder: |
+              Add as many references as you can -
+              L22:49 on project/example.rs calls function_with_error(value);
+              L72:88 on project/main.rs calls nested_function(error);
+      validations:
+          required: false
+
+    - type: dropdown
+      id: contribution
+      attributes:
+          label: Contribution
+          description: If the bug is confirmed, would you be willing to submit a PR?
+          multiple: false
+          options:
+              - "Yes, I will work on a PR"
+              - "No, I cannot contribute further"
+      validations:
+          required: true
+
+    - type: input
+      id: keywords
+      attributes:
+          label: Keywords
+          description:
+              What keywords did you use when trying to find an existing bug report?
+              List them here so people in the future can find this one more easily.
+          placeholder: i.e. database, connection, error 2025
+      validations:
+          required: false
