@@ -22,7 +22,7 @@ type TSelectExpressionAlias<T extends Model> = {
 };
 
 export class SelectBuilder<SubModel extends Model>
-	extends Builder<SubModel> 
+	extends Builder<SubModel>
 {
 	private select_fields = '*';
 	
