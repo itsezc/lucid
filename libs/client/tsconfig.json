@@ -8,6 +8,9 @@
 			"ESNext",
 			"DOM"
 		],
+		"types": [
+			"bun-types"
+		],
 		"module": "ESNext",
 		"target": "ESNext",
 		"moduleResolution": "node",
