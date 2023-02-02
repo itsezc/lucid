@@ -10,20 +10,14 @@ export type ITable<SubModel extends Model> = {
 	permissions?: TPermissions<SubModel>;
 };
 
-export function Table<SubModel extends Model = Model>(
-	props?: ITable<SubModel>,
-) {
+export function Table<SubModel extends Model = Model>(props?: ITable<SubModel>) {
 	return function (fn: typeof Model) {
 		const name = props?.name || toSnakeCase(fn.name);
-
 		if (props) {
-			Lucid.tableMetadata.set(
-				fn.name, 
-				{
-					...Lucid.tableMetadata.get(fn.name),
-					...props
-				}
-			);
+			Lucid.tableMetadata.set(fn.name, {
+				...Lucid.tableMetadata.get(fn.name),
+				...props,
+			});
 		}
 	};
 }

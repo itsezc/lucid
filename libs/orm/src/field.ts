@@ -2,7 +2,6 @@ import Lucid from './lucid';
 import { Model } from './model';
 import { TPermissions } from './permissions';
 import { ITable } from './table';
-
 export type TSurrealFieldIndex = 'unique' | boolean;
 
 export type TSurrealDataType =
@@ -43,9 +42,7 @@ type TAssertHandler<SubModel> =
 
 type EnumType = string[];
 
-export type SurrealRecord<SubModel extends Model = Model> = new (
-	props?: ITable<Model>,
-) => SubModel;
+export type SurrealRecord<SubModel extends Model = Model> = new (props?: ITable<Model>) => SubModel;
 
 interface ITableFieldProps<SubModel extends Model> {
 	name?: string;
@@ -55,30 +52,42 @@ interface ITableFieldProps<SubModel extends Model> {
 	permissions?: TPermissions<SubModel>;
 }
 
-export function Field<
-	SubModel extends Model = Model,
-	Key = string | symbol
->(props?: ITableFieldProps<SubModel>) {
-	return function (target: SubModel, propertyKey: Key) 
-	{
-		if (props?.name) 
-		{
+export function Field<SubModel extends Model = Model, Key = string | symbol>(props?: ITableFieldProps<SubModel>) {
+	return function (target: SubModel, propertyKey: Key) {
+		if (props?.name) {
 			const name = target.__tableName(true);
 			const existingMetadata = Lucid.tableMetadata.get(name);
-
-			Lucid.tableMetadata.set(
-				name, 
-				{
-					...existingMetadata,
-					fields: [
-						...(existingMetadata ? existingMetadata.fields : []),
-						{
-							from: propertyKey.toString(),
-							to: props?.name,
-						}
-					]
-				}
-			);
+			Lucid.tableMetadata.set(name, {
+				...existingMetadata,
+				fields: [
+					...(existingMetadata ? existingMetadata.fields : []),
+					{
+						from: propertyKey.toString(),
+						to: props?.name,
+					},
+				],
+			});
 		}
 	};
 }
+
+// type IFieldRelationProps = {
+// 	direction: 'IN' | 'OUT';
+// };
+
+// export function FieldRelation<SubModel extends Model = Model, Key = string | symbol>(props: IFieldRelationProps) {
+// 	return function (target: SubModel, propertyKey: Key) {
+// 		const name = target.__tableName(true);
+// 		const existingMetadata = Lucid.tableMetadata.get(name);
+// 		Lucid.tableMetadata.set(name, {
+// 			...existingMetadata,
+// 			fields: [
+// 				...(existingMetadata ? existingMetadata.fields : []),
+// 				{
+// 					from: propertyKey.toString(),
+// 					direciton: props.direction,
+// 				},
+// 			],
+// 		});
+// 	};
+// }

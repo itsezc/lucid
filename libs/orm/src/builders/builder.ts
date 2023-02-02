@@ -25,16 +25,15 @@ export class Builder<SubModel extends Model> {
 	constructor(props: IBuilderProps<SubModel>) {
 		this.model = props.model;
 		this.query_from = props?.query_from;
-		this.query_from = Lucid.tableMetadata.get(this.model.__tableName(true)).name 
-			|| this.model.__tableName();
+		this.query_from = Lucid.tableMetadata.get(this.model.__tableName(true)).name || this.model.__tableName();
 	}
 
 	public where(condition: string | TSubModelWhere<SubModel>) {
 		if (typeof condition === 'string') this.query_where = condition;
 		else this.query_where = WhereToSQL(this.model.__tableName(true), condition);
-		
+
 		return this;
-	};
+	}
 
 	public timeout(timeout: TTimeout) {
 		this.query_timeout = timeout;
@@ -52,9 +51,7 @@ export class Builder<SubModel extends Model> {
 	}
 }
 
-export class ReturnableBuilder<SubModel extends Model> 
-	extends Builder<SubModel> 
-{
+export class ReturnableBuilder<SubModel extends Model> extends Builder<SubModel> {
 	protected query_return: TDIFF = 'NONE';
 
 	public returnDiff() {
