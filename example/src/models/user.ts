@@ -1,4 +1,4 @@
-import { Table, Model, Field, Types, FieldRelation } from '@surreal-tools/orm';
+import { Table, Model, Field, Types } from '@surreal-tools/orm';
 import { AdminScope } from './scopes';
 
 @Table({ name: 'follows', edge: true })
@@ -41,10 +41,10 @@ export class User extends Model {
 
 	bestFriend?: User;
 
-	@FieldRelation({ direction: "OUT" })
+	// @FieldRelation({ direction: "OUT" })
 	followers?: Followers[];
 
-	@FieldRelation({ direction: "IN" })
+	// @FieldRelation({ direction: "IN" })
 	following?: Following[];
 }
 
@@ -97,7 +97,7 @@ const user = await User.select(['username', 'email', 'posts'])
 		as: 'posting',
 	})
 	.count(Post.select(['comments']), { as: 'postCount', '<=': 12 })
-	.execute();
+	.build();
 
 console.log(user);
 
