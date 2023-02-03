@@ -1,4 +1,4 @@
-import { type Types, Model, Lucid } from '..';
+import { type Types, IModel, Lucid } from '..';
 import { stringifyToSQL } from '../util';
 import { OfArray } from '../utilities/helper.types';
 import { SString } from '../utilities/string';
@@ -91,10 +91,10 @@ type ObjectOps<T> = Partial<{
 		: T[P] extends number
 		? TNumberWhereOps
 		: OfArray<T[P]> extends { type: infer U }
-		? U extends Model
+		? U extends IModel
 			? { $: ObjectOps<U> }
 			: ObjectOps<U>
-		: T[P] extends Model
+		: T[P] extends IModel
 		? { $: ObjectOps<T[P]> }
 		: T[P] extends object
 		? ObjectOps<T[P]>
@@ -103,13 +103,13 @@ type ObjectOps<T> = Partial<{
 		: never;
 }>;
 
-export type TSubModelWhere<T extends Model> = ObjectOps<T> & {
+export type TSubModelWhere<T extends IModel> = ObjectOps<T> & {
 	OR?: TSubModelWhere<T>;
 };
 
 const operators = ['gt', 'gte', 'lt', 'lte', 'eq', 'endsWith', 'startsWith', 'contains'];
 
-export function WhereToSQL<SubModel extends Model>(
+export function WhereToSQL<SubModel extends IModel>(
 	table: string,
 	where: TSubModelWhere<SubModel> | object,
 	options: {

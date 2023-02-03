@@ -3,11 +3,8 @@ import { Model } from '../model';
 
 import { IBuilder, IBuilderProps, ReturnableBuilder } from './builder';
 
-
-export class DeleteBuilder<SubModel extends Model> 
-	extends ReturnableBuilder<SubModel> implements IBuilder<SubModel>
-{
-	constructor(props: IBuilderProps) {
+export class DeleteBuilder<SubModel extends Model> extends ReturnableBuilder<SubModel> implements IBuilder<SubModel> {
+	constructor(props: IBuilderProps<SubModel>) {
 		super(props);
 	}
 
@@ -24,9 +21,7 @@ export class DeleteBuilder<SubModel extends Model>
 		return query;
 	}
 
-
 	execute(): SubModel | SubModel[] {
 		throw new Error('Method not implemented.');
 	}
-	
 }

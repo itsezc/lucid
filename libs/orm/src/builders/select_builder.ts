@@ -1,13 +1,13 @@
-import { Model } from '..';
+import { IModel, Model } from '..';
 import { joinRangeFields } from '../util';
 import { Builder, IBuilderProps } from './builder';
 import { Lucid } from '../lucid';
-import { Simplify, UnionToArray } from '../utilities/helper.types';
+import { Simplify, UnionToArray, RenameKey } from '../utilities/helper.types';
 import { RequireAtLeastOne, SetOptional } from 'type-fest';
 
 type TComparisonOperator = '<' | '<=' | '=' | '>' | '>=';
 
-export type TSelectExpression<SubModel extends Model, T extends keyof SubModel, AS extends string> =
+export type TSelectExpression<SubModel extends IModel, T extends keyof SubModel, AS extends string> =
 	| '*'
 	| T[]
 	| TSelectExpressionAlias<SubModel, T, AS>
@@ -15,23 +15,23 @@ export type TSelectExpression<SubModel extends Model, T extends keyof SubModel, 
 	| ['*', TSelectExpressionAlias<SubModel, T, AS>]
 	| ['*', TSelectExpressionAlias<SubModel, T, AS>][];
 
-type TSelectExpressionAlias<SubModel extends Model, T extends keyof SubModel, AS extends string> = {
+type TSelectExpressionAlias<SubModel extends IModel, T extends keyof SubModel, AS extends string> = {
 	$?: [T, TComparisonOperator, SubModel[T]] | T;
 	$$?: string | { [P in keyof SubModel]?: SubModel[keyof SubModel] };
 	as?: AS;
 	where?: string;
 };
 
-export type OnlyRecordProps<T extends Model> = { [P in keyof T as T[P] extends Model | Model[] ? P : never]: T[P] };
-export type BasicRecordProps<T extends Model> = {
-	[P in keyof T]: T[P] extends Model ? string : T[P] extends Model[] ? string[] : T[P];
-} & Model;
+export type OnlyRecordProps<T extends IModel> = { [P in keyof T as T[P] extends IModel | IModel[] ? P : never]: T[P] };
+export type BasicRecordProps<T extends IModel> = {
+	[P in keyof T]: T[P] extends IModel ? string : T[P] extends IModel[] ? string[] : T[P];
+} & IModel;
 
-export type SubsetModel<M extends Model> = { [P in keyof M as M[P] extends Function ? never : P]: M[P] } & { id: string };
-export type PartialId<SubModel extends Model> = SetOptional<SubsetModel<SubModel>, 'id'>;
+export type SubsetModel<M extends IModel> = { [P in keyof M as M[P] extends Function ? never : P]: M[P] } & { id: string };
+export type PartialId<SubModel extends IModel> = SetOptional<SubsetModel<SubModel>, 'id'>;
 
-export type MergeSelections<SubModel extends Model, Selections, NewKeys extends keyof SubModel | keyof Selections> = Simplify<
-	Pick<SubModel & BasicRecordProps<Selections & Model>, NewKeys | keyof Selections>
+export type MergeSelections<SubModel extends IModel, Selections, NewKeys extends keyof SubModel | keyof Selections> = Simplify<
+	Pick<SubModel & BasicRecordProps<Selections & IModel>, NewKeys | keyof Selections>
 >;
 
 export type RenamePropForSelect<T, K extends keyof T, NewKey extends string> = NewKey extends null ? T : Simplify<Omit<T, K> & { [P in NewKey]: T[K] }>;
@@ -55,7 +55,9 @@ type CountResult<
 	  }
 	: Simplify<{ [K in NewKey]: NewValue } & Selections>;
 
-export class SelectBuilder<SubModel extends Model, Selections> extends Builder<SubModel> {
+export type SelectBuilderAny = SelectBuilder<Model, unknown>;
+
+export class SelectBuilder<SubModel extends IModel, Selections> extends Builder<SubModel> {
 	private select_fields = '*';
 
 	private query_range?: string;
@@ -86,13 +88,16 @@ export class SelectBuilder<SubModel extends Model, Selections> extends Builder<S
 	}
 
 	#replaceExistingSelectedFields = (key: string) => {
-		const regex2 = new RegExp(`(, \\w+ AS ${key}|, ${key})`, 'gm');
+		const regex2 = new RegExp(`(, \\w+ AS ${key}|, ${key}|${key}, )`, 'gm');
 		this.select_fields = this.select_fields.replace(regex2, '');
 	};
 
 	public select<T extends keyof SubsetModel<SubModel>, AS extends string = null>(
 		fields: TSelectExpression<SubModel, T, AS>,
-	): SelectBuilder<SubModel, RenamePropForSelect<MergeSelections<BasicRecordProps<SubModel>, Selections, T>, T, AS>> {
+	): SelectBuilder<
+		AS extends null ? SubModel : RenameKey<SubModel, T, AS> & IModel,
+		RenamePropForSelect<MergeSelections<BasicRecordProps<SubModel>, Selections, T>, T, AS>
+	> {
 		if (Array.isArray(fields)) this.select_fields += fields.join(', ');
 		else if (typeof fields === 'string') this.select_fields += fields;
 		else if (fields.$) {
@@ -105,7 +110,10 @@ export class SelectBuilder<SubModel extends Model, Selections> extends Builder<S
 			}
 		}
 
-		return this as unknown as SelectBuilder<SubModel, RenamePropForSelect<MergeSelections<BasicRecordProps<SubModel>, Selections, T>, T, AS>>;
+		return this as unknown as SelectBuilder<
+			AS extends null ? SubModel : RenameKey<SubModel, T, AS> & IModel,
+			RenamePropForSelect<MergeSelections<BasicRecordProps<SubModel>, Selections, T>, T, AS>
+		>;
 		// return new SelectBuilder<SubModel, RenamePropForSelect<MergeSelections<BasicRecordProps<SubModel>, Selections, T>, T, AS>>(
 		// 	this.props,
 		// 	this.select_fields,
@@ -117,12 +125,10 @@ export class SelectBuilder<SubModel extends Model, Selections> extends Builder<S
 		return this;
 	}
 
-	public count<
-		C extends SelectBuilder<Model, unknown> | keyof Selections,
-		P extends CountParams<As, R & string>,
-		As extends string,
-		R extends keyof Selections = AsType<C>,
-	>(condition: C, options?: P): SelectBuilder<SubModel, CountResult<Selections, AsType<C>, P>> {
+	public count<C extends SelectBuilderAny | keyof Selections, P extends CountParams<As, R & string>, As extends string, R extends keyof Selections = AsType<C>>(
+		condition: C,
+		options?: P,
+	): SelectBuilder<SubModel, CountResult<Selections, AsType<C>, P>> {
 		if (condition instanceof SelectBuilder) {
 			this.count_condition = `${condition.build()}`;
 		} else {
@@ -137,6 +143,7 @@ export class SelectBuilder<SubModel extends Model, Selections> extends Builder<S
 			if (innerKey === 'replace') continue;
 			if (innerKey === 'as') {
 				if ('replace' in (options as object)) {
+					console.log('REPLACE', options['replace'], innerKey);
 					this.#replaceExistingSelectedFields(options['replace'] as string);
 				}
 				nested[2] = `AS ${options[innerKey]}`;

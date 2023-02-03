@@ -1,21 +1,21 @@
-import { Model } from '../model';
+import { IModel } from '../model';
 import { TSubModelWhere, WhereToSQL } from '../operations/where';
 import { TDIFF, TTimeout } from '../internal';
 import Lucid from '../lucid';
 
-export interface IBuilderProps<SubModel extends Model> {
+export interface IBuilderProps<SubModel extends IModel> {
 	model: SubModel;
 	query_from?: string;
 }
 
-export interface IBuilder<SubModel extends Model> {
+export interface IBuilder<SubModel extends IModel> {
 	build(): string;
 	execute(): SubModel | SubModel[];
 }
 
-export type TMappedModelProperty<T extends Model> = { [P in keyof T]: T[keyof T] };
+export type TMappedModelProperty<T extends IModel> = { [P in keyof T]: T[keyof T] };
 
-export class Builder<SubModel extends Model> {
+export class Builder<SubModel extends IModel> {
 	protected model: SubModel;
 	protected query_from?: string;
 	protected query_where?: string;
@@ -51,7 +51,7 @@ export class Builder<SubModel extends Model> {
 	}
 }
 
-export class ReturnableBuilder<SubModel extends Model> extends Builder<SubModel> {
+export class ReturnableBuilder<SubModel extends IModel> extends Builder<SubModel> {
 	protected query_return: TDIFF = 'NONE';
 
 	public returnDiff() {

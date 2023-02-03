@@ -91,12 +91,12 @@ export class Comment extends Model {
 	children?: Comment[];
 }
 
-const user = await User.select(['username', 'email', 'posts'])
+const user = User.select(['username', 'email', 'posts'])
 	.select({
 		$: 'posts',
 		as: 'posting',
 	})
-	.count(Post.select(['comments']), { as: 'postCount', '<=': 12 })
+	.count(Post.select(['comments']), { as: 'postCount', '<=': 12, replace: 'posting' })
 	.build();
 
 console.log(user);

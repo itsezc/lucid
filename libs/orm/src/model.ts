@@ -6,7 +6,12 @@ import type { ITable } from './table';
 import { stringifyToSQL, toSnakeCase } from './util';
 import { SubsetModel, PartialId, BasicRecordProps } from './builders/select_builder';
 
-export class Model {
+export interface IModel {
+	id: string;
+	__tableName(original?: boolean): string;
+}
+
+export class Model implements IModel {
 	protected schemafull = true;
 	protected edge = false;
 
@@ -23,7 +28,7 @@ export class Model {
 		return original ? this.constructor.name : toSnakeCase(Lucid.tableMetadata.get(this.constructor.name).name || this.constructor.name);
 	}
 
-	public static select<SubModel extends Model, T extends keyof SubsetModel<SubModel>>(
+	public static select<SubModel extends IModel, T extends keyof SubsetModel<SubModel>>(
 		this: { new (props?: ITable<Model>): SubModel },
 		fields: TSelectExpression<SubModel, T, null> = '*',
 	) {
