@@ -26,6 +26,10 @@ Lucid.init(
 			username: 'test2',
 			email: 'someemail2',
 			password: 'pass2',
+			posts: await Post.createMany([
+				{ title: 'test2', content: 'test2' },
+				{ title: 'test3', content: 'test3' },
+			]),
 		},
 	]);
 
