@@ -143,7 +143,6 @@ export class SelectBuilder<SubModel extends IModel, Selections> extends Builder<
 			if (innerKey === 'replace') continue;
 			if (innerKey === 'as') {
 				if ('replace' in (options as object)) {
-					console.log('REPLACE', options['replace'], innerKey);
 					this.#replaceExistingSelectedFields(options['replace'] as string);
 				}
 				nested[2] = `AS ${options[innerKey]}`;
@@ -254,8 +253,6 @@ export class SelectBuilder<SubModel extends IModel, Selections> extends Builder<
 		if (this.query_parallel) query = query.concat(' ', 'PARALLEL');
 
 		query += ';';
-
-		console.log(query);
 		return query;
 	}
 
