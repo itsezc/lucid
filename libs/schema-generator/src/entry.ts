@@ -22,16 +22,7 @@ export let checker = program.getTypeChecker();
 
 //Generates a full SurrealQL Schema for the project at the specified directory.
 export function generateSchema(): string {
-    const { config } = ts.readConfigFile(cfgFile, ts.sys.readFile);
-
-    config.compilerOptions.noEmit = true;
-
-    const { options, fileNames, errors } = ts.parseJsonConfigFileContent(config, ts.sys, process.cwd());
-
-    program = ts.createProgram(fileNames, options);
-    checker = program.getTypeChecker();
-
-    const { diagnostics, emitSkipped } = program.emit()
+    const { diagnostics } = program.emit()
 
     const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(diagnostics, errors)
 
