@@ -21,7 +21,7 @@ node:
     version: '8.19.2'
 
   # Add `node.version` as a constraint in the root `package.json` `engines`.
-  addEnginesConstraint: true
+  addEnginesConstraint: false
 
   # Use the `package.json` name as an alias for the respective moon project.
   aliasPackageNames: 'name-and-scope'

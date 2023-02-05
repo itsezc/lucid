@@ -13,6 +13,7 @@ export class SurrealWS implements ISurrealConnector
     private heartbeat?: NodeJS.Timeout;
     private socket?: WebSocket;
     private requestMap?: Map<string, [(value: unknown) => void, (value: unknown) => void]>;
+    public isConnected = false;
     public connected?: Promise<unknown>;
 
     private authType: 'root' | 'ns' | 'db' | 'scope' | 'token' = 'root';
@@ -22,7 +23,6 @@ export class SurrealWS implements ISurrealConnector
         private creds: TCredentialDetails
     ) {
         this.creds = creds;
-        console.log('WS', this.creds);
 
         // if ('token' in this.creds) this.authType = 'token'; // Token auth
         // else if ('NS' in this.creds && 'DB' in this.creds && 'SC' in this.creds) this.authType  = 'scope'; // Scope auth
@@ -58,6 +58,7 @@ export class SurrealWS implements ISurrealConnector
                     await this.send('authenticate', [this.creds.token]);
                 }
 
+                this.isConnected = true;
                 resolve(true);
             });
         });
@@ -86,7 +87,7 @@ export class SurrealWS implements ISurrealConnector
             });
 
             this.socket.addEventListener('close', (event) => {
-                console.warn("Recieved a close from the websocket!", event);
+                console.warn('Recieved a close from the websocket!', event);
 
                 this.connected = new Promise((resolve) => {
                     this.socket?.addEventListener('open', async (event) => {

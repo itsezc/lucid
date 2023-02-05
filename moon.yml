@@ -1,0 +1,21 @@
+type: 'tool'
+language: 'bash'
+
+project:
+    name: 'lucid'
+
+workspace:
+    inheritedTasks:
+        include: []
+
+tasks:
+    db:
+        platform: 'system'
+        local: true
+        command: 'surreal'
+        args:
+            - start
+            - --user=root
+            - --pass=root
+            - file://.dev/database
+        inputs: []

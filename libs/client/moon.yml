@@ -1,0 +1,7 @@
+type: 'library'
+language: 'typescript'
+
+tasks:
+    test:
+        deps:
+            - 'lucid:db'
