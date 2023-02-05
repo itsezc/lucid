@@ -1,7 +1,6 @@
 type: 'library'
 language: 'typescript'
 
-tasks:
-    test:
-        deps:
-            - 'lucid:db'
+project:
+    name: 'client'
+    description: 'SurrealDB client in TypeScript'

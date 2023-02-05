@@ -1,20 +1,20 @@
 {
-	"include": [
-		"**/*"
-	],
-	"references": [],
-	"compilerOptions": {
-		"lib": [
-			"ESNext",
-			"DOM"
-		],
-		"types": [
-			"bun-types"
-		],
-		"module": "ESNext",
-		"target": "ESNext",
-		"moduleResolution": "node",
-		"experimentalDecorators": true,
-		"outDir": "../../.moon/cache/types/libs/client"
-	}
+    "include": [
+        "**/*"
+    ],
+    "references": [],
+    "compilerOptions": {
+        "lib": [
+            "ESNext",
+            "DOM"
+        ],
+        "types": [
+            "bun-types"
+        ],
+        "module": "ESNext",
+        "target": "ESNext",
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "outDir": "../../.moon/cache/types/libs/client"
+    }
 }

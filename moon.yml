@@ -3,6 +3,7 @@ language: 'bash'
 
 project:
     name: 'lucid'
+    description: 'Lucid is a backend-less framework'
 
 workspace:
     inheritedTasks:
