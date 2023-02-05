@@ -1,7 +1,6 @@
 import * as ts from 'typescript';
 import { parseTable } from './table';
 import { tsquery } from '@phenomnomnominal/tsquery';
-import { writeFileSync} from 'fs';
 import { parseScope } from './scope';
 
 const cfgFile = ts.findConfigFile(process.cwd(), ts.sys.fileExists, 'tsconfig.json');
@@ -24,7 +23,7 @@ export let checker = program.getTypeChecker();
 export function generateSchema(): string {
     const { diagnostics } = program.emit()
 
-    const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(diagnostics, errors)
+    const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(diagnostics, errors);
 
     //Print any warnings that Typescript has detected.
     if (allDiagnostics.length) {

@@ -1,6 +1,6 @@
-import { ISurrealScope, TDefaultSessionVars } from "@surreal-tools/orm";
+import { ISurrealScope } from "@surreal-tools/orm";
 
-export type TExtractVars<T extends ISurrealScope<unknown>> = T extends ISurrealScope<infer V> ? Partial<V> : never;
+export type TExtractVars<T extends ISurrealScope<unknown, {}>> = T extends ISurrealScope<infer V, {}> ? Partial<V> : never;
 
 export interface ISurrealConnector {
     query<T>(query: string): Promise<Array<T>>;
@@ -8,8 +8,8 @@ export interface ISurrealConnector {
     //Promise<TExtractVars<S>>;
     //Use that to match return type.
     
-    signin<S extends ISurrealScope<unknown, TDefaultSessionVars>>(scope: S, args: TExtractVars<S>): void;
-    signup<S extends ISurrealScope<unknown, TDefaultSessionVars>>(scope: S, args: TExtractVars<S>): void;
+    signin<S extends ISurrealScope<unknown, {}>>(scope: S, args: TExtractVars<S>): void;
+    signup<S extends ISurrealScope<unknown, {}>>(scope: S, args: TExtractVars<S>): void;
 }
 
 

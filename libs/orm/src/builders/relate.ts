@@ -16,7 +16,9 @@ class Relation<
 	protected query_content?: object;
 
 	constructor(edge: Edge) {
-		super({ query_from: new edge().__tableName()})
+		const model = new edge();
+		// @ts-ignore
+		super({ model, query_from: model.__tableName() })
 	}
 	execute(): EdgeInstance | EdgeInstance[] {
 		throw new Error('Method not implemented.');

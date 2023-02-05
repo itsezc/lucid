@@ -77,7 +77,6 @@ function parseTableDecorator(decorator: ts.Node): [string | null, string | null]
 
             decoratorSchema += ',';
         });
-
     }
 
 

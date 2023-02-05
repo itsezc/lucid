@@ -1,4 +1,4 @@
-import { TDefaultSessionVars, ISurrealScope } from '@surreal-tools/orm';
+import { ISurrealScope } from '@surreal-tools/orm';
 import { ISurrealConnector, TExtractVars } from './client.interface';
 import { v4 as uuidv4 } from 'uuid';
 import { TCredentialDetails } from './types';
@@ -114,7 +114,7 @@ export class SurrealWS implements ISurrealConnector
         return await this.send('query', params ? [query, params] : [query]) as T[];
     }
 
-    async signin<S extends ISurrealScope<unknown, TDefaultSessionVars> | {}>(args: S extends ISurrealScope<unknown, TDefaultSessionVars> ? TExtractVars<S> : {}) {
+    async signin<S extends ISurrealScope<unknown, {}> | {}>(args: S extends ISurrealScope<unknown, {}> ? TExtractVars<S> : {}) {
        let newArgs = { ...this.creds, args };
 
         const res = await this.send('signin', [newArgs]);
@@ -123,7 +123,7 @@ export class SurrealWS implements ISurrealConnector
         this.creds = { token: res as string };
     }
 
-    async signup<S extends ISurrealScope<unknown, TDefaultSessionVars> | {}>(args: S extends ISurrealScope<unknown, TDefaultSessionVars> ? TExtractVars<S> : {}) {
+    async signup<S extends ISurrealScope<unknown, {}> | {}>(args: S extends ISurrealScope<unknown, {}> ? TExtractVars<S> : {}) {
         let newArgs = { ...this.creds, args };
 
         const res = await this.send('signup', [newArgs]);

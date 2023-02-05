@@ -1,4 +1,4 @@
-import { TDefaultSessionVars, ISurrealScope, Model, Table } from '@surreal-tools/orm';
+import { ISurrealScope, Model, Table } from '@surreal-tools/orm';
 import { ISurrealConnector, TAuthErrorResponse, TAuthSuccessResponse, TExtractVars } from './client.interface';
 
 import { TCredentialDetails, TTokenAuth } from './types';
@@ -9,7 +9,7 @@ type TSurrealResponse<T> = {
 };
 
 
-export class SurrealRest<S extends ISurrealScope<unknown, TDefaultSessionVars>> implements ISurrealConnector
+export class SurrealRest<S extends ISurrealScope<unknown, {}>> implements ISurrealConnector
 {
     // user / pass = root
     // user / root / NS = NS user
@@ -80,7 +80,7 @@ export class SurrealRest<S extends ISurrealScope<unknown, TDefaultSessionVars>> 
         return json;
     }
 
-    async signin<S extends ISurrealScope<unknown, TDefaultSessionVars>>(args: TExtractVars<S>) {
+    async signin<S extends ISurrealScope<unknown, {}>>(args: TExtractVars<S>) {
         //Strip out the $ from the request (Surreal does not expect it from the REST api).
         const surrealArgs = Object.fromEntries(Object.entries(args).map(([key, value]) => [key.replace("$", ""), value]));
     

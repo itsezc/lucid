@@ -7,7 +7,7 @@ import { IBuilder, IBuilderProps, ReturnableBuilder } from './builder';
 export class DeleteBuilder<SubModel extends Model> 
 	extends ReturnableBuilder<SubModel> implements IBuilder<SubModel>
 {
-	constructor(props: IBuilderProps) {
+	constructor(props: IBuilderProps<SubModel>) {
 		super(props);
 	}
 
