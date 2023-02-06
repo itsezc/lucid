@@ -1,5 +1,5 @@
 import { SurrealWS } from '../src/client.ws';
-import { describe, it, test, expect } from 'bun:test';
+import { describe, test, expect } from 'bun:test';
 
 describe('WS Client - Root', () => {
 	const rootUser = new SurrealWS('http://localhost:8000', {

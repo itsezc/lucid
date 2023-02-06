@@ -91,7 +91,7 @@ tasks:
     test:
         platform: 'system'
         command: 'noop'
-        inputs: ['src/**/*']
+        inputs: ['src/**/*', 'tests/**/*']
         deps:
             - 'lucid:db'
             - 'wiptest'
@@ -101,4 +101,4 @@ tasks:
     wiptest:
         platform: 'system'
         command: 'bun wiptest'
-        inputs: ['src/**/*']
+        inputs: ['src/**/*', 'tests/**/*']

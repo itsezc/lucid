@@ -14,7 +14,7 @@ export class SurrealWS implements ISurrealConnector
     private socket?: WebSocket;
     private requestMap?: Map<string, [(value: unknown) => void, (value: unknown) => void]>;
     public isConnected = false;
-    public connected?: Promise<unknown>;
+    public connection?: Promise<unknown>;
 
     private authType: 'root' | 'ns' | 'db' | 'scope' | 'token' = 'root';
     
@@ -39,9 +39,9 @@ export class SurrealWS implements ISurrealConnector
 
         this.requestMap = new Map();
 
-        this.connected = new Promise((resolve) => {
+        this.connection = new Promise((resolve) => {
             this.socket?.addEventListener('open', async (event) => {
-                this.connected = undefined;
+                this.connection = undefined;
 
                 if (this.creds 
                     && 'NS' in this.creds
@@ -89,7 +89,7 @@ export class SurrealWS implements ISurrealConnector
             this.socket.addEventListener('close', (event) => {
                 console.warn('Recieved a close from the websocket!', event);
 
-                this.connected = new Promise((resolve) => {
+                this.connection = new Promise((resolve) => {
                     this.socket?.addEventListener('open', async (event) => {
                         resolve(true);
                     });
@@ -134,7 +134,7 @@ export class SurrealWS implements ISurrealConnector
     }
 
     private async send(method: string, params: unknown[] = []) {
-        await this.connected;
+        await this.connection;
         
         const id = uuidv4();
     
