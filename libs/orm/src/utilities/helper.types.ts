@@ -20,7 +20,18 @@ export type UnionToOvlds<U> = UnionToIntersection<U extends any ? (f: U) => void
 export type PopUnion<U> = UnionToOvlds<U> extends (a: infer A) => void ? A : never;
 export type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
 export type UnionToArray<T, A extends unknown[] = []> = IsUnion<T> extends true ? UnionToArray<Exclude<T, PopUnion<T>>, [PopUnion<T>, ...A]> : [T, ...A];
-
 export type Constructor<T, Arguments extends unknown[] = unknown[]> = new (...arguments_: Arguments) => T;
 export type Simplify<T> = T extends object ? { [KeyType in keyof T]: T[KeyType] } : T;
 export type RenameKey<T, K extends keyof T, NewKey extends string> = Omit<T, K> & { [KeyType in NewKey]: T[K] };
+export type KeyOfArraysWithElement<T> = T extends object
+	? {
+			[K in keyof T as OfArray<T[K]> extends { type: infer U } ? K : never]: OfArray<T[K]> extends { type: infer U } ? U : never;
+	  }
+	: T;
+export type ContainsAllKeys<BaseType, CheckType> = {
+	[Key in keyof CheckType]: Key extends keyof BaseType ? (BaseType[Key] extends CheckType[Key] ? true : false) : false;
+} extends {
+	[Key in keyof CheckType]: true;
+}
+	? true
+	: false;

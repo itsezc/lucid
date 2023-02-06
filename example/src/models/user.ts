@@ -1,21 +1,22 @@
-import { Table, Model, Field, Types } from '@surreal-tools/orm';
+import { Table, Model, Field, Types, FieldRelation } from '@surreal-tools/orm';
 import { AdminScope } from './scopes';
+import 'reflect-metadata';
 
-@Table({ name: 'follows', edge: true })
+@Table({ name: "follows", edge: true })
 export class Followers extends Model {
 	@Field({ name: 'out' })
 	inside!: User;
 	out!: User;
 }
 
-@Table({ name: 'follows', edge: true })
+@Table({ name: "follows", permissions: ({ inside }) => [[['CREATE', 'UPDATE', 'SELECT'], true], ['DELETE', AdminScope]], edge: true})
 export class Following extends Model {
 	@Field({ name: 'in' })
 	inside!: User;
 	out!: User;
 }
 
-@Table<User>({
+@Table({
 	name: 'user',
 	permissions: ({ username }) => [
 		[['CREATE', 'UPDATE', 'SELECT'], true],
@@ -39,16 +40,22 @@ export class User extends Model {
 
 	portfolios?: Portfolio[];
 
+	nested?: {
+		foo: string;
+		posting?: Post;
+		items?: User[];
+	};
+
 	bestFriend?: User;
 
-	// @FieldRelation({ direction: "OUT" })
-	followers?: Followers[];
+	@FieldRelation({ model: Followers, direction: "OUT" })
+	followers?: Followers;
 
-	// @FieldRelation({ direction: "IN" })
-	following?: Following[];
+	@FieldRelation({ model: Following, direction: "IN" })
+	following?: Following;
 }
 
-@Table<Portfolio>({
+@Table({
 	name: 'portfolio',
 	auditable: true,
 })
@@ -58,9 +65,7 @@ export class Portfolio extends Model {
 	trades?: Trade[];
 }
 
-@Table<Trade>({
-	name: 'trade',
-})
+@Table({name: "trade"})
 export class Trade extends Model {
 	portfolio?: Portfolio;
 	asset: string;
@@ -70,8 +75,8 @@ export class Trade extends Model {
 	tradeDate?: Types.SDateTime;
 }
 
-@Table<Post>({
-  name: 'post',
+@Table({
+	name: 'post',
   auditable: true,
 })
 export class Post extends Model {
@@ -82,79 +87,11 @@ export class Post extends Model {
 	comments?: Comment[];
 }
 
-@Table<Comment>({
-  name: 'comment',
+@Table({
+	name: 'comment',
   auditable: true,
 })
 export class Comment extends Model {
 	content?: string;
 	children?: Comment[];
 }
-
-const user = User.select(['username', 'email', 'posts'])
-	.select({
-		$: 'posts',
-		as: 'posting',
-	})
-	.count(Post.select(['comments']), { as: 'postCount', '<=': 12, replace: 'posting' })
-	.build();
-
-console.log(user);
-
-/*
-@Table({ name: 'follows', edge: true })
-export class Followers extends Model {
-	@Field({ name: 'in' })
-	inside!: User;
-	out!: User;
-}
-
-@Table({ name: 'follows', edge: true })
-export class Following extends Model {
-	@Field({ name: 'out' })
-	inside!: User;
-	out!: User;
-}
-
-@Table<User>({
-	name: 'user',
-	permissions: ({ username }) => [
-		[['CREATE', 'UPDATE', 'SELECT'], true],
-		['DELETE', AdminScope]
-	],
-	auditable: true,
-})
-
-export class User extends Model {
-	@Field({ index: 'unique' })
-	username: string;
-	@Field({ assert: 'email', name: 'email_address', index: "unique" })
-	email?: string;
-	bestFriend?: User;
-	followers?: Followers[];
-	following?: Following[];
-}
-
-being able to select, relational fields via the select method
-eg. User.select(['username', 'followers', 'following']).build()
-SELECT username, <-follows<-user as followers, ->follows->user as following FROM user
-also to be able to fetch relational fields via the fetch method
-eg. User.select(['username', 'followers', 'following']).fetch(['followers', 'following']).build();
-SELECT username, <-follows<-user as followers, ->follows->user as following FROM user FETCH followers, following
-there are several issues which need to be addressed
-1. the schema generator must know how to handle the relational fields (i.e do not mistake them for record fields)
-2. the select builder must also know how to differentiate between relational and record fields
-
-one solution could be to create a new decorator called @Relational
-this decorator would be used to decorate the relational fields
-@Relational(Followers) (could also potentially add more props to this decorator)
-the schema generator would then know to ignore these fields
-the select builder would also know to ignore these fields
-
-another solution could be to add a new property to the @Field decorator
-eg. @Field({ relation: Followers })
-
-a third solution could be to expand the current select method to accept an instance of a select builder
-eg. User.select(['username')]).select(Followers.select())
-or expand the in, out logic to handle the relational query
-*/

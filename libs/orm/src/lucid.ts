@@ -1,10 +1,18 @@
 import { ISurrealConnector } from '@surreal-tools/client/src/client.interface';
+import { Model } from './model';
 
 class LucidInstance {
 	private scope?: string;
 	private surreal_client?: ISurrealConnector;
+	private tableMetadata = new Map();
 
-	public tableMetadata = new Map();
+	public get(name: string) {
+		return this.tableMetadata.get(name);
+	}
+
+	public set<Props>(name: string, value: Props) {
+		return this.tableMetadata.set(name, value);
+	}
 
 	public init(surreal_client: ISurrealConnector) {
 		this.surreal_client = surreal_client;

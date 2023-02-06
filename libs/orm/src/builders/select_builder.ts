@@ -3,7 +3,8 @@ import { joinRangeFields } from '../util';
 import { Builder, IBuilderProps } from './builder';
 import { Lucid } from '../lucid';
 import { Simplify, UnionToArray, RenameKey } from '../utilities/helper.types';
-import { RequireAtLeastOne, SetOptional } from 'type-fest';
+import { RequireAtLeastOne } from 'type-fest';
+import { BasicRecordProps, MergeSelections, OnlyRecordProps, SubsetModel } from './types';
 
 type TComparisonOperator = '<' | '<=' | '=' | '>' | '>=';
 
@@ -21,18 +22,6 @@ type TSelectExpressionAlias<SubModel extends IModel, T extends keyof SubModel, A
 	as?: AS;
 	where?: string;
 };
-
-export type OnlyRecordProps<T extends IModel> = { [P in keyof T as T[P] extends IModel | IModel[] ? P : never]: T[P] };
-export type BasicRecordProps<T extends IModel> = {
-	[P in keyof T]: T[P] extends IModel ? string : T[P] extends IModel[] ? string[] : T[P];
-} & IModel;
-
-export type SubsetModel<M extends IModel> = { [P in keyof M as M[P] extends Function ? never : P]: M[P] } & { id: string };
-export type PartialId<SubModel extends IModel> = SetOptional<SubsetModel<SubModel>, 'id'>;
-
-export type MergeSelections<SubModel extends IModel, Selections, NewKeys extends keyof SubModel | keyof Selections> = Simplify<
-	Pick<SubModel & BasicRecordProps<Selections & IModel>, NewKeys | keyof Selections>
->;
 
 export type RenamePropForSelect<T, K extends keyof T, NewKey extends string> = NewKey extends null ? T : Simplify<Omit<T, K> & { [P in NewKey]: T[K] }>;
 
@@ -98,8 +87,18 @@ export class SelectBuilder<SubModel extends IModel, Selections> extends Builder<
 		AS extends null ? SubModel : RenameKey<SubModel, T, AS> & IModel,
 		RenamePropForSelect<MergeSelections<BasicRecordProps<SubModel>, Selections, T>, T, AS>
 	> {
-		if (Array.isArray(fields)) this.select_fields += fields.join(', ');
-		else if (typeof fields === 'string') this.select_fields += fields;
+		if (Array.isArray(fields)) {
+			let fieldsStr = '';
+			(fields as T[]).forEach((field, index) => {
+				if (this.model[field] === 'RELATIONAL_FIELD') {
+					// will do ->relName->out
+					return;
+				}
+				fieldsStr += `${index > 0 ? ', ' : ''}${field as string}`;
+			});
+			this.select_fields += fieldsStr;
+			// this.select_fields += (fields as T[]).filter((field) => this.model?.[field] !== 'RELATIONAL_FIELD').join(', ');
+		} else if (typeof fields === 'string') this.select_fields += fields;
 		else if (fields.$) {
 			if (Array.isArray(fields.$)) {
 				this.select_fields += fields.$.join(' ');
@@ -114,10 +113,6 @@ export class SelectBuilder<SubModel extends IModel, Selections> extends Builder<
 			AS extends null ? SubModel : RenameKey<SubModel, T, AS> & IModel,
 			RenamePropForSelect<MergeSelections<BasicRecordProps<SubModel>, Selections, T>, T, AS>
 		>;
-		// return new SelectBuilder<SubModel, RenamePropForSelect<MergeSelections<BasicRecordProps<SubModel>, Selections, T>, T, AS>>(
-		// 	this.props,
-		// 	this.select_fields,
-		// );
 	}
 
 	public range(range: string[][] | number[]): SelectBuilder<SubModel, Selections> {

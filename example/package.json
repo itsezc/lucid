@@ -2,6 +2,7 @@
     "name": "example",
     "version": "0.1.0",
     "dependencies": {
-        "uuid": "^9.0.0"
+        "uuid": "^9.0.0",
+        "reflect-metadata": "0.1.13"
     }
 }

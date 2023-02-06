@@ -1,27 +1,25 @@
-import { Model } from './model';
+import { IBasicModel, Model } from './model';
 
-type TPermissionsCallback<SubModel extends Model = Model> = {
+type TPermissionsCallback<SubModel extends IBasicModel = Model> = {
 	$scope: string;
 	$auth: IDefaultContextAuth;
 };
 
 export type TSurrealPermissionOperation = 'CREATE' | 'UPDATE' | 'DELETE' | 'SELECT';
 
-type TPermissionMultiple = [
-	TSurrealPermissionOperation 
-	| TSurrealPermissionOperation[], 
-	string | boolean | object
-];
+type TPermissionMultiple = [TSurrealPermissionOperation | TSurrealPermissionOperation[], string | boolean | object];
 
-export type TPermissions<SubModel extends Model = Model> = (
+export type TPermissions<SubModel extends IBasicModel = Model> = (
 	model: SubModel,
 	args: TPermissionsCallback<SubModel>,
-) => {
-	select?: string | boolean | object;
-	create?: string | boolean | object;
-	update?: string | boolean | object;
-	delete?: string | boolean | object;
-} | TPermissionMultiple[];
+) =>
+	| {
+			select?: string | boolean | object;
+			create?: string | boolean | object;
+			update?: string | boolean | object;
+			delete?: string | boolean | object;
+	  }
+	| TPermissionMultiple[];
 
 /**
  * Surreal authentication context

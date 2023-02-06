@@ -131,7 +131,7 @@ export function WhereToSQL<SubModel extends IModel>(
 	entries.forEach(([key, value], index) => {
 		key = options.overrides ?? (options.prefix ? `${options.prefix}.${key}` : key).replaceAll('$.', '');
 
-		const metadata = Lucid.tableMetadata.get(table)?.fields || [];
+		const metadata = Lucid.get(table)?.fields || [];
 		const metadataFilter = metadata.filter((x) => x.from === key) || [];
 
 		key = metadataFilter.length > 0 ? metadataFilter[0].to : key;

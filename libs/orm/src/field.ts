@@ -1,7 +1,10 @@
+import { Constructor } from 'type-fest';
 import Lucid from './lucid';
-import { Model } from './model';
+import { Model, IModel } from './model';
 import { TPermissions } from './permissions';
 import { ITable } from './table';
+import 'reflect-metadata';
+
 export type TSurrealFieldIndex = 'unique' | boolean;
 
 export type TSurrealDataType =
@@ -56,8 +59,9 @@ export function Field<SubModel extends Model = Model, Key = string | symbol>(pro
 	return function (target: SubModel, propertyKey: Key) {
 		if (props?.name) {
 			const name = target.__tableName(true);
-			const existingMetadata = Lucid.tableMetadata.get(name);
-			Lucid.tableMetadata.set(name, {
+			const existingMetadata = Lucid.get(name);
+
+			Lucid.set(name, {
 				...existingMetadata,
 				fields: [
 					...(existingMetadata ? existingMetadata.fields : []),
@@ -71,23 +75,30 @@ export function Field<SubModel extends Model = Model, Key = string | symbol>(pro
 	};
 }
 
-// type IFieldRelationProps = {
-// 	direction: 'IN' | 'OUT';
-// };
+type IFieldRelationProps<T extends Constructor<Model>> = {
+	model: T;
+	direction: 'IN' | 'OUT';
+};
 
-// export function FieldRelation<SubModel extends Model = Model, Key = string | symbol>(props: IFieldRelationProps) {
-// 	return function (target: SubModel, propertyKey: Key) {
-// 		const name = target.__tableName(true);
-// 		const existingMetadata = Lucid.tableMetadata.get(name);
-// 		Lucid.tableMetadata.set(name, {
-// 			...existingMetadata,
-// 			fields: [
-// 				...(existingMetadata ? existingMetadata.fields : []),
-// 				{
-// 					from: propertyKey.toString(),
-// 					direciton: props.direction,
-// 				},
-// 			],
-// 		});
-// 	};
-// }
+export function FieldRelation<Rel extends Constructor<Model>, SubModel extends Model = Model, Key = string | symbol>(props: IFieldRelationProps<Rel>) {
+	return function (target: SubModel, propertyKey: Key) {
+		const name = target.__tableName(true);
+		// console.log(new props.model());
+		// Reflect.defineProperty(target, propertyKey, {
+		// 	enumerable: true,
+		// 	configurable: true,
+		// 	value: 'RELATIONAL_FIELD',
+		// });
+		const existingMetadata = Lucid.get(name);
+		Lucid.set(name, {
+			...existingMetadata,
+			fields: [
+				...(existingMetadata ? existingMetadata.fields : []),
+				{
+					from: propertyKey.toString(),
+					direciton: props.direction,
+				},
+			],
+		});
+	};
+}

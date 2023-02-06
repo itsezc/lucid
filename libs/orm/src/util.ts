@@ -5,7 +5,7 @@ export function toSnakeCase(name: string): string {
 			if (i === 0) {
 				newName += name[i].toLowerCase();
 			} else {
-				newName += `${name.includes('_') ?name[i].toLowerCase() : `_${name[i].toLowerCase()}`}`;
+				newName += `${name.includes('_') ? name[i].toLowerCase() : `_${name[i].toLowerCase()}`}`;
 			}
 		} else {
 			newName += name[i];
@@ -33,24 +33,29 @@ export function joinRangeFields(arr?: string[][] | number[]) {
 
 export function escapeString(text?: string): string | void {
 	if (text) {
-		return text.replaceAll('\'', '').replaceAll('"', '');
+		return text.replaceAll("'", '').replaceAll('"', '');
 	}
 
 	return;
 }
 
-export function stringifyToSQL(obj_from_json: object): string {
-    if (typeof obj_from_json !== "object" || Array.isArray(obj_from_json)){
-        // not an object, stringify using native function
-        return JSON.stringify(obj_from_json, null, 4);
-    }
-    // Implements recursive object serialization according to JSON spec
-    // but without quotes around the keys.
-    let props = Object
-        .keys(obj_from_json)
+// rome-ignore lint/suspicious/noExplicitAny: <explanation>
+export function stringifyToSQL(obj_from_json: any): string {
+	if (typeof obj_from_json !== 'object' || Array.isArray(obj_from_json)) {
+		// not an object, stringify using native function
+		// do not stringify ids such user:123123, post:something
+		if (typeof obj_from_json === 'string' && obj_from_json.includes(':')) return obj_from_json;
+		if (obj_from_json instanceof Array) {
+			return `[${obj_from_json.map((item) => stringifyToSQL(item)).join(', ')}]`;
+		}
+		return JSON.stringify(obj_from_json, null, 4);
+	}
+	// Implements recursive object serialization according to JSON spec
+	// but without quotes around the keys.
+	let props = Object.keys(obj_from_json)
 		// @ts-ignore
-        .map(key => `${key}: ${stringifyToSQL(obj_from_json[key])}`)
-        .join(', ');
+		.map((key) => `${key}: ${stringifyToSQL(obj_from_json[key])}`)
+		.join(', ');
 
-    return `{ ${props} }`;
+	return `{ ${props} }`;
 }
