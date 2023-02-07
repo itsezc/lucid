@@ -1,5 +1,5 @@
 {
-	"name": "surreal-tools",
+	"name": "lucid",
 	"version": "0.1.0",
 	"private": true,
 	"workspaces": [
@@ -13,9 +13,9 @@
 		"reflect-metadata": "^0.1.13"
 	},
 	"dependencies": {
-		"@surreal-tools/client": "file:libs/client",
 		"@surreal-tools/schema-generator": "file:libs/schema-generator",
 		"@surreal-tools/orm": "file:libs/orm",
+		"@lucid-framework/surreal": "file:libs/surreal",
 		"@lucid-framework/payments": "file:libs/payments",
 		"@types/uuid": "^9.0.0",
 		"cmd-ts": "^0.12.0",
