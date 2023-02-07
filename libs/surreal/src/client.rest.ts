@@ -16,20 +16,10 @@ type TSurrealResponse<T> = {
 export class SurrealRest<S extends ISurrealScope<unknown, {}>>
 	implements ISurrealConnector
 {
-	// user / pass = root
-	// user / root / NS = NS user
-	// user / root / NS / DB = DB user
-	// <any fields> / NS / DB / SC = scope
-
 	private authType: 'root' | 'ns' | 'db' | 'scope' | 'token' = 'root';
 
 	constructor(public host: string, private creds: TCredentialDetails) {
 		this.creds = creds;
-
-		// if ('token' in this.creds) this.authType = 'token'; // Token auth
-		// else if ('NS' in this.creds && 'DB' in this.creds && 'SC' in this.creds) this.authType  = 'scope'; // Scope auth
-		// else if ('NS' in this.creds && 'DB' in this.creds) this.authType = 'db'; // DB auth
-		// else if ('NS' in this.creds) this.authType = 'ns'; // NS auth
 	}
 
 	//Using a token must be done within the query method since this connector is stateless.

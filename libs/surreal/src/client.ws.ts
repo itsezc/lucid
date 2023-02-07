@@ -21,12 +21,6 @@ export class SurrealWS implements ISurrealConnector {
 
 	constructor(public host: string, private creds: TCredentialDetails) {
 		this.creds = creds;
-		console.log('WS', this.creds);
-
-		// if ('token' in this.creds) this.authType = 'token'; // Token auth
-		// else if ('NS' in this.creds && 'DB' in this.creds && 'SC' in this.creds) this.authType  = 'scope'; // Scope auth
-		// else if ('NS' in this.creds && 'DB' in this.creds) this.authType = 'db'; // DB auth
-		// else if ('NS' in this.creds) this.authType = 'ns'; // NS auth
 
 		const endpoint = new URL(
 			'rpc',
