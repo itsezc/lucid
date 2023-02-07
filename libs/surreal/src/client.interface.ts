@@ -6,9 +6,6 @@ export type TExtractVars<T extends ISurrealScope<unknown, {}>> =
 export interface ISurrealConnector {
 	query<T>(query: string): Promise<Array<T>>;
 
-	//Promise<TExtractVars<S>>;
-	//Use that to match return type.
-
 	signin<S extends ISurrealScope<unknown, {}>>(
 		scope: S,
 		args: TExtractVars<S>,

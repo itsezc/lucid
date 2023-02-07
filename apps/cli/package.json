@@ -1,6 +1,7 @@
 {
 	"name": "@lucid-framework/cli",
 	"version": "0.1.0",
+	"license": "MPL-2.0",
 	"main": "./mjs/index.mjs",
 	"type": "commonjs",
 	"dependencies": {

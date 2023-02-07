@@ -1,6 +1,7 @@
 {
 	"name": "@lucid-framework/orm",
 	"version": "0.1.0-alpha.8",
+	"license": "MPL-2.0",
 	"main": "src/index.js",
 	"files": [
 		"dist/src/**/*.{js,d.ts,json}"
