@@ -1,4 +1,4 @@
-import { ISurrealConnector } from '@surreal-tools/client/src/client.interface';
+import { ISurrealConnector } from '@lucid-framework/surreal/src/client.interface';
 
 class LucidInstance {
 	private scope?: string;
@@ -12,7 +12,9 @@ class LucidInstance {
 
 	public client() {
 		if (!this.surreal_client) {
-			throw new Error('You must initialize a Lucid client before you can use it!');
+			throw new Error(
+				'You must initialize a Lucid client before you can use it!',
+			);
 		}
 
 		return this.surreal_client;

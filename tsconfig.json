@@ -28,6 +28,9 @@
         },
         {
             "path": "libs/schema-generator"
+        },
+        {
+            "path": "libs/surreal"
         }
     ]
 }

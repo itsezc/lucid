@@ -1,26 +1,26 @@
 {
-	"name": "lucid",
-	"version": "0.1.0",
-	"private": true,
-	"workspaces": [
-		"apps/*",
-		"libs/*"
-	],
-	"devDependencies": {
-		"@phenomnomnominal/tsquery": "^5.0.0",
-		"@types/node": "^18.11.18",
-		"bun-types": "latest",
-		"reflect-metadata": "^0.1.13"
-	},
-	"dependencies": {
-		"@lucid-framework/surreal": "file:libs/surreal",
-		"@surreal-tools/orm": "file:libs/orm",
-		"@surreal-tools/schema-generator": "file:libs/schema-generator",
-		"@types/uuid": "^9.0.0",
-		"cmd-ts": "^0.12.0",
-		"singleton-js": "^1.0.0",
-		"typescript": "^4.9.4",
-		"uuid": "^9.0.0"
-	},
-	"packageManager": "npm@8.19.2"
+    "name": "lucid",
+    "version": "0.1.0",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "libs/*"
+    ],
+    "devDependencies": {
+        "@phenomnomnominal/tsquery": "^5.0.0",
+        "@types/node": "^18.11.18",
+        "bun-types": "latest",
+        "reflect-metadata": "^0.1.13"
+    },
+    "dependencies": {
+        "@lucid-framework/surreal": "file:libs/surreal",
+        "@surreal-tools/orm": "file:libs/orm",
+        "@surreal-tools/schema-generator": "file:libs/schema-generator",
+        "@types/uuid": "^9.0.0",
+        "cmd-ts": "^0.12.0",
+        "singleton-js": "^1.0.0",
+        "typescript": "^4.9.4",
+        "uuid": "^9.0.0"
+    },
+    "packageManager": "npm@8.19.2"
 }
