@@ -4,6 +4,7 @@
     ],
     "exclude": [],
     "compilerOptions": {
+        "composite": true,
         "module": "CommonJS",
         "target": "ESNext",
         "outDir": "../../.moon/cache/types/libs/schema-generator",

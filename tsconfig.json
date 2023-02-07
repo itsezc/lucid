@@ -21,13 +21,13 @@
             "path": "apps/cli"
         },
         {
-            "path": "libs/client"
-        },
-        {
             "path": "libs/orm"
         },
         {
             "path": "libs/schema-generator"
+        },
+        {
+            "path": "libs/surreal"
         }
     ]
 }

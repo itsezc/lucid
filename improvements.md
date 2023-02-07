@@ -1,4 +1,3 @@
-
 # Improvements:
 
 Inject this. context into permission callback for typescript safety.
