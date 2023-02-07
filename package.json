@@ -13,7 +13,7 @@
 		"reflect-metadata": "^0.1.13"
 	},
 	"dependencies": {
-		"@surreal-tools/client": "file:libs/client",
+		"@lucid-framework/surreal": "file:libs/surreal",
 		"@surreal-tools/orm": "file:libs/orm",
 		"@surreal-tools/schema-generator": "file:libs/schema-generator",
 		"@types/uuid": "^9.0.0",
