@@ -1,8 +1,7 @@
 name: "Pipeline"
 on:
-    push:
-        branches:
-            - "master"
+    release:
+        types: [published]
 
 jobs:
     ci:
