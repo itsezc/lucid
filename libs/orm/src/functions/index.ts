@@ -6,3 +6,5 @@ export * from './geo';
 export * from './count';
 export * from './crypto';
 export * from './session';
+export * from './http';
+export * from './validation';
