@@ -16,7 +16,7 @@
 		"@surreal-tools/client": "file:libs/client",
 		"@surreal-tools/schema-generator": "file:libs/schema-generator",
 		"@surreal-tools/orm": "file:libs/orm",
-		"@luicd-framework/payments": "file:libs/payments",
+		"@lucid-framework/payments": "file:libs/payments",
 		"@types/uuid": "^9.0.0",
 		"cmd-ts": "^0.12.0",
 		"isomorphic-fetch": "^3.0.0",
