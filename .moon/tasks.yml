@@ -95,8 +95,6 @@ tasks:
         deps:
             - 'lucid:db'
             - 'wiptest'
-        options:
-            runDepsInParallel: false
 
     wiptest:
         platform: 'system'
