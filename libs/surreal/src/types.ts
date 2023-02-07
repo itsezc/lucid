@@ -1,12 +1,12 @@
 type TSurrealAuth = {
 	user: string;
 	pass: string;
-}
+};
 
 export type TRootAuth = TSurrealAuth;
 
-export type TNamespaceAuth = { 
-	NS: string 
+export type TNamespaceAuth = {
+	NS: string;
 };
 
 export type TDatabaseAuth = {

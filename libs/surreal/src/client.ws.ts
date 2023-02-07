@@ -4,145 +4,154 @@ import { v4 as uuidv4 } from 'uuid';
 import { TCredentialDetails } from './types';
 
 type TSurrealResponse<T> = {
-    result: T[],
-    error: {}[],
+	result: T[];
+	error: {}[];
 };
 
-export class SurrealWS implements ISurrealConnector 
-{
-    private heartbeat?: NodeJS.Timeout;
-    private socket?: WebSocket;
-    private requestMap?: Map<string, [(value: unknown) => void, (value: unknown) => void]>;
-    public connected?: Promise<unknown>;
+export class SurrealWS implements ISurrealConnector {
+	private heartbeat?: NodeJS.Timeout;
+	private socket?: WebSocket;
+	private requestMap?: Map<
+		string,
+		[(value: unknown) => void, (value: unknown) => void]
+	>;
+	public connected?: Promise<unknown>;
 
-    private authType: 'root' | 'ns' | 'db' | 'scope' | 'token' = 'root';
-    
-    constructor(
-        public host: string,
-        private creds: TCredentialDetails
-    ) {
-        this.creds = creds;
-        console.log('WS', this.creds);
+	private authType: 'root' | 'ns' | 'db' | 'scope' | 'token' = 'root';
 
-        // if ('token' in this.creds) this.authType = 'token'; // Token auth
-        // else if ('NS' in this.creds && 'DB' in this.creds && 'SC' in this.creds) this.authType  = 'scope'; // Scope auth
-        // else if ('NS' in this.creds && 'DB' in this.creds) this.authType = 'db'; // DB auth
-        // else if ('NS' in this.creds) this.authType = 'ns'; // NS auth
-        
-    
-        const endpoint = new URL('rpc', host.replace('http', 'ws').replace('https  ', 'wss'));
+	constructor(public host: string, private creds: TCredentialDetails) {
+		this.creds = creds;
+		console.log('WS', this.creds);
 
-        //Keep alive.
-        this.heartbeat = setInterval(() => this.send('ping'), 30_000);
+		// if ('token' in this.creds) this.authType = 'token'; // Token auth
+		// else if ('NS' in this.creds && 'DB' in this.creds && 'SC' in this.creds) this.authType  = 'scope'; // Scope auth
+		// else if ('NS' in this.creds && 'DB' in this.creds) this.authType = 'db'; // DB auth
+		// else if ('NS' in this.creds) this.authType = 'ns'; // NS auth
 
-        this.socket = new WebSocket(endpoint.toString());
+		const endpoint = new URL(
+			'rpc',
+			host.replace('http', 'ws').replace('https  ', 'wss'),
+		);
 
-        this.requestMap = new Map();
+		//Keep alive.
+		this.heartbeat = setInterval(() => this.send('ping'), 30_000);
 
-        this.connected = new Promise((resolve) => {
-            this.socket?.addEventListener('open', async (event) => {
-                this.connected = undefined;
+		this.socket = new WebSocket(endpoint.toString());
 
-                if (this.creds 
-                    && 'NS' in this.creds
-                    && 'DB' in this.creds
-                ) {
-                    await this.send('use', [this.creds.NS, this.creds.DB]);
-                }
+		this.requestMap = new Map();
 
-                if ('user' in this.creds && 'pass' in this.creds) {
-                    await this.send('signin', [{ ...this.creds, NS: undefined, DB: undefined }]);
-                }
+		this.connected = new Promise((resolve) => {
+			this.socket?.addEventListener('open', async (event) => {
+				this.connected = undefined;
 
-                if ('token' in this.creds) {
-                    await this.send('authenticate', [this.creds.token]);
-                }
+				if (this.creds && 'NS' in this.creds && 'DB' in this.creds) {
+					await this.send('use', [this.creds.NS, this.creds.DB]);
+				}
 
-                resolve(true);
-            });
-        });
+				if ('user' in this.creds && 'pass' in this.creds) {
+					await this.send('signin', [
+						{ ...this.creds, NS: undefined, DB: undefined },
+					]);
+				}
 
-        this.init();
-    }
+				if ('token' in this.creds) {
+					await this.send('authenticate', [this.creds.token]);
+				}
 
-    public init() {
-        if (this.socket) {
-            this.socket.addEventListener('message', (event) => {
-                const { id, result, method, error } = JSON.parse(event.data);
+				resolve(true);
+			});
+		});
 
-                //Not sure what this does.
-                if (method === 'notify') return;
+		this.init();
+	}
 
-                if (!this.requestMap?.has(id)) {
-                    console.warn('Received a message with no associated request!');
-                    console.warn({ id, result, method, error });
-                }
-                else {
-                    const [resolve, reject] = this.requestMap.get(id) || [];
-                    this.requestMap.delete(id);
-            
-                    error ? reject!(error) : resolve!(result);
-                }
-            });
+	public init() {
+		if (this.socket) {
+			this.socket.addEventListener('message', (event) => {
+				const { id, result, method, error } = JSON.parse(event.data);
 
-            this.socket.addEventListener('close', (event) => {
-                console.warn("Recieved a close from the websocket!", event);
+				//Not sure what this does.
+				if (method === 'notify') return;
 
-                this.connected = new Promise((resolve) => {
-                    this.socket?.addEventListener('open', async (event) => {
-                        resolve(true);
-                    });
-                });
+				if (!this.requestMap?.has(id)) {
+					console.warn('Received a message with no associated request!');
+					console.warn({ id, result, method, error });
+				} else {
+					const [resolve, reject] = this.requestMap.get(id) || [];
+					this.requestMap.delete(id);
 
-                //Cancel all pending queries.
-                //TODO: replace this with a query restart.
-                this.requestMap?.forEach(([_, reject]) => reject('Connection closed'));
-            });
+					error ? reject!(error) : resolve!(result);
+				}
+			});
 
-            this.socket.addEventListener('error', (event) => {
-                console.warn("Recieved an error from the websocket!", event);
-            });
-        }
-    }
+			this.socket.addEventListener('close', (event) => {
+				console.warn('Recieved a close from the websocket!', event);
 
-    async disconnect() {
-        this.socket?.close();
-    }
+				this.connected = new Promise((resolve) => {
+					this.socket?.addEventListener('open', async (event) => {
+						resolve(true);
+					});
+				});
 
-    //Using a token must be done within the query method since this connector is stateless.
-    async query<T>(query: string, params?: Record<string, unknown>): Promise<T[]> {
-        return await this.send('query', params ? [query, params] : [query]) as T[];
-    }
+				//Cancel all pending queries.
+				//TODO: replace this with a query restart.
+				this.requestMap?.forEach(([_, reject]) => reject('Connection closed'));
+			});
 
-    async signin<S extends ISurrealScope<unknown, {}> | {}>(args: S extends ISurrealScope<unknown, {}> ? TExtractVars<S> : {}) {
-       let newArgs = { ...this.creds, args };
+			this.socket.addEventListener('error', (event) => {
+				console.warn('Recieved an error from the websocket!', event);
+			});
+		}
+	}
 
-        const res = await this.send('signin', [newArgs]);
+	async disconnect() {
+		this.socket?.close();
+	}
 
-        this.authType = 'token';
-        this.creds = { token: res as string };
-    }
+	//Using a token must be done within the query method since this connector is stateless.
+	async query<T>(
+		query: string,
+		params?: Record<string, unknown>,
+	): Promise<T[]> {
+		return (await this.send(
+			'query',
+			params ? [query, params] : [query],
+		)) as T[];
+	}
 
-    async signup<S extends ISurrealScope<unknown, {}> | {}>(args: S extends ISurrealScope<unknown, {}> ? TExtractVars<S> : {}) {
-        let newArgs = { ...this.creds, args };
+	async signin<S extends ISurrealScope<unknown, {}> | {}>(
+		args: S extends ISurrealScope<unknown, {}> ? TExtractVars<S> : {},
+	) {
+		let newArgs = { ...this.creds, args };
 
-        const res = await this.send('signup', [newArgs]);
+		const res = await this.send('signin', [newArgs]);
 
-        this.authType = 'token';
-        this.creds = { token: res as string };
-    }
+		this.authType = 'token';
+		this.creds = { token: res as string };
+	}
 
-    private async send(method: string, params: unknown[] = []) {
-        await this.connected;
-        
-        const id = uuidv4();
-    
-        return new Promise((success, reject) => {
-            this.requestMap?.set(id, [success, reject]);
+	async signup<S extends ISurrealScope<unknown, {}> | {}>(
+		args: S extends ISurrealScope<unknown, {}> ? TExtractVars<S> : {},
+	) {
+		let newArgs = { ...this.creds, args };
 
-            const data = JSON.stringify({ id, method, params });
+		const res = await this.send('signup', [newArgs]);
 
-            if (this.socket) this.socket?.send(data);
-        });
-    }
+		this.authType = 'token';
+		this.creds = { token: res as string };
+	}
+
+	private async send(method: string, params: unknown[] = []) {
+		await this.connected;
+
+		const id = uuidv4();
+
+		return new Promise((success, reject) => {
+			this.requestMap?.set(id, [success, reject]);
+
+			const data = JSON.stringify({ id, method, params });
+
+			if (this.socket) this.socket?.send(data);
+		});
+	}
 }
