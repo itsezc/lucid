@@ -43,3 +43,4 @@ Internally, Lucid has many packages such as `schema-generator` which handle much
 
 - Chiru B. (@itsezc)
 - Drew R. (@DrewRidley)
+- Soya (@soya-miruku)
