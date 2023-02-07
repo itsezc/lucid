@@ -9,8 +9,7 @@
 	"devDependencies": {
 		"@phenomnomnominal/tsquery": "^5.0.0",
 		"@types/node": "^18.11.18",
-		"bun-types": "latest",
-		"reflect-metadata": "^0.1.13"
+		"bun-types": "latest"
 	},
 	"dependencies": {
 		"@surreal-tools/schema-generator": "file:libs/schema-generator",
