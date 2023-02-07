@@ -1,4 +1,4 @@
-import { ISurrealScope } from '@surreal-tools/orm';
+import { ISurrealScope } from '@lucid-framework/orm';
 
 export type TExtractVars<T extends ISurrealScope<unknown, {}>> =
 	T extends ISurrealScope<infer V, {}> ? Partial<V> : never;
