@@ -1,4 +1,4 @@
-import { ISurrealScope, Model, Table } from '@surreal-tools/orm';
+import { ISurrealScope, Model, Table } from '@lucid-framework/orm';
 import {
 	ISurrealConnector,
 	TAuthErrorResponse,

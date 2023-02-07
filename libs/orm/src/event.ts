@@ -8,25 +8,8 @@ type TSurrealEventAccessors<SubModel extends Model> = {
 	$before: TModelProperties<SubModel>;
 };
 
-// rome-ignore lint/suspicious/noExplicitAny: Currently the type is unknown
-type TSurrealEventWhenOperation<M extends Model, T extends any = any> = {
-	$: [T, '=' | '!=', T];
-	OR?: TSurrealEventTopLevelOperator<M, T>;
-};
-
-// rome-ignore lint/suspicious/noExplicitAny: Currently the type is unknown
-type TSurrealEventTopLevelOperator<M extends Model, T extends any = any> =
-	| TSurrealEventWhenOperation<M, T>
-	| TSurrealEventWhenOperation<M, T>[];
-
-// rome-ignore lint/suspicious/noExplicitAny: Currently the type is unknown
-type TSurrealEventWhen<M extends Model, T extends any = any> = {
-	$: TSurrealEventTopLevelOperator<M, T>[];
-	OR: TSurrealEventTopLevelOperator<M, T>[];
-};
-
 export type TSurrealEventProps<SubModel extends Model> = {
-	name: string;
+	name?: string;
 	when: (cb: TSurrealEventAccessors<SubModel>) => boolean;
 	then: (cb: TSurrealEventAccessors<SubModel>) => string | string[];
 };
