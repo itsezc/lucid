@@ -1,4 +1,6 @@
 export class SDateTime {
+	public static now = 'time::now()';
+
 	public static day(time: string) {
 		return `time::day(${time})`;
 	}
@@ -28,10 +30,6 @@ export class SDateTime {
 
 	public static nano(time: string) {
 		return `time::nano(${time})`;
-	}
-
-	public static now() {
-		return 'time::now()';
 	}
 
 	public static round(time: string, duration: string) {
