@@ -23,7 +23,6 @@ export class TGeo {
 
 	public static hash_encode(point: SGeoPoint, number?: number) {
 		if (number) return `geo::hash::encode(${toGeoPoint(point)}, ${number})`;
-
 		return `geo::hash::encode(${toGeoPoint(point)})`;
 	}
 }

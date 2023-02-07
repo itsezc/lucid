@@ -12,8 +12,6 @@ export * from './builders/relate';
 
 export * from './lucid';
 
-export * from './operations/count';
-
 export * as Types from './utilities';
 export * as Functions from './functions';
 export * as Constants from './utilities/constants';
