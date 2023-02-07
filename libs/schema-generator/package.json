@@ -1,5 +1,5 @@
 {
-	"name": "@surreal-tools/schema-generator",
+	"name": "@lucid-framework/schema-generator",
 	"version": "0.1.0",
 	"main": "dist/entry.js",
 	"type": "commonjs"

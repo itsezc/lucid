@@ -1,5 +1,5 @@
 {
-	"name": "@surreal-tools/cli",
+	"name": "@lucid-framework/cli",
 	"version": "0.1.0",
 	"main": "./mjs/index.mjs",
 	"type": "commonjs",

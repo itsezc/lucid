@@ -1,5 +1,5 @@
 {
-	"name": "@surreal-tools/orm",
+	"name": "@lucid-framework/orm",
 	"version": "0.1.0-alpha.8",
 	"main": "src/index.js",
 	"files": [
