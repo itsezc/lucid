@@ -1,8 +1,11 @@
-import stripe from 'stripe';
-import { sync } from './sync';
+import { sync } from './stripe';
 
 export type TPricingProps = {
-	apiKey: string;
+	providers: {
+		stripe?: {
+			apiKey: string;
+		};
+	};
 	plans: {
 		name: string;
 		description?: string;

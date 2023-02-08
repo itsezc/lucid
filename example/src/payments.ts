@@ -1,7 +1,11 @@
 import { pricing } from '@lucid-framework/payments';
 
 pricing({
-	apiKey: process.env.STRIPE_SK,
+	providers: {
+		stripe: {
+			apiKey: process.env.STRIPE_SK,
+		},
+	},
 	plans: [
 		{
 			name: 'seat',
