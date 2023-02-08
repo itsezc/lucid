@@ -1,7 +1,0 @@
-type: "library"
-language: "typescript"
-
-project:
-    name: "schema-generator"
-    description: "Surreal schema generator"
-    maintainers: ["chiru.b", "drew.r"]
