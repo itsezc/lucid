@@ -27,40 +27,44 @@ export async function sync({ providers, plans }: TPricingProps) {
 
 					console.log('Created product', name);
 
-					feature[1].currencies?.map(async (pricingCurrency) => {
-						const tiered =
-							pricingCurrency.tiers && pricingCurrency.tiers.length > 0;
+					const currencies = feature[1].currencies;
+					const primaryCurrency = currencies[0];
 
-						console.log(
-							'Creating product pricing for',
-							name,
-							pricingCurrency.currency,
-						);
+					const currency_options: Record<
+						string,
+						Stripe.PriceCreateParams.CurrencyOptions
+					> = {};
 
-						const productPricing = tiered
-							? {
-									tiers: pricingCurrency.tiers?.map((tier) => ({
-										up_to: tier.upto || ('inf' as const),
-										flat_amount: tier.base,
-										unit_amount: tier.price,
-									})),
-							  }
-							: {};
+					currencies.map(({ currency, tiers }, currencyIdx) => {
+						if (currencyIdx !== 0) {
+							currency_options[currency] = {
+								tiers: tiers?.map((tier) => ({
+									up_to: tier.upto || ('inf' as const),
+									flat_amount: tier.base,
+									unit_amount: tier.price,
+								})),
+							};
+						}
+					});
 
-						// Create pricing for stripe
-						await stripe.prices.create({
-							currency: pricingCurrency.currency ?? 'usd',
-							product: product.id,
-							unit_amount: !tiered
-								? pricingCurrency.base || pricingCurrency.price
-								: undefined,
-							billing_scheme: tiered ? 'tiered' : 'per_unit',
-							tiers_mode: tiered ? mode || 'graduated' : undefined,
-							recurring,
-							...productPricing,
-						});
+					const tiered =
+						primaryCurrency.tiers && primaryCurrency.tiers.length > 0;
 
-						console.log('Created pricing for', name);
+					await stripe.prices.create({
+						currency: primaryCurrency.currency,
+						product: product.id,
+						unit_amount: primaryCurrency.base || primaryCurrency.price,
+						billing_scheme: tiered ? 'tiered' : 'per_unit',
+						tiers: tiered
+							? primaryCurrency.tiers?.map((tier) => ({
+									up_to: tier.upto || ('inf' as const),
+									flat_amount: tier.base,
+									unit_amount: tier.price,
+							  }))
+							: undefined,
+						tiers_mode: tiered ? mode || 'graduated' : undefined,
+						recurring,
+						currency_options,
 					});
 				});
 			},

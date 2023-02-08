@@ -33,7 +33,7 @@ type TPricingPlanFeatureTier = {
 
 type TPricingPlanFeature = {
 	aggregate?: 'graduated' | 'perpetual';
-	currencies?: TPricingPlanFeatureCurrency[];
+	currencies: TPricingPlanFeatureCurrency[];
 };
 
 /**
