@@ -1,20 +1,42 @@
 import { pricing } from '@lucid-framework/payments';
 
 pricing({
+	apiKey: process.env.STRIPE_SK,
 	plans: [
 		{
 			name: 'seat',
-			interval: 'monthly',
+			description: 'Sass seat',
+			recurring: {
+				interval: 'month',
+				usage_type: 'licensed',
+			},
 			features: {
 				'feature:seat': {
-					aggregrate: 'perpetual',
-					tiers: [
+					aggregate: 'perpetual',
+					currencies: [
 						{
-							upto: 5,
-							base: 0,
+							currency: 'usd',
+							tiers: [
+								{
+									upto: 5,
+									base: 0,
+								},
+								{
+									price: 9900,
+								},
+							],
 						},
 						{
-							price: 9900,
+							currency: 'gbp',
+							tiers: [
+								{
+									upto: 5,
+									base: 0,
+								},
+								{
+									price: 9900,
+								},
+							],
 						},
 					],
 				},
@@ -22,10 +44,18 @@ pricing({
 		},
 		{
 			name: 'storage',
-			interval: 'monthly',
+			recurring: {
+				interval: 'month',
+				usage_type: 'metered',
+			},
 			features: {
 				'feature:storage': {
-					base: 10,
+					currencies: [
+						{
+							currency: 'usd',
+							base: 10,
+						},
+					],
 				},
 			},
 		},
