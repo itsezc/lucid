@@ -1,6 +1,5 @@
 import { Lucid } from '@surreal-tools/orm';
 import { SurrealRest, SurrealWS } from '@surreal-tools/client';
-
 import { User, Post } from '../models/user';
 // import { AccountScope } from '../models/scopes';
 
@@ -59,13 +58,21 @@ Lucid.init(
 
 	// console.log(updatedUser);
 	// console.log(singleUpdate);
-	const user = await User.select(['id', 'username', 'posts', 'bestFriend', 'followers']).fetch(['bestFriend']).build();
-	console.log(user);
+
+	const res = await User.select(['bestFriend', 'email'])
+		.fetch(['bestFriend'])
+		.groupBy(['bestFriend', 'email']) //todo add type def to check selections
+		.execute();
+	console.log(res);
 	process.exit(0);
 })();
 
-/*
-	update().where({username: "test"})
-	.set("posts", Post.update().where({ title: "test" }).execute())
-	.add("posts", Post.create({ title: "test", content: "test" }))
-*/
+/**
+ *
+ * count(SELECT * FROM post)
+ * User.select(['username', 'email', Lucid.count(Post.select(['title'])).as('postCount)])
+ *
+ * User.select(['username', 'email', Post.count().as('postCount)])
+ * Lucid.query().from("User").select(['username', 'email', Post.count().as('postCount')])
+ * User.select(['orders']).where({ orders: count() }).execute()
+ */

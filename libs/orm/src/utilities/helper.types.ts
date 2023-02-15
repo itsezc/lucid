@@ -22,6 +22,11 @@ export type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
 export type UnionToArray<T, A extends unknown[] = []> = IsUnion<T> extends true ? UnionToArray<Exclude<T, PopUnion<T>>, [PopUnion<T>, ...A]> : [T, ...A];
 export type Constructor<T, Arguments extends unknown[] = unknown[]> = new (...arguments_: Arguments) => T;
 export type Simplify<T> = T extends object ? { [KeyType in keyof T]: T[KeyType] } : T;
+export type SimplifyDeep<T> = T extends object
+	? {
+			[KeyType in keyof T]: OfArray<T[KeyType]> extends { type: infer U } ? Simplify<U>[] : Simplify<T[KeyType]>;
+	  }
+	: T;
 export type RenameKey<T, K extends keyof T, NewKey extends string> = Omit<T, K> & { [KeyType in NewKey]: T[K] };
 export type KeyOfArraysWithElement<T> = T extends object
 	? {
@@ -35,3 +40,9 @@ export type ContainsAllKeys<BaseType, CheckType> = {
 }
 	? true
 	: false;
+
+export type ArrayToUnion<T> = T extends [infer A, ...infer B] ? A | ArrayToUnion<B> : never;
+
+export type UnionToCommaString<T> = UnionToArray<T> extends [infer A, ...infer B]
+	? `${A}${B extends [] ? '' : `_${UnionToCommaString<ArrayToUnion<B>>}`}`
+	: never;

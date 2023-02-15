@@ -1,15 +1,14 @@
-import type { ITable } from './table';
-import { Field, Lucid } from './';
+import { Field, ITable, Lucid } from './';
 import { SurrealEventManager, TSurrealEventProps } from './event';
-import { SelectBuilder, TSelectExpression, UpdateBuilder, DeleteBuilder } from './builders';
+import { TSelectExpression, UpdateBuilder, DeleteBuilder } from './builders';
 import { stringifyToSQL, toSnakeCase } from './util';
 import { SubsetModel, PartialId } from './builders/types';
 import { InsertableBuilder, IBuilderProps } from './builders/builder';
+import { SelectBuilder, SelectBuilderAny } from './builders/select_builder';
 
 export interface IBasicModel {
 	id: string;
 }
-
 export interface IModel extends IBasicModel {
 	__tableName(original?: boolean): string;
 	// __modelName: string;
@@ -74,30 +73,50 @@ export class ModelWriter<T extends IModel> extends InsertableBuilder<T> {
 	}
 }
 
-export class Model implements IModel {
+export type UnselectedProperties<SubModel extends IBasicModel, T> = {
+	[P in keyof SubModel as P extends T ? never : P]: SubModel[P];
+};
+
+export type AllowedProperties<SubModel extends IModel, T> = T | keyof UnselectedProperties<SubModel, T>;
+
+export class Model<Edge extends boolean = boolean> implements IModel {
 	protected schemafull = true;
-	protected edge = false;
+	protected edge?: Edge;
 
 	// @Field()
 	// public __modelName!: string;
 	public id!: string;
+	// private type?: Constructor<IModel>;
+	// protected fields: LucidMetadata<this>;
 
 	constructor(props?: ITable<Model>) {
-		const tableMeta = Lucid.get(this.constructor.name);
-		if (tableMeta) {
-			this.edge = props?.edge ?? Lucid.get(this.constructor.name)?.edge ?? false;
-		}
+		// this.type = Reflect.getPrototypeOf(this).constructor as Constructor<IModel>;
+		// const tableMeta = Lucid.get(this.constructor.name);
+		// if (tableMeta) {
+		// 	this.edge = props?.edge ?? Lucid.get(this.constructor.name)?.table?.edge ?? false;
+		// }
 	}
+
+	// export type TSelectExpression<SubModel extends IModel, T extends keyof SubModel | SelectBuilderAny, AS extends string> = '*' | T[];
+
+	// public static select<SubModel extends IModel, T extends keyof UnselectedProperties<SubModel, T>>(
+	// 		this: { new (props?: ITable<Model>): SubModel },
+	// 		fields: TSelectExpression<SubModel, T, null> = '*',
+	// 	) {
+	// 		return new SelectBuilder<SubModel, Pick<SubModel, T>>({ model: new this({ name: Lucid.get(this.name).table.name, edge: true }) }).select(fields);
+	// 	}
 
 	public __tableName(original = false) {
-		return original ? this.constructor.name : toSnakeCase(Lucid.get(this.constructor.name).name || this.constructor.name);
+		return original ? this.constructor.name : toSnakeCase(Lucid.get(this.constructor.name).table.name || this.constructor.name);
 	}
 
-	public static select<SubModel extends IModel, T extends keyof SubsetModel<SubModel>>(
+	public static select<SubModel extends IModel, T extends keyof SubsetModel<SubModel> | SelectBuilderAny>(
 		this: { new (props?: ITable<Model>): SubModel },
 		fields: TSelectExpression<SubModel, T, null> = '*',
 	) {
-		return new SelectBuilder<SubModel, Pick<SubModel, T>>({ model: new this({ name: Lucid.get(this.name), edge: true }) }).select(fields);
+		return new SelectBuilder<SubModel, Pick<SubsetModel<SubModel>, T & keyof SubsetModel<SubModel>>>({
+			model: new this({ name: Lucid.get(this.name).table.name, edge: true }),
+		}).select(fields);
 	}
 
 	public static update<SubModel extends Model, From extends `${string}:${string}`>(this: { new (props?: ITable<Model>): SubModel }, from?: From) {
@@ -134,4 +153,16 @@ export class Model implements IModel {
 	) {
 		return new ModelWriter<SubModel>({ model: new this() }).set(field, data);
 	}
+
+	public static Empty<SubModel extends Model>(this: { new (props?: ITable<Model>): SubModel }) {
+		return new this();
+	}
+}
+
+export class EdgeModel<Inside extends Model = Model, Outside extends Model = Model> extends Model<true> {
+	@Field({name: "in"})
+	public inside!: Inside;
+
+	@Field({name: "out"})
+	public outside!: Outside;
 }
