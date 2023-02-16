@@ -4,6 +4,8 @@ export * from './model';
 export * from './table';
 export * from './spec';
 
+export * from './indexes';
+
 export * from './event';
 export * from './scope';
 

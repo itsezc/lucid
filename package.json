@@ -1,28 +1,28 @@
 {
-    "name": "lucid",
-    "version": "0.1.0",
-    "license": "MPL-2.0",
-    "private": true,
-    "workspaces": [
-        "apps/*",
-        "libs/*"
-    ],
-    "devDependencies": {
-        "@phenomnomnominal/tsquery": "^5.0.0",
-        "@types/node": "^18.11.18",
-        "bun-types": "latest"
-    },
-    "dependencies": {
-        "@lucid-framework/orm": "file:libs/orm",
-        "@lucid-framework/payments": "file:libs/payments",
-        "@lucid-framework/schema-generator": "file:libs/schema-generator",
-        "@lucid-framework/surreal": "file:libs/surreal",
-        "@types/uuid": "^9.0.0",
-        "cmd-ts": "^0.12.0",
-        "singleton-js": "^1.0.0",
-        "stripe": "^11.9.1",
-        "typescript": "^4.9.4",
-        "uuid": "^9.0.0"
-    },
-    "packageManager": "npm@8.19.2"
+	"name": "lucid",
+	"version": "0.1.0",
+	"license": "MPL-2.0",
+	"private": true,
+	"workspaces": [
+		"apps/*",
+		"libs/*"
+	],
+	"devDependencies": {
+		"@phenomnomnominal/tsquery": "^5.0.0",
+		"@types/node": "^18.11.18",
+		"bun-types": "latest",
+		"@lucid-framework/orm": "file:libs/orm"
+	},
+	"dependencies": {
+		"@lucid-framework/payments": "file:libs/payments",
+		"@lucid-framework/schema-generator": "file:libs/schema-generator",
+		"@lucid-framework/surreal": "file:libs/surreal",
+		"@types/uuid": "^9.0.0",
+		"cmd-ts": "^0.12.0",
+		"singleton-js": "^1.0.0",
+		"stripe": "^11.9.1",
+		"typescript": "^4.9.4",
+		"uuid": "^9.0.0"
+	},
+	"packageManager": "npm@8.19.2"
 }

@@ -9,7 +9,7 @@ pricing({
 	plans: [
 		{
 			name: 'seat',
-			description: 'Sass seat',
+			description: 'SaaS seat',
 			recurring: {
 				interval: 'month',
 				usage_type: 'licensed',

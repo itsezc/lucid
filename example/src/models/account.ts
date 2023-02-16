@@ -4,6 +4,7 @@ import {
 	Field,
 	type Types,
 	SurrealEvent,
+	Index,
 } from '@lucid-framework/orm';
 import { Issue } from './issue';
 import { IssueLabel } from './issue_label';
@@ -66,6 +67,11 @@ export class Account extends Model {
 	}[];
 
 	years_active?: number;
+
+	@Index<Account>({ 
+		columns: ['years_active', 'username'],
+	})
+	private idx_meta;
 
 	private changeUsernameEvent = new SurrealEvent<Account>({
 		name: 'change_username',
