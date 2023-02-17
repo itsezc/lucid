@@ -1,18 +1,18 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# moon
+.moon/cache
+.moon/docker
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# Node
+node_modules
 
 target/
 
-# testing
 /coverage
 
 # next.js
 /.next/
 /out/
+# testing
 
 # production
 /build
@@ -37,5 +37,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Packaging
+dist
+
+# Dev
 .dev
 .env

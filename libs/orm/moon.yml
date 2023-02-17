@@ -1,0 +1,7 @@
+type: "library"
+language: "typescript"
+
+project:
+    name: "orm"
+    description: "Surreal ORM"
+    maintainers: ["chiru.b", "drew.r"]

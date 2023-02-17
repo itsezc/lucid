@@ -1,0 +1,9 @@
+{
+	"name": "@lucid-framework/orm",
+	"version": "0.1.2",
+	"license": "MPL-2.0",
+	"main": "dist/index.js",
+	"files": [
+		"dist/"
+	]
+}

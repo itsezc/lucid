@@ -1,0 +1,20 @@
+{
+	"include": [
+		"**/*"
+	],
+	"references": [],
+	"compilerOptions": {
+		"composite": true,
+		"lib": [
+			"ESNext",
+			"DOM"
+		],
+		"declaration": true,
+		"rootDir": "./src",
+		"module": "ESNext",
+		"target": "ESNext",
+		"moduleResolution": "node",
+		"experimentalDecorators": true,
+		"outDir": "../../.moon/cache/types/libs/surreal"
+	}
+}

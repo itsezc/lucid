@@ -1,0 +1,6 @@
+type: 'library'
+language: 'typescript'
+
+project:
+    name: 'surreal'
+    description: 'SurrealDB client in TypeScript'
