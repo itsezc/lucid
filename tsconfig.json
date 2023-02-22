@@ -24,9 +24,6 @@
             "path": "libs/orm"
         },
         {
-            "path": "libs/schema-generator"
-        },
-        {
             "path": "libs/surreal"
         }
     ]
