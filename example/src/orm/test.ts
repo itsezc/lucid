@@ -58,19 +58,19 @@ Lucid.init(
 
 	// console.log(updatedUser);
 	// console.log(singleUpdate);
-	const rele = await User.select(['bestFriend', 'email', Post.count('comments').as('posts_count')]).execute();
+	const rele = await User.select(['bestFriend', 'email', { count: 'posts', as: 'post_count_lt2', '<=': 2 }]).execute();
 
-	const rel = await User.select(['posts', { count: 'email' }])
-		.fetch(['posts'])
-		.execute();
+	// const rel = await User.select(['posts', { count: 'email' }])
+	// 	.fetch(['posts'])
+	// 	.execute();
 
-	const res = await User.select(['bestFriend', 'email', 'posts'])
-		.fetch(['bestFriend'])
-		.groupBy('bestFriend', 'email') //todo add type def to check selections
-		.orderBy('bestFriend', 'ASC')
-		.execute();
+	// const res = await User.select(['bestFriend', 'email', 'posts'])
+	// 	.fetch(['bestFriend'])
+	// 	.groupBy('bestFriend', 'email') //todo add type def to check selections
+	// 	.orderBy('bestFriend', 'ASC')
+	// 	.execute();
 
-	console.log(res);
+	console.log(rele);
 	process.exit(0);
 })();
 

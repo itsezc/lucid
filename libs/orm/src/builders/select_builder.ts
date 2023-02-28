@@ -92,13 +92,13 @@ export class SelectBuilder<
 
 	//#region vars
 	private subquery?: string[] = [];
-	private count_condition?: string;
-	private count_operator?: [TComparisonOperator, number?, string?];
 
 	private query_select_fields: SelectedFields<SubModel> = {} as SelectedFields<SubModel>;
 	private query_select_fields_projections?: string[];
 
 	private query_split?: string;
+
+	private query_alias?: string;
 
 	private query_orderByRand = false;
 	private query_orderBy?: [string, 'ASC' | 'DESC', 'COLLATE' | 'NUMERIC' | undefined][];
@@ -124,8 +124,31 @@ export class SelectBuilder<
 
 		if (Array.isArray(fields)) {
 			let selections: SelectedFields<SubModel> = {} as SelectedFields<SubModel>;
+
 			(fields as T[]).forEach((field) => {
-				if (field instanceof SelectBuilder) {
+				if (typeof field === 'object') {
+					if ('count' in field) {
+						const { count, as: asField, ...rest } = field;
+						const metafield = metafields[count as string]; // todo: add for relational
+						// check if operator in rest
+
+						const operator = Object.keys(rest)[0] as TComparisonOperator;
+						const value = rest[operator];
+
+						if (operator && value) {
+							selections[count as string] = {
+								key: count,
+								formattedField: `count(${count as string}) ${operator} ${value}`,
+								as: asField as string,
+							};
+						} else {
+							selections[count as string] = { key: count, formattedField: `count(${count as string})`, as: asField || (count as string) };
+						}
+					}
+					return;
+				} else if (field instanceof SelectBuilder) {
+					const subquery = field.build(true);
+					this.subquery?.push(subquery);
 					return;
 				}
 				const metafield = metafields[field as string];
@@ -158,7 +181,7 @@ export class SelectBuilder<
 	public count<Key extends keyof SubsetModel<SubModel> | '*'>(
 		field: Key,
 	): SelectBuilder<SubModel, Omit<Selections, Key> & { [P in Key]: number }, Alias> {
-		this.query_select_fields[field as string] = { key: field, formattedField: `COUNT(${field as string})` };
+		this.query_select_fields[field as string] = { key: field, formattedField: `count(${field as string})` };
 		return this as unknown as SelectBuilder<SubModel, Omit<Selections, Key> & { [P in Key]: number }, Alias>;
 	}
 
@@ -187,8 +210,7 @@ export class SelectBuilder<
 		HasAtLeastTwoKeys<Selections> extends never ? { [P in keyof Selections as ALIAS]: Selections[P] } : { [P in ALIAS]: Selections },
 		ALIAS
 	> {
-		// this.query_alias = alias;
-
+		this.query_alias = alias;
 		return this as unknown as SelectBuilder<
 			SubModel,
 			HasAtLeastTwoKeys<Selections> extends never ? { [P in keyof Selections as ALIAS]: Selections[P] } : { [P in ALIAS]: Selections },
@@ -241,9 +263,11 @@ export class SelectBuilder<
 		return this as unknown as SelectBuilder<SubModel, Simplify<FetchFrom<SubModel, T> & Omit<Selections, T>>>;
 	}
 
-	public build(): string {
-		let query = 'SELECT';
-		if (this.subquery.length > 0 && this.query_from) query = query.concat(' ', this.subquery.join(''), '->', this.query_from);
+	public build(isSubquery?: boolean): string {
+		let query = isSubquery ? '(SELECT' : 'SELECT';
+		// if (this.subquery.length > 0 && this.query_from) query = query.concat(' ', this.subquery.join(''), '->', this.query_from);
+		if (this.subquery.length > 0 && this.query_from) query = query.concat(' ', this.subquery.join(''), ',');
+
 		// else query = query.concat(' ', this.select_fields);
 
 		if (Object.keys(this.query_select_fields).length > 0) {
@@ -256,8 +280,6 @@ export class SelectBuilder<
 					.join(', '),
 			);
 		}
-
-		// if (this.count_condition) query = query.concat(' ', 'count', '(', this.count_condition, ')', ' ', this.count_operator?.join('') ?? '');
 
 		if (this.query_from) query = query.concat(' ', 'FROM ', this.query_from);
 
@@ -276,6 +298,7 @@ export class SelectBuilder<
 
 		if (this.query_groupBy && this.query_select_fields_projections)
 			query = query.concat(' ', 'GROUP BY ', this.query_select_fields_projections.join(', '));
+
 		if (this.query_fetch_fields.length > 0) query = query.concat(' ', 'FETCH ', this.query_fetch_fields.join(', '));
 
 		if (this.query_limit) query = query.concat(' ', 'LIMIT ', this.query_limit.toString());
@@ -283,9 +306,12 @@ export class SelectBuilder<
 		if (this.query_timeout) query = query.concat(' ', 'TIMEOUT ', this.query_timeout);
 		if (this.query_parallel) query = query.concat(' ', 'PARALLEL');
 
-		query += ';';
+		if (!isSubquery) query += ';';
+		else query += ')';
 
-		console.log(query);
+		if (this.query_alias) query = query.concat(' ', 'AS ', this.query_alias);
+
+		console.log(`Building query: ${query}`);
 		return query;
 	}
 
