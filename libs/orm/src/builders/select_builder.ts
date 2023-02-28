@@ -2,29 +2,30 @@ import { IModel, Model } from '..';
 import { joinRangeFields } from '../util';
 import { Builder, IBuilderProps } from './builder';
 import { Lucid } from '../lucid';
-import { Simplify, UnionToArray, OfArray, UnionToCommaString } from '../utilities/helper.types';
+import { Simplify, OfArray, UnionToCommaString } from '../utilities/helper.types';
 import { IsEmptyObject, IsEqual } from 'type-fest';
 import { Basic, MergeSelections, OnlyRecordProps, SubsetModel, OnlyRelationalProps, HasAtLeastTwoKeys, HasExactlyOneKey } from './types';
 import { EdgeModel, IBasicModel } from '../model';
 
 type TComparisonOperator = '<' | '<=' | '=' | '>' | '>=';
 
+// rome-ignore lint/suspicious/noExplicitAny: <explanation>
+export type SelectBuilderAny = SelectBuilder<Model, any>;
+type KeysOfSB<T, Selects> = T extends SelectBuilder<infer M, unknown> ? keyof TypeFromSelectBuilder<M, Selects> : T;
+
 type TEMP_KEY = 'RESULTS';
 type TEMPORARY = { [P in TEMP_KEY]: IModel };
 
 type TSelectOperation<SubModel extends IModel, T extends keyof SubsetModel<SubModel>, AS extends string> = {
 	count: T;
-	as?: AS;
-};
+} & QueryOptions<AS, TComparisonOperator>;
 
-export type TSelectExpression<SubModel extends IModel, T extends keyof SubsetModel<SubModel> | SelectBuilderAny, AS extends string> =
-	| '*'
-	| T[]
-	| TSelectOperation<SubModel, Extract<T, string>, AS>[];
+export type TSelectInput<SubModel extends IModel, Alias extends string> =
+	| keyof SubModel
+	| SelectBuilderAny
+	| TSelectOperation<SubModel, keyof SubsetModel<SubModel>, Alias>;
 
-export type RenamePropForSelect<T, K extends keyof T, NewKey extends string> = NewKey extends null ? T : Simplify<Omit<T, K> & { [P in NewKey]: T[K] }>;
-
-type FirstKey<T> = UnionToArray<keyof T> extends [infer U, ...unknown[]] ? U : never;
+export type TSelectExpression<SubModel extends IModel, T extends TSelectInput<SubModel, Alias>, Alias extends string> = '*' | T[];
 
 type TypeFromSelectBuilder<M extends IModel, Selects> = {
 	[P in
@@ -41,23 +42,7 @@ type TypeFromSelectBuilder<M extends IModel, Selects> = {
 		: U
 	: never;
 
-type KeysOfSB<T, Selects> = T extends SelectBuilder<infer M, unknown> ? keyof TypeFromSelectBuilder<M, Selects> : T;
-
 type QueryOptions<AS extends string, Operation extends TComparisonOperator> = Simplify<{ [OP in Operation]?: number } & { as?: AS }>;
-
-type CountResult<
-	Selections,
-	DefaultKey extends string,
-	T extends QueryOptions<As, Operator>,
-	As extends string,
-	Operator extends TComparisonOperator,
-> = Simplify<{
-	[P in keyof Selections as P extends DefaultKey ? (T extends { as: infer U } ? U & string : P) : never]: // CHECK IF ANY OPERATOR IS SET
-	HasExactlyOneKey<Omit<T, 'as'>> extends true ? boolean : number;
-}>;
-
-// rome-ignore lint/suspicious/noExplicitAny: <explanation>
-export type SelectBuilderAny = SelectBuilder<Model, any>;
 
 export type FetchFrom<M extends IModel, T extends keyof M> = {
 	[P in T]: M[P] extends EdgeModel<infer IN, infer OUT> | EdgeModel<infer IN, infer OUT>[] ? OUT[] : M[P];
@@ -76,16 +61,31 @@ type SelectedFields<SubModel extends IModel> = {
 type HandleNestedSelection<T, Selections> = T extends SelectBuilder<any, infer UU, infer IAlias>
 	? IAlias extends null
 		? HasAtLeastTwoKeys<UU> extends never
-			? Simplify<Basic<Selections> & { [P in keyof UU as TEMP_KEY]: UU[P][] }>
-			: Simplify<Basic<Selections> & { [TK in UnionToCommaString<keyof UU>]: UU[] }>
+			? Simplify<Basic<Selections> & { [P in keyof UU as `${TEMP_KEY}_${UnionToCommaString<keyof UU>}`]: UU[P] }>
+			: Simplify<Basic<Selections> & { [TK in UnionToCommaString<keyof UU>]: UU }>
 		: Simplify<Basic<Selections> & UU>
+	: never;
+
+type ParseOptions<T, Selections> = T extends { count: infer CKey }
+	? Omit<Selections, CKey & keyof Selections> & {
+			[P in T extends { as?: infer U } ? U : CKey as P extends string ? P : never]: HasExactlyOneKey<Omit<T, 'as' | 'count'>> extends true
+				? boolean
+				: number;
+	  }
+	: never;
+
+type SelectOutput<SubModel extends IModel, Selections, T extends TSelectInput<SubModel, string>> = SubModel extends object
+	? HandleNestedSelection<T, Selections> extends never
+		? ParseOptions<T, Selections> extends never
+			? MergeSelections<Basic<SubModel> & IBasicModel, Selections, T & keyof SubModel>
+			: Simplify<ParseOptions<T, MergeSelections<Basic<SubModel> & IBasicModel, Selections, T & keyof SubModel>>>
+		: HandleNestedSelection<T, Selections>
 	: never;
 
 export class SelectBuilder<
 	SubModel extends IModel,
 	Selections,
 	Alias extends string = null,
-	AcceptInput = keyof Selections | SelectBuilderAny,
 	OriginalTypes = Pick<SubModel, keyof Selections & keyof SubModel>,
 > extends Builder<SubModel> {
 	private query_range?: string;
@@ -116,12 +116,9 @@ export class SelectBuilder<
 		super(props);
 	}
 
-	public select<
-		T extends keyof SubsetModel<SubModel> | SelectBuilderAny,
-		AS extends string = null,
-		MS = MergeSelections<Basic<SubModel> & IBasicModel, Selections, T & keyof SubModel>,
-		SB = HandleNestedSelection<T, Selections> extends never ? MS : HandleNestedSelection<T, Selections>,
-	>(fields: TSelectExpression<SubModel, T, AS>): SelectBuilder<SubModel, Simplify<SB>, Alias> {
+	public select<T extends TSelectInput<SubModel, SelectAlias>, SelectAlias extends string>(
+		fields: TSelectExpression<SubModel, T, SelectAlias>,
+	): SelectBuilder<SubModel, SelectOutput<SubModel, Selections, T>, Alias> {
 		const metafields = Lucid.get(this.model.__tableName(true)).fields;
 		if (!metafields) throw new Error(`No metafield found for model: ${this.model.__tableName(true)}`);
 
@@ -150,7 +147,7 @@ export class SelectBuilder<
 		} else if (typeof fields === 'string') {
 			this.query_select_fields[fields] = { key: fields, formattedField: fields as string };
 		}
-		return this as unknown as SelectBuilder<SubModel, Simplify<SB>, Alias>;
+		return this as unknown as SelectBuilder<SubModel, SelectOutput<SubModel, Selections, T>, Alias>;
 	}
 
 	public range(range: string[][] | number[]): SelectBuilder<SubModel, Selections> {
@@ -158,49 +155,11 @@ export class SelectBuilder<
 		return this;
 	}
 
-	public count<C extends AcceptInput, A extends string, O extends TComparisonOperator, P extends QueryOptions<A, O>, K = KeysOfSB<C, OriginalTypes>>(
-		condition: C,
-		options?: P,
-	): SelectBuilder<SubModel, CountResult<Selections, K & string, P, A, O>, Alias> {
-		if (condition instanceof SelectBuilder) {
-			this.count_condition = `${condition.build()}`;
-		} else {
-			this.count_condition += condition as string;
-		}
-
-		if (!options) return this as unknown as SelectBuilder<SubModel, CountResult<Selections, K & string, P, A, O>, Alias>;
-
-		const nested: [TComparisonOperator, number?, string?] = [undefined, undefined, undefined];
-
-		for (const innerKey in options) {
-			if (innerKey === 'replace') continue;
-			if (innerKey === 'as') {
-				if ('replace' in (options as object)) {
-					const replace = options['replace'] as string;
-					if (this.query_select_fields[replace]) {
-						this.count_condition = this.query_select_fields[replace].formattedField;
-						//// rome-ignore lint/performance/noDelete: <explanation>
-						// delete this.query_select_fields[replace];
-					}
-				}
-				nested[2] = `AS ${options[innerKey]}`;
-				continue;
-			}
-
-			const operator = innerKey as TComparisonOperator;
-			const countValue = options[operator];
-			nested[0] = operator;
-			nested[1] = countValue;
-		}
-
-		if (this.count_operator) {
-			// rome-ignore lint/suspicious/noExplicitAny: <explanation>
-			this.count_operator.push(nested as any);
-		} else {
-			this.count_operator = nested;
-		}
-
-		return this as unknown as SelectBuilder<SubModel, CountResult<Selections, K & string, P, A, O>, Alias>;
+	public count<Key extends keyof SubsetModel<SubModel> | '*'>(
+		field: Key,
+	): SelectBuilder<SubModel, Omit<Selections, Key> & { [P in Key]: number }, Alias> {
+		this.query_select_fields[field as string] = { key: field, formattedField: `COUNT(${field as string})` };
+		return this as unknown as SelectBuilder<SubModel, Omit<Selections, Key> & { [P in Key]: number }, Alias>;
 	}
 
 	public in(model: typeof Model | string): SelectBuilder<SubModel, Selections> {
@@ -225,13 +184,14 @@ export class SelectBuilder<
 		alias: ALIAS,
 	): SelectBuilder<
 		SubModel,
-		HasAtLeastTwoKeys<Selections> extends never ? { [P in keyof Selections as ALIAS]: Selections[P][] } : { [P in ALIAS]: Selections[] },
+		HasAtLeastTwoKeys<Selections> extends never ? { [P in keyof Selections as ALIAS]: Selections[P] } : { [P in ALIAS]: Selections },
 		ALIAS
 	> {
 		// this.query_alias = alias;
+
 		return this as unknown as SelectBuilder<
 			SubModel,
-			HasAtLeastTwoKeys<Selections> extends never ? { [P in keyof Selections as ALIAS]: Selections[P][] } : { [P in ALIAS]: Selections[] },
+			HasAtLeastTwoKeys<Selections> extends never ? { [P in keyof Selections as ALIAS]: Selections[P] } : { [P in ALIAS]: Selections },
 			ALIAS
 		>;
 	}
@@ -246,7 +206,7 @@ export class SelectBuilder<
 	/**
 	 * SurrealDB supports data aggregation and grouping, with support for multiple fields, nested fields, and aggregate functions. In SurrealDB, every field which appears in the field projections of the select statement (and which is not an aggregate function), must also be present in the `GROUP BY` clause.
 	 */
-	public groupBy<GroupKey extends keyof Selections>(fields?: GroupKey[]): SelectBuilder<SubModel, Selections> {
+	public groupBy<GroupKey extends keyof Selections>(...fields: GroupKey[]): SelectBuilder<SubModel, Selections> {
 		if (fields) this.query_groupByFields = fields;
 		this.query_groupBy = true;
 		return this;
@@ -314,7 +274,8 @@ export class SelectBuilder<
 		// @todo - GroupBy calculation
 		if (this.query_groupByFields) query = query.concat(' ', 'GROUP BY ', this.query_groupByFields.join(', '));
 
-		if (this.query_groupBy && this.query_select_fields_projections) query = query.concat(' ', 'GROUP BY ', this.query_select_fields_projections.join(', '));
+		if (this.query_groupBy && this.query_select_fields_projections)
+			query = query.concat(' ', 'GROUP BY ', this.query_select_fields_projections.join(', '));
 		if (this.query_fetch_fields.length > 0) query = query.concat(' ', 'FETCH ', this.query_fetch_fields.join(', '));
 
 		if (this.query_limit) query = query.concat(' ', 'LIMIT ', this.query_limit.toString());

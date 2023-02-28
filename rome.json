@@ -3,7 +3,7 @@
 		"enabled": true,
 		"indentStyle": "tab",
 		"indentSize": 4,
-		"lineWidth": 160
+		"lineWidth": 140
 	},
 	"javascript": {
 		"formatter": {

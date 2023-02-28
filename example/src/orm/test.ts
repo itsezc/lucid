@@ -58,11 +58,18 @@ Lucid.init(
 
 	// console.log(updatedUser);
 	// console.log(singleUpdate);
+	const rele = await User.select(['bestFriend', 'email', Post.count('comments').as('posts_count')]).execute();
 
-	const res = await User.select(['bestFriend', 'email'])
-		.fetch(['bestFriend'])
-		.groupBy(['bestFriend', 'email']) //todo add type def to check selections
+	const rel = await User.select(['posts', { count: 'email' }])
+		.fetch(['posts'])
 		.execute();
+
+	const res = await User.select(['bestFriend', 'email', 'posts'])
+		.fetch(['bestFriend'])
+		.groupBy('bestFriend', 'email') //todo add type def to check selections
+		.orderBy('bestFriend', 'ASC')
+		.execute();
+
 	console.log(res);
 	process.exit(0);
 })();
@@ -75,4 +82,12 @@ Lucid.init(
  * User.select(['username', 'email', Post.count().as('postCount)])
  * Lucid.query().from("User").select(['username', 'email', Post.count().as('postCount')])
  * User.select(['orders']).where({ orders: count() }).execute()
+ *
+ * User.count().as('userCount')
+ * vs
+ * Lucid.count(User).as('userCount')
+ * vs
+ * User.count({ as: 'userCount' })
+ * vs
+ * User.select([{ count: '*', as: 'userCount' }, { sum: 'age' }, 'gender', 'country']).groupBy(['gender', 'country'])
  */

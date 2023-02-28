@@ -4,7 +4,7 @@ import { TSelectExpression, UpdateBuilder, DeleteBuilder } from './builders';
 import { stringifyToSQL, toSnakeCase } from './util';
 import { SubsetModel, PartialId } from './builders/types';
 import { InsertableBuilder, IBuilderProps } from './builders/builder';
-import { SelectBuilder, SelectBuilderAny } from './builders/select_builder';
+import { SelectBuilder, SelectBuilderAny, TSelectInput } from './builders/select_builder';
 
 export interface IBasicModel {
 	id: string;
@@ -110,20 +110,33 @@ export class Model<Edge extends boolean = boolean> implements IModel {
 		return original ? this.constructor.name : toSnakeCase(Lucid.get(this.constructor.name).table.name || this.constructor.name);
 	}
 
-	public static select<SubModel extends IModel, T extends keyof SubsetModel<SubModel> | SelectBuilderAny>(
+	public static select<SubModel extends IModel, T extends TSelectInput<SubModel, Alias>, Alias extends string>(
 		this: { new (props?: ITable<Model>): SubModel },
-		fields: TSelectExpression<SubModel, T, null> = '*',
+		fields: TSelectExpression<SubModel, T, Alias> = '*',
 	) {
 		return new SelectBuilder<SubModel, Pick<SubsetModel<SubModel>, T & keyof SubsetModel<SubModel>>>({
 			model: new this({ name: Lucid.get(this.name).table.name, edge: true }),
 		}).select(fields);
 	}
 
-	public static update<SubModel extends Model, From extends `${string}:${string}`>(this: { new (props?: ITable<Model>): SubModel }, from?: From) {
+	public static count<SubModel extends IModel, T extends keyof SubsetModel<SubModel> | '*'>(
+		this: { new (props?: ITable<Model>): SubModel },
+		field: T,
+	) {
+		return new SelectBuilder<SubModel, Pick<SubModel, T extends '*' ? keyof SubsetModel<SubModel> : T>>({ model: new this() }).count(field);
+	}
+
+	public static update<SubModel extends Model, From extends `${string}:${string}`>(
+		this: { new (props?: ITable<Model>): SubModel },
+		from?: From,
+	) {
 		return new UpdateBuilder<SubModel>({ model: new this() }).from(from);
 	}
 
-	public static delete<SubModel extends Model, From extends `${string}:${string}`>(this: { new (props?: ITable<Model>): SubModel }, from?: From) {
+	public static delete<SubModel extends Model, From extends `${string}:${string}`>(
+		this: { new (props?: ITable<Model>): SubModel },
+		from?: From,
+	) {
 		return new DeleteBuilder<SubModel>({ model: new this() }).from(from);
 	}
 
@@ -131,7 +144,10 @@ export class Model<Edge extends boolean = boolean> implements IModel {
 		return new SurrealEventManager(new this(), args);
 	}
 
-	public static async create<SubModel extends Model>(this: { new (props?: ITable<Model>): SubModel }, props: PartialId<SubsetModel<SubModel>>) {
+	public static async create<SubModel extends Model>(
+		this: { new (props?: ITable<Model>): SubModel },
+		props: PartialId<SubsetModel<SubModel>>,
+	) {
 		const model = new this();
 		Object.assign(model, props);
 		const writer = new ModelWriter<SubModel>({ model: model });
