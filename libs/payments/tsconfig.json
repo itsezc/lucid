@@ -1,7 +1,5 @@
 {
-	"compilerOptions": {
-		"types": [
-			"bun-types"
-		]
-	}
+    "compilerOptions": {
+        "outDir": "../../.moon/cache/types/libs/payments"
+    }
 }

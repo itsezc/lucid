@@ -24,6 +24,9 @@
             "path": "libs/orm"
         },
         {
+            "path": "libs/payments"
+        },
+        {
             "path": "libs/surreal"
         }
     ]

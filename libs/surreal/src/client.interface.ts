@@ -1,4 +1,4 @@
-import { ISurrealScope } from '@lucid-framework/orm';
+import { ISurrealScope } from "./scope";
 
 export type TExtractVars<T extends ISurrealScope<unknown, {}>> =
 	T extends ISurrealScope<infer V, {}> ? Partial<V> : never;

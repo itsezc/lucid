@@ -1,7 +1,4 @@
 {
-	"include": [
-		"**/*"
-	],
 	"references": [],
 	"compilerOptions": {
 		"composite": true,
