@@ -2,15 +2,15 @@
 
 Lucid helps build & ship apps that scale infinitely with maximum performance, in record time with amazing DX and no vendor lock-in.
 
-Backends can be very complex, expensive, and non-performant. Lucid helps solve these problems by providing you with a framework that replaces the need for one. By leveraging SurrealDB, a powerful, all-in-one database engine with a typed abstraction acting as an ORM. This means you don't pay for servers (other than your database), most of the logic is executed on SurrealDB (which is made with Rust and highly performative) and provides full typing so you can focus on your UX and business requirements.
+Backends can be very complex, expensive, and non-performant. Lucid helps solve these problems by providing you with a framework that replaces the need for one. By leveraging SurrealDB, a powerful, all-in-one database engine with a typed abstraction acting as an ORM, lucid enables you to ship and scale faster and with ease. This means you don't pay for servers (other than your database), ~~most~~ all of the backend logic is executed on SurrealDB (which is made with Rust and highly performative) and provides full typing so you can focus on your UX and business requirements.
 
-Our target is to build an enterprise ready framework, custom mixins, and a full testing suite, so that you may sleep in peace knowing your app works just the way you expect it to.
+Our target is to build an enterprise ready framework, custom mixins, and a full testing suite, so that you can sleep in peace knowing your app works just the way you expect it to.
 
 ## Packages
 
 - ✅ [ORM](https://github.com/itsezc/lucid/tree/master/libs/orm) - Lucid ORM
 - ✅ [SurrealDB Client](https://github.com/itsezc/lucid/tree/master/libs/surreal) - TS based client for Surreal DB
-- 🚧 [Payments](https://github.com/itsezc/lucid/tree/master/libs/surreal) - Manage your billing and payments through Lucid
+- 🚧 [Payments](https://github.com/itsezc/lucid/tree/master/libs/payments) - Manage your billing and payments through Lucid
 
 Internally, Lucid has many packages such as `schema-generator` which handle much of the functionality exposed to you, the developer. We suggest you read the docs to make yourself familiar with the ecosystem.
 
