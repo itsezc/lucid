@@ -1,16 +1,9 @@
-import {
-	Table,
-	Model,
-	Field,
-	type Types,
-	SurrealEvent,
-	Index,
-} from '@lucid-framework/orm';
+import { Table, Model, Field, type Types, SurrealEvent, Index } from '@lucid-framework/orm';
 import { Issue } from './issue';
 import { IssueLabel } from './issue_label';
 import { AdminScope, AccountScope } from './scopes';
 
-@Table<Account>({
+@Table({
 	name: 'abc',
 	permissions: ({ username }) => [
 		[['CREATE', 'UPDATE', 'SELECT'], AccountScope.username === username],
@@ -76,9 +69,7 @@ export class Account extends Model {
 	private changeUsernameEvent = new SurrealEvent<Account>({
 		name: 'change_username',
 		when: ({ $after, $before, $event }) =>
-			($before.username !== $after.username &&
-				$before.passKey !== $after.passKey &&
-				$event === 'CREATE') ||
+			($before.username !== $after.username && $before.passKey !== $after.passKey && $event === 'CREATE') ||
 			$before.username !== $after.username,
 		then: ({ $after, $before }) => '',
 	});

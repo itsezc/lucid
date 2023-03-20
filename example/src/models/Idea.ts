@@ -29,9 +29,8 @@
  *
  */
 
-import { Field, Model, TAssertHandler } from '@surreal-tools/orm';
+import { Field, Model, TAssertHandler, TPermissions } from '@lucid-framework/orm';
 import { Constructor } from 'type-fest';
-import { TPermissions } from '../../../libs/orm/src/permissions';
 import { PartialId, SubsetModel } from '../../../libs/orm/src/builders/types';
 
 // function applyMixins(derivedCtor: any, constructors: any[]) {

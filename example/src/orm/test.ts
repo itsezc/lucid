@@ -1,5 +1,5 @@
-import { Lucid } from '@surreal-tools/orm';
-import { SurrealRest, SurrealWS } from '@lucid-framework/surreal';
+import { Lucid } from '@lucid-framework/orm';
+import { SurrealRest, SurrealWS } from '@lucid-framework/client';
 import { User, Post } from '../models/user';
 // import { AccountScope } from '../models/scopes';
 
