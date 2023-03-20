@@ -3,13 +3,17 @@ import { SurrealRest, SurrealWS } from '@lucid-framework/client';
 import { User, Post } from '../models/user';
 
 Lucid.init(
-	new SurrealWS('http://localhost:8000', {
+	new SurrealRest('http://localhost:8000', {
 		NS: 'ttest',
 		DB: 'ttest',
 		user: 'root',
 		pass: 'root',
 	}),
 );
+
+const rele = await User.select(['bestFriend', 'email', { count: 'posts', as: 'post_count_lt2', '<=': 2 }]).execute();
+console.log(rele);
+process.exit(0);
 
 (async () => {
 	// const createRes = await User.createMany([
@@ -34,19 +38,13 @@ Lucid.init(
 	// 		]),
 	// 	},
 	// ]);
-
 	// console.log(createRes);
-
 	// const setRes = await User.set('password', 'password').set('email', 'email').set('username', 'username').save();
-
 	// const res = await User.delete().where({ username: 'test' }).execute();
 	// console.log(res, 'DELETIONS');
 	// console.log(setRes);
-
 	// console.log(setRes);
-
 	// const singleUpdate = await User.update('user:sd').set('username', 'new').execute();
-
 	// const updatedUser = await User.update()
 	// 	.where({ username: 'test2' })
 	// 	.content({
@@ -54,23 +52,16 @@ Lucid.init(
 	// 		password: 'pass2',
 	// 	})
 	// 	.execute();
-
 	// console.log(updatedUser);
 	// console.log(singleUpdate);
-	const rele = await User.select(['bestFriend', 'email', { count: 'posts', as: 'post_count_lt2', '<=': 2 }]).execute();
-
 	// const rel = await User.select(['posts', { count: 'email' }])
 	// 	.fetch(['posts'])
 	// 	.execute();
-
 	// const res = await User.select(['bestFriend', 'email', 'posts'])
 	// 	.fetch(['bestFriend'])
 	// 	.groupBy('bestFriend', 'email') //todo add type def to check selections
 	// 	.orderBy('bestFriend', 'ASC')
 	// 	.execute();
-
-	console.log(rele);
-	process.exit(0);
 })();
 
 /**
