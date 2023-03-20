@@ -9,7 +9,7 @@ type TSurrealResponse<T> = {
 };
 
 export class SurrealWS implements ISurrealConnector {
-	private heartbeat?: NodeJS.Timeout;
+	private heartbeat?: Timer;
 	private socket?: WebSocket;
 	private requestMap?: Map<string, [(value: unknown) => void, (value: unknown) => void]>;
 	public connected?: Promise<unknown>;

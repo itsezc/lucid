@@ -7,6 +7,9 @@
 			"ESNext",
 			"DOM"
 		],
+		"types": [
+			"bun-types"
+		],
 		"declaration": true,
 		"rootDir": "./src",
 		"module": "ESNext",
