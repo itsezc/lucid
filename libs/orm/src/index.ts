@@ -11,7 +11,7 @@ export * from './event';
 export * from './scope';
 
 export * from './sql';
-export * from './builders/relate';
+export * from './builders';
 
 export * from './lucid';
 export * from './permissions';

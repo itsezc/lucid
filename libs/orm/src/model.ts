@@ -21,7 +21,7 @@ export class ModelWriter<T extends IModel> extends InsertableBuilder<T> {
 	}
 
 	public set<K extends keyof SubsetModel<T>, Data extends SubsetModel<T>[K], I = { [P in K]: Data }>(field: K, data: Data): this & I {
-		this.model[field as K as string] = this.transformModel(data);
+		this.model[field as K] = this.transformModel(data);
 		this.isSetting = true;
 		return super.set(field, data) as unknown as this & I;
 	}
@@ -35,7 +35,7 @@ export class ModelWriter<T extends IModel> extends InsertableBuilder<T> {
 		};
 
 		// rome-ignore lint/performance/noDelete: Surreal expects empty properties not undefined
-		Object.keys(row).forEach((key) => row[key] === undefined && delete row[key]);
+		Object.keys(row).forEach((key) => row[key as keyof typeof row] === undefined && delete row[key as keyof typeof row]);
 		row = this.transformModel(row);
 		if (this.props.model.id) {
 			// @ts-ignore
@@ -46,7 +46,7 @@ export class ModelWriter<T extends IModel> extends InsertableBuilder<T> {
 				// return as SET property = value in all object
 				let set = '';
 				Object.keys(row).forEach((key) => {
-					set += `${key} = ${stringifyToSQL(row[key])}, `;
+					set += `${key} = ${stringifyToSQL(row[key as keyof typeof row])}, `;
 				});
 				set = set.slice(0, -2);
 				query = query.concat(' SET ', set, ';');
@@ -54,7 +54,6 @@ export class ModelWriter<T extends IModel> extends InsertableBuilder<T> {
 				query = query.concat(' CONTENT ', stringifyToSQL(row), ';');
 			}
 
-			console.log(query);
 			const response = await Lucid.client().query<T[]>(query);
 			//todo: handle errors in a more elegant way perhaps a custom error class
 
@@ -107,7 +106,7 @@ export class Model<Edge extends boolean = boolean> implements IModel {
 	// 	}
 
 	public __tableName(original = false) {
-		return original ? this.constructor.name : toSnakeCase(Lucid.get(this.constructor.name).table.name || this.constructor.name);
+		return original ? this.constructor.name : toSnakeCase(Lucid.get(this.constructor.name)?.table.name || this.constructor.name);
 	}
 
 	public static select<SubModel extends IModel, T extends TSelectInput<SubModel, Alias>, Alias extends string>(
@@ -115,28 +114,19 @@ export class Model<Edge extends boolean = boolean> implements IModel {
 		fields: TSelectExpression<SubModel, T, Alias> = '*',
 	) {
 		return new SelectBuilder<SubModel, Pick<SubsetModel<SubModel>, T & keyof SubsetModel<SubModel>>>({
-			model: new this({ name: Lucid.get(this.name).table.name, edge: true }),
+			model: new this({ name: Lucid.get(this.name)?.table.name || '', edge: true }),
 		}).select(fields);
 	}
 
-	public static count<SubModel extends IModel, T extends keyof SubsetModel<SubModel> | '*'>(
-		this: { new (props?: ITable<Model>): SubModel },
-		field: T,
-	) {
+	public static count<SubModel extends IModel, T extends keyof SubsetModel<SubModel> | '*'>(this: { new (props?: ITable<Model>): SubModel }, field: T) {
 		return new SelectBuilder<SubModel, Pick<SubModel, T extends '*' ? keyof SubsetModel<SubModel> : T>>({ model: new this() }).count(field);
 	}
 
-	public static update<SubModel extends Model, From extends `${string}:${string}`>(
-		this: { new (props?: ITable<Model>): SubModel },
-		from?: From,
-	) {
+	public static update<SubModel extends Model, From extends `${string}:${string}`>(this: { new (props?: ITable<Model>): SubModel }, from?: From) {
 		return new UpdateBuilder<SubModel>({ model: new this() }).from(from);
 	}
 
-	public static delete<SubModel extends Model, From extends `${string}:${string}`>(
-		this: { new (props?: ITable<Model>): SubModel },
-		from?: From,
-	) {
+	public static delete<SubModel extends Model, From extends `${string}:${string}`>(this: { new (props?: ITable<Model>): SubModel }, from?: From) {
 		return new DeleteBuilder<SubModel>({ model: new this() }).from(from);
 	}
 
@@ -144,21 +134,15 @@ export class Model<Edge extends boolean = boolean> implements IModel {
 		return new SurrealEventManager(new this(), args);
 	}
 
-	public static async create<SubModel extends Model>(
-		this: { new (props?: ITable<Model>): SubModel },
-		props: PartialId<SubsetModel<SubModel>>,
-	) {
+	public static async create<SubModel extends Model>(this: { new (props?: ITable<Model>): SubModel }, props: PartialId<SubsetModel<SubModel>>) {
 		const model = new this();
 		Object.assign(model, props);
 		const writer = new ModelWriter<SubModel>({ model: model });
 		return await (writer as typeof writer & SubModel).save();
 	}
 
-	public static async createMany<SubModel extends Model>(
-		this: { new (props?: ITable<Model>): SubModel },
-		props: PartialId<SubsetModel<SubModel>>[],
-	): Promise<SubModel[]> {
-		const staticModel = this as unknown as typeof Model;
+	public static async createMany<SubModel extends Model>(this: { new (props?: ITable<Model>): SubModel }, props: PartialId<SubsetModel<SubModel>>[]): Promise<SubModel[]> {
+		const staticModel = this as unknown as typeof this & typeof Model;
 		return await Promise.all(props.map((prop) => staticModel.create(prop)) as Promise<SubModel>[]);
 	}
 

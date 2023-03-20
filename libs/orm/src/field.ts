@@ -1,7 +1,6 @@
 import { Constructor } from 'type-fest';
 import Lucid, { IFieldRelationProps, ITable, ITableFieldProps } from './lucid';
 import { Model } from './model';
-import 'reflect-metadata';
 
 export type TSurrealFieldIndex = 'unique' | boolean;
 

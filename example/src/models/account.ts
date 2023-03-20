@@ -64,13 +64,12 @@ export class Account extends Model {
 	@Index<Account>({ 
 		columns: ['years_active', 'username'],
 	})
-	private idx_meta;
-
+	// rome-ignore lint/suspicious/noExplicitAny: <explanation>
+	private idx_meta: any;
 	private changeUsernameEvent = new SurrealEvent<Account>({
 		name: 'change_username',
 		when: ({ $after, $before, $event }) =>
-			($before.username !== $after.username && $before.passKey !== $after.passKey && $event === 'CREATE') ||
-			$before.username !== $after.username,
+			($before.username !== $after.username && $before.passKey !== $after.passKey && $event === 'CREATE') || $before.username !== $after.username,
 		then: ({ $after, $before }) => '',
 	});
 }

@@ -1,4 +1,4 @@
-import { ISurrealConnector } from '@lucid-framework/surreal/src/client.interface';
+import { ISurrealConnector } from '@lucid-framework/client';
 import { IBasicModel, Model } from './model';
 import { TAssertHandler, TSurrealFieldIndex } from './field';
 import { TPermissions } from './permissions';
