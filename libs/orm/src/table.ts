@@ -1,29 +1,24 @@
-import Lucid from './lucid';
+import Lucid, { ITable } from './lucid';
 import { Model } from './model';
-import { TPermissions } from './permissions';
 import { toSnakeCase } from './util';
+import { Constructor } from 'type-fest';
 
-export type ITable<SubModel extends Model> = {
-	name?: string;
-	edge?: boolean;
-	auditable?: boolean;
-	permissions?: TPermissions<SubModel>;
-};
-
-export function Table<SubModel extends Model = Model>(
-	props?: ITable<SubModel>,
-) {
-	return function (fn: typeof Model) {
-		const name = props?.name || toSnakeCase(fn.name);
+export function Table<SubModel extends Model<boolean>, Name extends string, Edge extends boolean>(props?: ITable<SubModel, Name, Edge>) {
+	return (ctor: Constructor<SubModel>) => {
+		const name = props?.name || toSnakeCase(ctor.name);
+		const prototype = ctor.prototype as Model;
+		// prototype.__modelName = name;
+		// prototype.edge = props?.edge;
 
 		if (props) {
-			Lucid.tableMetadata.set(
-				fn.name, 
-				{
-					...Lucid.tableMetadata.get(fn.name),
-					...props
-				}
-			);
+			Lucid.set(ctor.name, {
+				table: {
+					...Lucid.get(ctor.name)?.table,
+					...props,
+					name,
+				},
+				fields: Lucid.get(ctor.name)?.fields || {},
+			});
 		}
 	};
 }

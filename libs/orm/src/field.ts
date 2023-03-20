@@ -1,7 +1,7 @@
-import Lucid from './lucid';
+import { Constructor } from 'type-fest';
+import Lucid, { IFieldRelationProps, ITable, ITableFieldProps } from './lucid';
 import { Model } from './model';
-import { TPermissions } from './permissions';
-import { ITable } from './table';
+import 'reflect-metadata';
 
 export type TSurrealFieldIndex = 'unique' | boolean;
 
@@ -27,7 +27,7 @@ export type TSurrealDataType =
 
 export type TSurrealDataTypePrimitive = Omit<TSurrealDataType, 'future'>;
 
-type TAssertHandler<SubModel> =
+export type TAssertHandler<SubModel> =
 	| 'alpha'
 	| 'alphanum'
 	| 'ascii'
@@ -43,42 +43,57 @@ type TAssertHandler<SubModel> =
 
 type EnumType = string[];
 
-export type SurrealRecord<SubModel extends Model = Model> = new (
-	props?: ITable<Model>,
-) => SubModel;
+export type SurrealRecord<SubModel extends Model = Model> = new (props?: ITable<Model>) => SubModel;
 
-interface ITableFieldProps<SubModel extends Model> {
-	name?: string;
-	index?: TSurrealFieldIndex;
-	flexible?: boolean;
-	assert?: TAssertHandler<SubModel>;
-	permissions?: TPermissions<SubModel>;
+export function Field<SubModel extends Model = Model, Key = string | symbol>(props?: ITableFieldProps<SubModel>) {
+	return function (target: SubModel, propertyKey: Key) {
+		if (props?.name) {
+			const name = target.__tableName(true);
+			const existingMetadata = Lucid.get(name);
+			Lucid.set(name, {
+				...existingMetadata,
+				fields: {
+					...existingMetadata?.fields,
+					[propertyKey.toString()]: {
+						...(existingMetadata?.fields?.[propertyKey.toString()] || {}),
+						from: propertyKey.toString(),
+						to: props?.name,
+						props: props,
+					},
+				},
+			});
+		}
+	};
 }
 
-export function Field<
+export function FieldRelation<
+	Rel extends Constructor<Model<true>>,
+	IN extends Constructor<Model>,
+	OUT extends Constructor<Model>,
 	SubModel extends Model = Model,
-	Key = string | symbol
->(props?: ITableFieldProps<SubModel>) {
-	return function (target: SubModel, propertyKey: Key) 
-	{
-		if (props?.name) 
-		{
-			const name = target.__tableName(true);
-			const existingMetadata = Lucid.tableMetadata.get(name);
-
-			Lucid.tableMetadata.set(
-				name, 
-				{
-					...existingMetadata,
-					fields: [
-						...(existingMetadata ? existingMetadata.fields : []),
-						{
-							from: propertyKey.toString(),
-							to: props?.name,
-						}
-					]
-				}
-			);
-		}
+	Key = string | symbol,
+>(props: IFieldRelationProps<Rel, IN, OUT>) {
+	return function (target: SubModel, propertyKey: Key) {
+		const name = target.__tableName(true);
+		const direction = props.in ? 'IN' : 'OUT';
+		const existingMetadata = Lucid.get(name);
+		Lucid.set(name, {
+			...existingMetadata,
+			fields: {
+				...existingMetadata?.fields,
+				[propertyKey.toString()]: {
+					...(existingMetadata?.fields?.[propertyKey.toString()] || {}),
+					from: propertyKey.toString(),
+					to: undefined,
+					props: props,
+					relation: {
+						from: target,
+						via: props.model,
+						to: props.in || props.out,
+						direction: direction,
+					},
+				},
+			},
+		});
 	};
 }

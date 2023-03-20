@@ -3,12 +3,10 @@ import { Model } from '../model';
 
 import { IBuilder, IBuilderProps, ReturnableBuilder } from './builder';
 
-
-export class DeleteBuilder<SubModel extends Model> 
-	extends ReturnableBuilder<SubModel> implements IBuilder<SubModel>
-{
+export class DeleteBuilder<SubModel extends Model> extends ReturnableBuilder<SubModel> implements IBuilder<SubModel> {
 	constructor(props: IBuilderProps<SubModel>) {
 		super(props);
+		this.query_return = 'NONE';
 	}
 
 	public build() {
@@ -24,9 +22,10 @@ export class DeleteBuilder<SubModel extends Model>
 		return query;
 	}
 
-
-	execute(): SubModel | SubModel[] {
-		throw new Error('Method not implemented.');
+	async execute(): Promise<SubModel[]> {
+		const query = this.build();
+		const response = await Lucid.client().query<SubModel[]>(query);
+		console.log(response);
+		return response[0].result;
 	}
-	
 }

@@ -2,7 +2,8 @@
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab",
-		"indentSize": 4
+		"indentSize": 4,
+		"lineWidth": 140
 	},
 	"javascript": {
 		"formatter": {

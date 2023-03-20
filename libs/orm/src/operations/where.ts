@@ -1,5 +1,6 @@
-import { type Types, Model, Lucid } from '..';
+import { type Types, IModel, Lucid } from '..';
 import { stringifyToSQL } from '../util';
+import { OfArray } from '../utilities/helper.types';
 import { SString } from '../functions/string';
 
 type TDateTimeOps = {
@@ -57,22 +58,10 @@ type TMultiPolygon = {
 
 type TGeometryCollection = {
 	type: 'GeometryCollection';
-	geometries:
-		| TGeoPoint
-		| TGeoLineString
-		| TGeoPolygon
-		| TGeoMultiPoint
-		| TMultiLineString
-		| TMultiPolygon[];
+	geometries: TGeoPoint | TGeoLineString | TGeoPolygon | TGeoMultiPoint | TMultiLineString | TMultiPolygon[];
 };
 
-export type TGeoType =
-	| TGeoPoint
-	| TGeoLineString
-	| TGeoPolygon
-	| TGeoMultiPoint
-	| TMultiLineString
-	| TMultiPolygon;
+export type TGeoType = TGeoPoint | TGeoLineString | TGeoPolygon | TGeoMultiPoint | TMultiLineString | TMultiPolygon;
 
 type TGeoOps = {
 	inside?: TGeoType;
@@ -107,9 +96,11 @@ type ObjectOps<T> = Partial<{
 		? TGeoWhereOps
 		: T[P] extends number
 		? TNumberWhereOps
-		: T[P] extends Array<infer U>
-		? Array<ObjectOps<U>>
-		: T[P] extends Model
+		: OfArray<T[P]> extends { type: infer U }
+		? U extends IModel
+			? { $: ObjectOps<U> }
+			: ObjectOps<U>
+		: T[P] extends IModel
 		? { $: ObjectOps<T[P]> }
 		: T[P] extends object
 		? ObjectOps<T[P]>
@@ -118,22 +109,13 @@ type ObjectOps<T> = Partial<{
 		: never;
 }>;
 
-export type TSubModelWhere<T extends Model> = ObjectOps<T> & {
+export type TSubModelWhere<T extends IModel> = ObjectOps<T> & {
 	OR?: TSubModelWhere<T>;
 };
 
-const operators = [
-	'gt',
-	'gte',
-	'lt',
-	'lte',
-	'eq',
-	'endsWith',
-	'startsWith',
-	'contains',
-];
+const operators = ['gt', 'gte', 'lt', 'lte', 'eq', 'endsWith', 'startsWith', 'contains'];
 
-export function WhereToSQL<SubModel extends Model>(
+export function WhereToSQL<SubModel extends IModel>(
 	table: string,
 	where: TSubModelWhere<SubModel> | object,
 	options: {
@@ -153,17 +135,14 @@ export function WhereToSQL<SubModel extends Model>(
 	const entries = Object.entries(where);
 
 	entries.forEach(([key, value], index) => {
-		key =
-			options.overrides ??
-			(options.prefix ? `${options.prefix}.${key}` : key).replaceAll('$.', '');
+		key = options.overrides ?? (options.prefix ? `${options.prefix}.${key}` : key).replaceAll('$.', '');
 
-		const metadata = Lucid.tableMetadata.get(table)?.fields || [];
-		const metadataFilter = metadata.filter((x) => x.from === key) || [];
+		const metadata = Lucid.get(table)?.fields || [];
+		const metadataFilter = metadata[key];
 
-		key = metadataFilter.length > 0 ? metadataFilter[0].to : key;
+		key = metadataFilter ? metadataFilter.to : key;
 
 		value = cleanValue(value);
-
 		switch (typeof value) {
 			case 'string':
 				sql += `${key} = '${value}'`;
@@ -176,14 +155,8 @@ export function WhereToSQL<SubModel extends Model>(
 
 			case 'object':
 				const isOR = key === 'OR';
-				const isRecord = Object.getOwnPropertyNames(value as object).includes(
-					'$',
-				);
-				const isCompObj =
-					!isOR &&
-					Object.getOwnPropertyNames(value as object).some((v) =>
-						operators.includes(v),
-					);
+				const isRecord = Object.getOwnPropertyNames(value as object).includes('$');
+				const isCompObj = !isOR && Object.getOwnPropertyNames(value as object).some((v) => operators.includes(v));
 				const isInlineObjArr = !isOR && Array.isArray(value);
 				const isInlineObj = !(isOR || isRecord || isInlineObjArr || isCompObj);
 
@@ -192,7 +165,7 @@ export function WhereToSQL<SubModel extends Model>(
 				const hasMultiple = valueKeys.length > 1;
 				const isLastMultiple = index === value.length - 1;
 
-				console.log(hasMultiple, key, isLastMultiple);
+				// console.log(hasMultiple, key, isLastMultiple);
 
 				// console.log({ key, isOR, isCompObj, isInlineObj, isInlineObjArr, isRecord });
 
@@ -203,14 +176,11 @@ export function WhereToSQL<SubModel extends Model>(
 					if (value.lt) sql += `${key} < ${cleanValue(value.lt)}`;
 					if (value.lte) sql += `${key} <= ${cleanValue(value.lte)}`;
 					if (value.gte) sql += `${key} >= ${cleanValue(value.gte)}`;
-					if (value.inside)
-						sql += `${key} INSIDE ${stringifyToSQL(value.inside)}`;
-					if (value.outside)
-						sql += `${key} OUTSIDE ${stringifyToSQL(value.outside)}`;
+					if (value.inside) sql += `${key} INSIDE ${stringifyToSQL(value.inside)}`;
+					if (value.outside) sql += `${key} OUTSIDE ${stringifyToSQL(value.outside)}`;
 					if (value.contains) sql += `${key} ∋ '${cleanValue(value.contains)}'`;
 					if (value.endsWith) sql += SString.endsWith(key, value.endsWith);
-					if (value.startsWith)
-						sql += SString.startsWith(key, value.startsWith);
+					if (value.startsWith) sql += SString.startsWith(key, value.startsWith);
 				} else {
 					const parsedValue = isOR
 						? ` OR (${WhereToSQL(value, { OR: true })})`
@@ -228,8 +198,7 @@ export function WhereToSQL<SubModel extends Model>(
 				break;
 		}
 
-		if (index !== entries.length - 1 && entries[index + 1][0] !== 'OR')
-			sql += ' AND ';
+		if (index !== entries.length - 1 && entries[index + 1][0] !== 'OR') sql += ' AND ';
 	});
 
 	return sql;
