@@ -1,4 +1,11 @@
-import { Table, Model, Field, type Types } from '@surreal-tools/orm';
+import {
+	Table,
+	Model,
+	Field,
+	type Types,
+	SurrealEvent,
+	Index,
+} from '@lucid-framework/orm';
 import { Issue } from './issue';
 import { IssueLabel } from './issue_label';
 import { AdminScope, AccountScope } from './scopes';
@@ -60,6 +67,21 @@ export class Account extends Model {
 	}[];
 
 	years_active?: number;
+
+	@Index<Account>({ 
+		columns: ['years_active', 'username'],
+	})
+	private idx_meta;
+
+	private changeUsernameEvent = new SurrealEvent<Account>({
+		name: 'change_username',
+		when: ({ $after, $before, $event }) =>
+			($before.username !== $after.username &&
+				$before.passKey !== $after.passKey &&
+				$event === 'CREATE') ||
+			$before.username !== $after.username,
+		then: ({ $after, $before }) => '',
+	});
 }
 
 // Account.events([
@@ -83,7 +105,7 @@ export class Account extends Model {
 
 // // // Select all account records with IDs between the given range
 // // // SELECT * FROM account:1..1000;
-// console.log('\n', 
+// console.log('\n',
 // 	Account.select()
 // 		.range([1, 1000])
 // 		.build()
@@ -130,7 +152,7 @@ export class Account extends Model {
 // 		.execute()
 // );
 
-// console.log('\n', 
+// console.log('\n',
 // 	Account.select()
 // 		.select('*')
 // 		.select(['username', 'passKey'])
@@ -157,13 +179,13 @@ export class Account extends Model {
 // 			}
 // 		])
 // 		.select([
-// 			{ 
+// 			{
 // 				$$: '->like->friend.name',
 // 				as: 'farenheit'
 // 			}
 // 		])
 // 		.select([
-// 			{ 
+// 			{
 // 				$$: '((celcius * 2) + 30)',
 // 				as: 'farenheit'
 // 			}
@@ -180,7 +202,7 @@ export class Account extends Model {
 // 			'*',
 // 			{
 // 				$$: sql(
-// 					'SELECT * FROM events WHERE host == $parent.id', 
+// 					'SELECT * FROM events WHERE host == $parent.id',
 // 					{ subquery: true }
 // 				),
 // 				as: 'self_hosted'
@@ -351,7 +373,6 @@ export class Account extends Model {
 
 	// SELECT ->purchased->product<-purchased<-person->(purchased WHERE created_at > time::now() - 3w)->product FROM person:chiru;
  */
-
 
 // const x = new Account();
 // x.email = 'email@test.com';

@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "composite": true,
         "lib": [
             "ESNext",
             "DOM"
@@ -7,19 +8,13 @@
         "declaration": true,
         "module": "ESNext",
         "target": "ESNext",
-        "baseUrl": ".",
-        "paths": {
-            "@/src/*": [
-                "src/*"
-            ]
-        },
+        "rootDir": "./src",
         "moduleResolution": "node",
         "experimentalDecorators": true,
         "outDir": "../../.moon/cache/types/libs/orm"
     },
     "include": [
-        "src/**/*",
-        "tests/**/*"
+        "**/*"
     ],
     "exclude": []
 }

@@ -1,11 +1,12 @@
 {
-	"name": "@surreal-tools/orm",
-	"version": "0.1.0-alpha.8",
-	"main": "src/index.js",
+	"name": "@lucid-framework/orm",
+	"version": "0.1.2",
+	"license": "MPL-2.0",
+	"main": "dist/index.js",
 	"dependencies": {
 		"type-fest": "^3.5.4"
 	},
 	"files": [
-		"dist/src/**/*.{js,d.ts,json}"
+		"dist/"
 	]
 }

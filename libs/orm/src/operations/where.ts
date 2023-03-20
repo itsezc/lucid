@@ -1,7 +1,7 @@
 import { type Types, IModel, Lucid } from '..';
 import { stringifyToSQL } from '../util';
 import { OfArray } from '../utilities/helper.types';
-import { SString } from '../utilities/string';
+import { SString } from '../functions/string';
 
 type TDateTimeOps = {
 	eq?: Types.SDateTime;
@@ -61,13 +61,13 @@ type TGeometryCollection = {
 	geometries: TGeoPoint | TGeoLineString | TGeoPolygon | TGeoMultiPoint | TMultiLineString | TMultiPolygon[];
 };
 
-type TUtilGeoType = TGeoPoint | TGeoLineString | TGeoPolygon | TGeoMultiPoint | TMultiLineString | TMultiPolygon;
+export type TGeoType = TGeoPoint | TGeoLineString | TGeoPolygon | TGeoMultiPoint | TMultiLineString | TMultiPolygon;
 
 type TGeoOps = {
-	inside?: TUtilGeoType;
-	notInside?: TUtilGeoType;
-	outside?: TUtilGeoType;
-	intersects?: TUtilGeoType;
+	inside?: TGeoType;
+	notInside?: TGeoType;
+	outside?: TGeoType;
+	intersects?: TGeoType;
 };
 
 type TNumberWhereOps = TNumberOps | number;
@@ -86,7 +86,13 @@ type ObjectOps<T> = Partial<{
 		? TDateTimeWhereOps
 		: T[P] extends Types.SDateTime
 		? TDateTimeWhereOps
-		: T[P] extends Types.SGeoPoint | Types.SGeoLine | Types.SGeoPolygon | Types.SGeoMultiPoint | Types.SGeoMultiLine | Types.SGeoMultiPolygon
+		: T[P] extends
+				| Types.SGeoPoint
+				| Types.SGeoLine
+				| Types.SGeoPolygon
+				| Types.SGeoMultiPoint
+				| Types.SGeoMultiLine
+				| Types.SGeoMultiPolygon
 		? TGeoWhereOps
 		: T[P] extends number
 		? TNumberWhereOps

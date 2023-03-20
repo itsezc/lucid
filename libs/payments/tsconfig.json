@@ -1,0 +1,5 @@
+{
+    "compilerOptions": {
+        "outDir": "../../.moon/cache/types/libs/payments"
+    }
+}

@@ -20,7 +20,7 @@ export class ModelSpec<SubModelType extends typeof Model> {
 	) {}
 
 	public async canOperateWithPermission<
-		T extends ISurrealScope<InstanceType<SubModelType>>
+		T extends ISurrealScope<InstanceType<SubModelType>, {}>
 	>(
 		args: {
 			scope?: T,
