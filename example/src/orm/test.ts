@@ -1,7 +1,6 @@
 import { Lucid } from '@lucid-framework/orm';
 import { SurrealRest, SurrealWS } from '@lucid-framework/client';
 import { User, Post } from '../models/user';
-// import { AccountScope } from '../models/scopes';
 
 Lucid.init(
 	new SurrealWS('http://localhost:8000', {

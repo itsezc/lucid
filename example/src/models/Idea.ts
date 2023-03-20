@@ -1,3 +1,6 @@
+import { Field, Model, TAssertHandler, TPermissions, SubsetModel } from '@lucid-framework/orm';
+import { Constructor } from 'type-fest';
+
 /**
  * Lucid.Define({
  *
@@ -28,10 +31,6 @@
  *
  *
  */
-
-import { Field, Model, TAssertHandler, TPermissions } from '@lucid-framework/orm';
-import { Constructor } from 'type-fest';
-import { PartialId, SubsetModel } from '../../../libs/orm/src/builders/types';
 
 // function applyMixins(derivedCtor: any, constructors: any[]) {
 // 	constructors.forEach((baseCtor) => {

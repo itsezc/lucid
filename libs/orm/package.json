@@ -2,12 +2,12 @@
 	"name": "@lucid-framework/orm",
 	"version": "0.1.2",
 	"license": "MPL-2.0",
-	"main": "dist/index.js",
+	"main": "src/index.ts",
 	"dependencies": {
 		"type-fest": "^3.5.4",
 		"@lucid-framework/client": "link:@lucid-framework/client"
 	},
-	"files": [
-		"dist/"
-	]
+	"devDependencies": {
+		"bun-types":"^0.5.7"
+	}
 }

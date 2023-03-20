@@ -25,7 +25,7 @@ export class Builder<SubModel extends IModel> {
 	constructor(props: IBuilderProps<SubModel>) {
 		this.model = props.model;
 		this.query_from = props?.query_from;
-		this.query_from = Lucid.get(this.model.__tableName(true)).table.name || this.model.__tableName();
+		this.query_from = Lucid.get(this.model.__tableName(true))?.table.name || this.model.__tableName();
 	}
 
 	public where(condition: string | TSubModelWhere<SubModel>) {
@@ -74,27 +74,31 @@ type AppendOperator = '=' | '+=' | '-=';
 export class InsertableBuilder<SubModel extends IModel> extends ReturnableBuilder<SubModel> {
 	protected query_set?: string;
 
-	public transformModel<Data>(row: Data) {
+	// rome-ignore lint/suspicious/noExplicitAny: <explanation>
+	public transformModel<Data>(row: Data): any {
 		if (typeof row !== 'object') return row;
 		if (row instanceof Model) return row.id;
 		if (row instanceof Array) return row.map((item) => this.transformModel(item));
 
 		// check for nested models, if found, transform them to their id
-		Object.keys(row).forEach((key) => {
-			if (row[key] instanceof Model) {
-				console.log('ZE TRANSFORMER', row);
-				if (!row[key].id) return;
-				row[key] = row[key].id;
-			}
+		if (row instanceof Object) {
+			Object.keys(row).forEach((key) => {
+				if (row[key as keyof Data] instanceof Model) {
+					const rowItem = row as Data[keyof Data] & { id: string };
+					if (!rowItem.id) return;
+					(row[key as keyof Data] as string) = rowItem.id;
+				}
 
-			// recursively transform nested models
-			if (row[key] instanceof Array) {
-				row[key] = row[key].map((item) => this.transformModel(item));
-			}
-			if (typeof row[key] === 'object') {
-				row[key] = this.transformModel(row[key]);
-			}
-		});
+				// recursively transform nested models
+				if (row[key as keyof Data] instanceof Array) {
+					// rome-ignore lint/suspicious/noExplicitAny: <explanation>
+					(row[key as keyof Data] as any) = (row[key as keyof Data] as Data[keyof Data][]).map((item: Data[keyof Data]) => this.transformModel(item));
+				}
+				if (typeof row[key as keyof Data] === 'object') {
+					row[key as keyof Data] = this.transformModel(row[key as keyof Data]);
+				}
+			});
+		}
 		return row;
 	}
 

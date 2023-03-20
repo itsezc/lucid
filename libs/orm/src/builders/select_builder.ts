@@ -20,22 +20,12 @@ type TSelectOperation<SubModel extends IModel, T extends keyof SubsetModel<SubMo
 	count: T;
 } & QueryOptions<AS, TComparisonOperator>;
 
-export type TSelectInput<SubModel extends IModel, Alias extends string> =
-	| keyof SubModel
-	| SelectBuilderAny
-	| TSelectOperation<SubModel, keyof SubsetModel<SubModel>, Alias>;
+export type TSelectInput<SubModel extends IModel, Alias extends string> = keyof SubModel | SelectBuilderAny | TSelectOperation<SubModel, keyof SubsetModel<SubModel>, Alias>;
 
 export type TSelectExpression<SubModel extends IModel, T extends TSelectInput<SubModel, Alias>, Alias extends string> = '*' | T[];
 
 type TypeFromSelectBuilder<M extends IModel, Selects> = {
-	[P in
-		keyof Selects as IsEqual<Selects[P], M> extends true
-			? P
-			: OfArray<Selects[P]> extends { type: infer A }
-			? IsEqual<A, M> extends true
-				? P
-				: never
-			: never]: Selects[P];
+	[P in keyof Selects as IsEqual<Selects[P], M> extends true ? P : OfArray<Selects[P]> extends { type: infer A } ? (IsEqual<A, M> extends true ? P : never) : never]: Selects[P];
 } extends infer U
 	? IsEmptyObject<U> extends true
 		? TEMPORARY
@@ -68,9 +58,7 @@ type HandleNestedSelection<T, Selections> = T extends SelectBuilder<any, infer U
 
 type ParseOptions<T, Selections> = T extends { count: infer CKey }
 	? Omit<Selections, CKey & keyof Selections> & {
-			[P in T extends { as?: infer U } ? U : CKey as P extends string ? P : never]: HasExactlyOneKey<Omit<T, 'as' | 'count'>> extends true
-				? boolean
-				: number;
+			[P in T extends { as?: infer U } ? U : CKey as P extends string ? P : never]: HasExactlyOneKey<Omit<T, 'as' | 'count'>> extends true ? boolean : number;
 	  }
 	: never;
 
@@ -85,13 +73,13 @@ type SelectOutput<SubModel extends IModel, Selections, T extends TSelectInput<Su
 export class SelectBuilder<
 	SubModel extends IModel,
 	Selections,
-	Alias extends string = null,
+	Alias extends string | null = null,
 	OriginalTypes = Pick<SubModel, keyof Selections & keyof SubModel>,
 > extends Builder<SubModel> {
 	private query_range?: string;
 
 	//#region vars
-	private subquery?: string[] = [];
+	private subquery: string[] = [];
 
 	private query_select_fields: SelectedFields<SubModel> = {} as SelectedFields<SubModel>;
 	private query_select_fields_projections?: string[];
@@ -119,30 +107,31 @@ export class SelectBuilder<
 	public select<T extends TSelectInput<SubModel, SelectAlias>, SelectAlias extends string>(
 		fields: TSelectExpression<SubModel, T, SelectAlias>,
 	): SelectBuilder<SubModel, SelectOutput<SubModel, Selections, T>, Alias> {
-		const metafields = Lucid.get(this.model.__tableName(true)).fields;
+		const metafields = Lucid.get(this.model.__tableName(true))?.fields;
 		if (!metafields) throw new Error(`No metafield found for model: ${this.model.__tableName(true)}`);
 
 		if (Array.isArray(fields)) {
 			let selections: SelectedFields<SubModel> = {} as SelectedFields<SubModel>;
 
-			(fields as T[]).forEach((field) => {
+			(fields as T[]).forEach((field: TSelectInput<SubModel, SelectAlias>) => {
 				if (typeof field === 'object') {
 					if ('count' in field) {
 						const { count, as: asField, ...rest } = field;
 						const metafield = metafields[count as string]; // todo: add for relational
-						// check if operator in rest
-
+						// if(Object(rest).length > 1) {
+						// 	return;
+						// }
 						const operator = Object.keys(rest)[0] as TComparisonOperator;
-						const value = rest[operator];
+						const value = (rest as { [P in TComparisonOperator]: number | boolean })[operator];
 
 						if (operator && value) {
-							selections[count as string] = {
+							(selections[count] as any) = {
 								key: count,
 								formattedField: `count(${count as string}) ${operator} ${value}`,
 								as: asField as string,
 							};
 						} else {
-							selections[count as string] = { key: count, formattedField: `count(${count as string})`, as: asField || (count as string) };
+							(selections[count] as any) = { key: count, formattedField: `count(${count as string})`, as: asField || (count as string) };
 						}
 					}
 					return;
@@ -157,18 +146,18 @@ export class SelectBuilder<
 						const { via, to, direction } = metafield.relation;
 						const dirArrow = direction === 'IN' ? '<-' : '->';
 						const alias = `${dirArrow}${new via().__tableName()}${dirArrow}${new to().__tableName()}`;
-						selections[field as string] = { key: field, formattedField: alias as string, as: field as string, relational: true };
+						selections[field] = { key: field, formattedField: alias as string, as: field as string, relational: true };
 						return;
 					}
 				}
-				selections[field as string] = { key: field, formattedField: `${field as string}` };
+				selections[field] = { key: field, formattedField: `${field as string}` };
 			});
 			this.query_select_fields = {
 				...this.query_select_fields,
 				...selections,
 			};
 		} else if (typeof fields === 'string') {
-			this.query_select_fields[fields] = { key: fields, formattedField: fields as string };
+			(this.query_select_fields as any)[fields] = { key: fields, formattedField: fields as string };
 		}
 		return this as unknown as SelectBuilder<SubModel, SelectOutput<SubModel, Selections, T>, Alias>;
 	}
@@ -178,16 +167,14 @@ export class SelectBuilder<
 		return this;
 	}
 
-	public count<Key extends keyof SubsetModel<SubModel> | '*'>(
-		field: Key,
-	): SelectBuilder<SubModel, Omit<Selections, Key> & { [P in Key]: number }, Alias> {
-		this.query_select_fields[field as string] = { key: field, formattedField: `count(${field as string})` };
+	public count<Key extends keyof SubsetModel<SubModel> | '*'>(field: Key): SelectBuilder<SubModel, Omit<Selections, Key> & { [P in Key]: number }, Alias> {
+		(this.query_select_fields as any)[field as string] = { key: field, formattedField: `count(${field as string})` };
 		return this as unknown as SelectBuilder<SubModel, Omit<Selections, Key> & { [P in Key]: number }, Alias>;
 	}
 
 	public in(model: typeof Model | string): SelectBuilder<SubModel, Selections> {
-		if (typeof model === 'string') this.subquery.push(model);
-		else this.subquery.push(`->${new model().__tableName()}`);
+		if (typeof model === 'string') this.subquery?.push(model);
+		else this.subquery?.push(`->${new model().__tableName()}`);
 		return this;
 	}
 
@@ -205,11 +192,7 @@ export class SelectBuilder<
 
 	public as<ALIAS extends string>(
 		alias: ALIAS,
-	): SelectBuilder<
-		SubModel,
-		HasAtLeastTwoKeys<Selections> extends never ? { [P in keyof Selections as ALIAS]: Selections[P] } : { [P in ALIAS]: Selections },
-		ALIAS
-	> {
+	): SelectBuilder<SubModel, HasAtLeastTwoKeys<Selections> extends never ? { [P in keyof Selections as ALIAS]: Selections[P] } : { [P in ALIAS]: Selections }, ALIAS> {
 		this.query_alias = alias;
 		return this as unknown as SelectBuilder<
 			SubModel,
@@ -296,10 +279,9 @@ export class SelectBuilder<
 		// @todo - GroupBy calculation
 		if (this.query_groupByFields) query = query.concat(' ', 'GROUP BY ', this.query_groupByFields.join(', '));
 
-		if (this.query_groupBy && this.query_select_fields_projections)
-			query = query.concat(' ', 'GROUP BY ', this.query_select_fields_projections.join(', '));
+		if (this.query_groupBy && this.query_select_fields_projections) query = query.concat(' ', 'GROUP BY ', this.query_select_fields_projections.join(', '));
 
-		if (this.query_fetch_fields.length > 0) query = query.concat(' ', 'FETCH ', this.query_fetch_fields.join(', '));
+		if ((this.query_fetch_fields?.length ?? 0) > 0) query = query.concat(' ', 'FETCH ', this.query_fetch_fields?.join(', ') ?? '');
 
 		if (this.query_limit) query = query.concat(' ', 'LIMIT ', this.query_limit.toString());
 		if (this.query_start) query = query.concat(' ', 'START ', this.query_start.toString());

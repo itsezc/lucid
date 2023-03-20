@@ -2,9 +2,7 @@
     "name": "example",
     "version": "0.1.0",
     "dependencies": {
-        "uuid": "^9.0.0",
-        "reflect-metadata": "0.1.13",
-        "@lucid-framework/client":"link:@lucid-framework/client",
-        "@lucid-framework/orm": "link:@lucid-framework/orm"
+			"@lucid-framework/client":"link:@lucid-framework/client",
+			"@lucid-framework/orm": "link:@lucid-framework/orm"
     }
 }

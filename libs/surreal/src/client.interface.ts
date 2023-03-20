@@ -1,19 +1,16 @@
-import { ISurrealScope } from "./scope";
+import { ISurrealScope } from './scope';
 
-export type TExtractVars<T extends ISurrealScope<unknown, {}>> =
-	T extends ISurrealScope<infer V, {}> ? Partial<V> : never;
-
+export type TExtractVars<T extends ISurrealScope<unknown, {}>> = T extends ISurrealScope<infer V, {}> ? Partial<V> : never;
+export type SurrealResponse<T> = {
+	time: string;
+	status: string;
+	result: T;
+};
 export interface ISurrealConnector {
-	query<T>(query: string): Promise<Array<T>>;
+	query<T>(query: string): Promise<Array<SurrealResponse<T>>>;
 
-	signin<S extends ISurrealScope<unknown, {}>>(
-		scope: S,
-		args: TExtractVars<S>,
-	): void;
-	signup<S extends ISurrealScope<unknown, {}>>(
-		scope: S,
-		args: TExtractVars<S>,
-	): void;
+	signin<S extends ISurrealScope<unknown, {}>>(scope: S, args: TExtractVars<S>): void;
+	signup<S extends ISurrealScope<unknown, {}>>(scope: S, args: TExtractVars<S>): void;
 }
 
 export type TAuthSuccessResponse = {

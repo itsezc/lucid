@@ -15,13 +15,5 @@
         "moduleResolution": "node",
         "strict": true,
         "skipLibCheck": true
-    },
-    "references": [
-        {
-            "path": "libs/orm"
-        },
-        {
-            "path": "libs/surreal"
-        }
-    ]
+    }
 }

@@ -43,3 +43,5 @@ dist
 # Dev
 .dev
 .env
+
+*.-lock.json

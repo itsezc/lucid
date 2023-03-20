@@ -1,14 +1,10 @@
 import { Model } from '../model';
-import { TModelContent, TOmitInternalMethods } from '../internal';
+import { TModelContent } from '../internal';
 import { IBuilder, ReturnableBuilder } from './builder';
 import { stringifyToSQL } from '../util';
+import { Constructor } from '../utilities/helper.types';
 
-class Relation<
-		Edge extends typeof Model<true> = typeof Model<true>,
-		T1 extends Model = Model,
-		T2 extends Model = Model,
-		EdgeInstance extends Model = InstanceType<Edge>,
-	>
+export class Relation<Edge extends Model<true> = Model<true>, T1 extends Model = Model, T2 extends Model = Model, EdgeInstance extends Model = InstanceType<Constructor<Edge>>>
 	extends ReturnableBuilder<EdgeInstance>
 	implements IBuilder<EdgeInstance>
 {
@@ -16,7 +12,7 @@ class Relation<
 	protected modelOut?: T2;
 	protected query_content?: object;
 
-	constructor(edge: Edge) {
+	constructor(edge: Constructor<Edge>) {
 		const model = new edge();
 		// @ts-ignore
 		super({ model, query_from: model.__tableName() });
@@ -44,9 +40,7 @@ class Relation<
 	public build() {
 		let query = 'RELATE ';
 
-		query = query.concat(
-			`${this.modelIn?.__tableName()}:${this.modelIn?.id}->${this.query_from}->${this.modelOut?.__tableName()}:${this.modelOut?.id}`,
-		);
+		query = query.concat(`${this.modelIn?.__tableName()}:${this.modelIn?.id}->${this.query_from}->${this.modelOut?.__tableName()}:${this.modelOut?.id}`);
 
 		if (this.query_content) query = query.concat(' ', 'CONTENT ', stringifyToSQL(this.query_content));
 
@@ -59,6 +53,6 @@ class Relation<
 	}
 }
 
-export function relate<Edge extends typeof Model<true>>(edge: Edge): Relation<Edge, Model, Model> {
+export function relate<Edge extends Model<true>>(edge: Constructor<Edge>): Relation<Edge, Model, Model> {
 	return new Relation(edge);
 }
