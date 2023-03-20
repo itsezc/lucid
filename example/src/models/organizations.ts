@@ -1,4 +1,4 @@
-import { Field, Model, Table } from '@surreal-tools/orm';
+import { Field, Model, Table } from '@lucid-framework/orm';
 import { Account } from './account';
 
 @Table()
@@ -9,15 +9,15 @@ export class Organization extends Model {
 @Table({ name: 'org_member_of' })
 export class MemberOf extends Model {
 	@Field({ name: 'in' })
-	inside!: Account
+	inside!: Account;
 
-	out!: Organization
+	out!: Organization;
 }
 
 @Table()
 export class SubsidaryOf extends Model {
 	@Field({ name: 'in' })
-	inside!: Organization
+	inside!: Organization;
 
 	@Field<SubsidaryOf>({
 		assert: ({ inside }, $value) => $value !== inside,
@@ -25,5 +25,5 @@ export class SubsidaryOf extends Model {
 			select: inside !== out
 		})
 	})
-	out!: Organization
+	out!: Organization;
 }

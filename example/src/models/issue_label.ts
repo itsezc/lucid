@@ -1,7 +1,7 @@
-import { Field, Model, Table } from '@surreal-tools/orm';
+import { Field, Model, Table } from '@lucid-framework/orm';
 
 @Table()
-export class IssueLabel extends Model {
+export class IssueLabel extends Model<true> {
 	name!: string;
 	label!: string;
 }

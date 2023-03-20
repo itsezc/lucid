@@ -1,12 +1,12 @@
-import { sql } from '@surreal-tools/orm';
+import { sql } from '@lucid-framework/orm';
 import { Account } from './account';
-import { createScope } from '@surreal-tools/orm/src/scope';
+import { createScope } from '@lucid-framework/orm';
 
-export const AccountScope = createScope<Account, { $email: string, $password: string, $passKey: string }>({
+export const AccountScope = createScope<Account, { $email: string; $password: string; $passKey: string }>({
 	name: 'account',
 	session: '15m',
 	signin: ({ $email, $password, $passKey }) => {
-		return sql('SELECT * FROM account WHERE username = $username AND (crypto::argon2::compare(password, $password))')
+		return sql('SELECT * FROM account WHERE username = $username AND (crypto::argon2::compare(password, $password))');
 	},
 	signup: ({ $email, $password, $passKey }) => {
 		return sql(`
@@ -19,15 +19,15 @@ export const AccountScope = createScope<Account, { $email: string, $password: st
 						password = crypto::argon2::generate($password)
 			)
 			END
-		`)
+		`);
 	},
 });
 
-export const AdminScope = createScope<Account, { $email: string, $password: string }>({
+export const AdminScope = createScope<Account, { $email: string; $password: string }>({
 	name: 'admin',
 	session: '15m',
 	signin: ({ $email, $password }) => {
-		return sql('SELECT * FROM account WHERE username = $username AND (crypto::argon2::compare(password, $password))')
+		return sql('SELECT * FROM account WHERE username = $username AND (crypto::argon2::compare(password, $password))');
 	},
 	signup: ({ $email, $password }) => {
 		return sql(`
@@ -40,6 +40,6 @@ export const AdminScope = createScope<Account, { $email: string, $password: stri
 						password = crypto::argon2::generate($password)
 			)
 			END
-		`)
+		`);
 	},
 });

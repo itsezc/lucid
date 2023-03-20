@@ -4,18 +4,16 @@
 	"license": "MPL-2.0",
 	"private": true,
 	"workspaces": [
-		"apps/*",
-		"libs/*"
+		"libs/orm",
+		"libs/payments",
+		"libs/surreal"
 	],
 	"devDependencies": {
 		"@phenomnomnominal/tsquery": "^5.0.0",
 		"@types/node": "^18.11.18",
-		"bun-types": "latest",
-		"@lucid-framework/orm": "file:libs/orm"
+		"bun-types": "latest"
 	},
 	"dependencies": {
-		"@lucid-framework/payments": "file:libs/payments",
-		"@lucid-framework/surreal": "file:libs/surreal",
 		"@types/uuid": "^9.0.0",
 		"stripe": "^11.9.1",
 		"typescript": "^4.9.4",

@@ -1,4 +1,4 @@
-import { Model, Table } from '@surreal-tools/orm';
+import { Model, Table } from '@lucid-framework/orm';
 import { AdminScope } from './scopes';
 
 @Table({ name: 'abc'})

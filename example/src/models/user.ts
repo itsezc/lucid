@@ -1,4 +1,4 @@
-import { Table, Model, Field, Types, FieldRelation, EdgeModel } from '@surreal-tools/orm';
+import { Table, Model, Field, Types, FieldRelation, EdgeModel } from '@lucid-framework/orm';
 import { AdminScope } from './scopes';
 
 @Table({ name: "follows", edge: true })

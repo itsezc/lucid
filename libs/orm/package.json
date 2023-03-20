@@ -4,7 +4,8 @@
 	"license": "MPL-2.0",
 	"main": "dist/index.js",
 	"dependencies": {
-		"type-fest": "^3.5.4"
+		"type-fest": "^3.5.4",
+		"@lucid-framework/client": "link:@lucid-framework/client"
 	},
 	"files": [
 		"dist/"

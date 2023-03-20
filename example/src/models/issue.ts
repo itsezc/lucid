@@ -1,4 +1,4 @@
-import { type Types, Field, Model, Table, count, Functions } from '@surreal-tools/orm';
+import { type Types, Field, Model, Table, Functions } from '@lucid-framework/orm';
 
 import { Account } from './account';
 import { IssueLabel } from './issue_label';
@@ -8,9 +8,10 @@ import { AccountScope, AdminScope } from './scopes';
 
 const { SArray } = Functions;
 
-@Table<Issue>({
+@Table({
+	name: 'issue',
 	permissions: ({ id, title, labels }, { $auth }) => ({
-		create: AccountScope && count(SArray.intersect(labels, ['admin', 'manager'])) > 0,
+		create: AccountScope && Functions.count(SArray.intersect(labels, ['admin', 'manager'])) > 0,
 		delete: 'id == $auth.id',
 		update: AdminScope || (AccountScope.id  === id || AdminScope.id === id),
 		select: AdminScope || (id == $auth.id && title != null && (AdminScope) && AccountScope)

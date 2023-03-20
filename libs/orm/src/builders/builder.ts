@@ -25,7 +25,7 @@ export class Builder<SubModel extends IModel> {
 	constructor(props: IBuilderProps<SubModel>) {
 		this.model = props.model;
 		this.query_from = props?.query_from;
-		this.query_from = Lucid.get(this.model.__tableName(true)).name || this.model.__tableName();
+		this.query_from = Lucid.get(this.model.__tableName(true)).table.name || this.model.__tableName();
 	}
 
 	public where(condition: string | TSubModelWhere<SubModel>) {
