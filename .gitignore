@@ -45,3 +45,6 @@ dist
 .env
 
 *.-lock.json
+
+# Bun
+bun.lockb

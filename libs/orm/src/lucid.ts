@@ -1,13 +1,13 @@
-import { ISurrealConnector } from "@lucid-framework/client";
-import { IBasicModel, Model } from "./model";
-import { TAssertHandler, TSurrealFieldIndex } from "./field";
-import { TPermissions } from "./permissions";
-import { Constructor } from "type-fest";
+import { ISurrealConnector } from '@lucid-framework/client';
+import { IBasicModel, Model } from './model';
+import { TAssertHandler, TSurrealFieldIndex } from './field';
+import { TPermissions } from './permissions';
+import { Constructor } from 'type-fest';
 
 export type ITable<SubModel extends IBasicModel, Name extends string = string, Edge extends boolean = boolean> = {
 	name: Name;
 	edge?: Edge;
-	auditable?: boolean;
+	temporal?: boolean;
 	permissions?: TPermissions<SubModel>;
 };
 
@@ -32,7 +32,7 @@ type MetadataFields<SubModel extends Model> = ITableFieldProps<SubModel> & {
 		from: Model;
 		via: Constructor<Model<true>>;
 		to: Constructor<Model>;
-		direction: "IN" | "OUT";
+		direction: 'IN' | 'OUT';
 	};
 	props: ITableFieldProps<SubModel> | IFieldRelationProps<Constructor<Model<true>>, Constructor<Model>, Constructor<Model>>;
 };
@@ -67,7 +67,7 @@ export class LucidInstance {
 
 	public client() {
 		if (!this.surreal_client) {
-			throw new Error("You must initialize a Lucid client before you can use it!");
+			throw new Error('You must initialize a Lucid client before you can use it!');
 		}
 
 		return this.surreal_client;
