@@ -42,7 +42,7 @@ export class SelectBuilder<SubModel extends IModel, Selections, Alias extends st
 		if (!metafields) throw new Error(`No metafield found for model: ${this.model.__tableName(true)}`);
 
 		if (Array.isArray(fields)) {
-			let selections: SelectedFields<SubModel> = {} as SelectedFields<SubModel>;
+			const selections: SelectedFields<SubModel> = {} as SelectedFields<SubModel>;
 
 			(fields as T[]).forEach((field: TSelectInput<SubModel, SelectAlias>) => {
 				if (typeof field === "object") {
@@ -156,7 +156,6 @@ export class SelectBuilder<SubModel extends IModel, Selections, Alias extends st
 	}
 
 	public orderBy(key: keyof Selections, order: "ASC" | "DESC", extra?: "COLLATE" | "NUMERIC"): SelectBuilder<SubModel, Selections, Alias, Limited> {
-		console.log("ORDER BY", key, order, extra);
 		this.query_orderBy?.push([key.toString(), order, extra]);
 		return this;
 	}
