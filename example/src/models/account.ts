@@ -1,14 +1,14 @@
-import { Table, Model, Field, type Types, SurrealEvent, Index } from '@lucid-framework/orm';
-import { Issue } from './issue';
-import { IssueLabel } from './issue_label';
-import { AdminScope, AccountScope } from './scopes';
+import { Table, Model, Field, type Types, SurrealEvent, Index } from "@lucid-framework/orm";
+import { Issue } from "./issue.js";
+import { IssueLabel } from "./issue_label.js";
+import { AdminScope, AccountScope } from "./scopes.js";
 
 @Table({
 	name: 'abc',
-	permissions: ({ username }) => [
-		[['CREATE', 'UPDATE', 'SELECT'], AccountScope.username === username],
-		['DELETE', AdminScope]
-	],
+	// permissions: ({ username }) => [
+	// 	[['CREATE', 'UPDATE', 'SELECT']],
+	// 	['DELETE', AdminScope]
+	// ],
 	auditable: true,
 })
 export class Account extends Model {
@@ -67,10 +67,10 @@ export class Account extends Model {
 	// rome-ignore lint/suspicious/noExplicitAny: <explanation>
 	private idx_meta: any;
 	private changeUsernameEvent = new SurrealEvent<Account>({
-		name: 'change_username',
+		name: "change_username",
 		when: ({ $after, $before, $event }) =>
-			($before.username !== $after.username && $before.passKey !== $after.passKey && $event === 'CREATE') || $before.username !== $after.username,
-		then: ({ $after, $before }) => '',
+			($before.username !== $after.username && $before.passKey !== $after.passKey && $event === "CREATE") || $before.username !== $after.username,
+		then: ({ $after, $before }) => "",
 	});
 }
 

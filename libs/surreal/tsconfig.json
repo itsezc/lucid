@@ -1,5 +1,4 @@
 {
-	"extends": "../../tsconfig.json",
 	"references": [],
 	"compilerOptions": {
 		"composite": true,
@@ -11,7 +10,6 @@
 			"bun-types"
 		],
 		"declaration": true,
-		"rootDir": "./src",
 		"module": "ESNext",
 		"target": "ESNext",
 		"moduleResolution": "node",

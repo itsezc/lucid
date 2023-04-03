@@ -1,7 +1,9 @@
-import { type Types, IModel, Lucid } from '..';
-import { stringifyToSQL } from '../util';
-import { OfArray } from '../utilities/helper.types';
-import { SString } from '../functions/string';
+import { stringifyToSQL } from "../util.js";
+import { OfArray } from "../utilities/helper.types.js";
+import { SString } from "../functions/string.js";
+import { Types } from "../index.js";
+import { IModel } from "../model.js";
+import Lucid from "../lucid.js";
 
 type TDateTimeOps = {
 	eq?: Types.SDateTime;
@@ -27,37 +29,37 @@ type TStringOps = {
 };
 
 type TGeoPoint = {
-	type: 'Point';
+	type: "Point";
 	coordinates: [number, number];
 };
 
 type TGeoLineString = {
-	type: 'LineString';
+	type: "LineString";
 	coordinates: number[][];
 };
 
 type TGeoPolygon = {
-	type: 'Polygon';
+	type: "Polygon";
 	coordinates: number[][][];
 };
 
 type TGeoMultiPoint = {
-	type: 'MultiPoint';
+	type: "MultiPoint";
 	coordinates: number[][];
 };
 
 type TMultiLineString = {
-	type: 'MultiLinestring';
+	type: "MultiLinestring";
 	coordinates: number[][][];
 };
 
 type TMultiPolygon = {
-	type: 'MultiPolygon';
+	type: "MultiPolygon";
 	coordinates: number[][][][];
 };
 
 type TGeometryCollection = {
-	type: 'GeometryCollection';
+	type: "GeometryCollection";
 	geometries: TGeoPoint | TGeoLineString | TGeoPolygon | TGeoMultiPoint | TMultiLineString | TMultiPolygon[];
 };
 
@@ -76,7 +78,7 @@ type TStringWhereOps = TStringOps | string;
 type TGeoWhereOps = TGeoOps | Types.SGeoPoint;
 
 type ObjectOps<T> = Partial<{
-	[P in keyof T]: T[P] extends string
+	[P in keyof T]: NonNullable<T[P]> extends string
 		? TStringWhereOps
 		: T[P] extends Types.SDecimal
 		? TNumberWhereOps
@@ -86,13 +88,7 @@ type ObjectOps<T> = Partial<{
 		? TDateTimeWhereOps
 		: T[P] extends Types.SDateTime
 		? TDateTimeWhereOps
-		: T[P] extends
-				| Types.SGeoPoint
-				| Types.SGeoLine
-				| Types.SGeoPolygon
-				| Types.SGeoMultiPoint
-				| Types.SGeoMultiLine
-				| Types.SGeoMultiPolygon
+		: T[P] extends Types.SGeoPoint | Types.SGeoLine | Types.SGeoPolygon | Types.SGeoMultiPoint | Types.SGeoMultiLine | Types.SGeoMultiPolygon
 		? TGeoWhereOps
 		: T[P] extends number
 		? TNumberWhereOps
@@ -113,7 +109,7 @@ export type TSubModelWhere<T extends IModel> = ObjectOps<T> & {
 	OR?: TSubModelWhere<T>;
 };
 
-const operators = ['gt', 'gte', 'lt', 'lte', 'eq', 'endsWith', 'startsWith', 'contains'];
+const operators = ["gt", "gte", "lt", "lte", "eq", "endsWith", "startsWith", "contains"];
 
 export function WhereToSQL<SubModel extends IModel>(
 	table: string,
@@ -128,34 +124,34 @@ export function WhereToSQL<SubModel extends IModel>(
 		object: false,
 	},
 ) {
-	let sql = '';
+	let sql = "";
 
 	let orStatements: string[] = [];
 
 	const entries = Object.entries(where);
 
 	entries.forEach(([key, value], index) => {
-		key = options.overrides ?? (options.prefix ? `${options.prefix}.${key}` : key).replaceAll('$.', '');
-
+		key = options.overrides ?? (options.prefix ? `${options.prefix}.${key}` : key).replaceAll("$.", "");
 		const metadata = Lucid.get(table)?.fields || [];
+		//@ts-ignore
 		const metadataFilter = metadata[key];
-
-		key = metadataFilter ? metadataFilter.to : key;
+		key = metadataFilter ? metadataFilter.from : key;
 
 		value = cleanValue(value);
+
 		switch (typeof value) {
-			case 'string':
+			case "string":
 				sql += `${key} = '${value}'`;
 				break;
 
-			case 'boolean':
-			case 'number':
+			case "boolean":
+			case "number":
 				sql += `${key} = ${value}`;
 				break;
 
-			case 'object':
-				const isOR = key === 'OR';
-				const isRecord = Object.getOwnPropertyNames(value as object).includes('$');
+			case "object":
+				const isOR = key === "OR";
+				const isRecord = Object.getOwnPropertyNames(value as object).includes("$");
 				const isCompObj = !isOR && Object.getOwnPropertyNames(value as object).some((v) => operators.includes(v));
 				const isInlineObjArr = !isOR && Array.isArray(value);
 				const isInlineObj = !(isOR || isRecord || isInlineObjArr || isCompObj);
@@ -164,11 +160,7 @@ export function WhereToSQL<SubModel extends IModel>(
 				const valueKeys = Object.keys(value);
 				const hasMultiple = valueKeys.length > 1;
 				const isLastMultiple = index === value.length - 1;
-
-				// console.log(hasMultiple, key, isLastMultiple);
-
-				// console.log({ key, isOR, isCompObj, isInlineObj, isInlineObjArr, isRecord });
-
+				console.log(value, isInlineObjArr, isCompObj, Array.isArray(value));
 				// Is inline or inline comparison object
 				if (!(isOR || isCompObj || isInlineObjArr)) {
 					if (value.eq) sql += `${key} = ${cleanValue(value.eq)}`;
@@ -198,9 +190,9 @@ export function WhereToSQL<SubModel extends IModel>(
 				break;
 		}
 
-		if (index !== entries.length - 1 && entries[index + 1][0] !== 'OR') sql += ' AND ';
+		if (index !== entries.length - 1 && entries[index + 1][0] !== "OR") sql += " AND ";
 	});
-
+	console.log("SQL WHERE", sql, where);
 	return sql;
 }
 

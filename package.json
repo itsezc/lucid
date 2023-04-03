@@ -3,19 +3,15 @@
 	"version": "0.1.0",
 	"license": "MPL-2.0",
 	"private": true,
-	"workspaces": [
-		"libs/orm",
-		"libs/payments",
-		"libs/surreal"
-	],
+	"workspaces": ["libs/orm", "libs/payments", "libs/surreal"],
 	"devDependencies": {
 		"@phenomnomnominal/tsquery": "^5.0.0",
-		"@types/node": "^18.15.3",
-		"bun-types": "^0.5.7"
+		"@types/node": "^18.15.10",
+		"bun-types": "^0.5.8"
 	},
 	"dependencies": {
 		"stripe": "^11.9.1",
-		"typescript": "^5.0.2",
+		"typescript": "^5.0.3",
 		"@paralleldrive/cuid2": "^2.2.0"
 	}
 }

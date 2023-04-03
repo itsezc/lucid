@@ -10,11 +10,17 @@
     "downlevelIteration": true,
     "skipLibCheck": true,
     "jsx": "preserve",
+    "outDir": "dist",
+    "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
     "types": [
-      "bun-types" // add Bun global
+      "bun-types"
     ]
-  }
+  },
+  "include": [
+    "src",
+    "index.ts"
+  ]
 }

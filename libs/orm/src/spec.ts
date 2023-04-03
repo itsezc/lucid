@@ -1,8 +1,4 @@
-import { 
-	type ISurrealScope,
-	Model
-} from './';
-
+import { type ISurrealScope, Model } from "./index.js";
 
 interface ISurrealResult {}
 
@@ -14,20 +10,13 @@ interface ISurrealDBInfoResult {
 }
 
 export class ModelSpec<SubModelType extends typeof Model> {
-	constructor(
-		protected model: SubModelType, 
-		private instance = new model()
-	) {}
+	constructor(protected model: SubModelType, private instance = new model()) {}
 
-	public async canOperateWithPermission<
-		T extends ISurrealScope<InstanceType<SubModelType>, {}>
-	>(
-		args: {
-			scope?: T,
-			model?: ReturnType<T['signup']>,
-			query?: SubModelType
-		},
-	): Promise<boolean> {
+	public async canOperateWithPermission<T extends ISurrealScope<Model, { args: any }>>(args: {
+		scope?: T;
+		model?: ReturnType<T["signup"] & any>;
+		query?: SubModelType;
+	}): Promise<boolean> {
 		return false;
 	}
 
@@ -55,4 +44,3 @@ export class ModelSpec<SubModelType extends typeof Model> {
 		return false;
 	}
 }
-

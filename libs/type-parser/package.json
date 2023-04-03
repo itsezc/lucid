@@ -1,0 +1,20 @@
+{
+  "name": "@lucid-framework/type-parser",
+  "module": "index.ts",
+  "types": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@lucid-framework/orm": "link:@lucid-framework/orm",
+    "@ts-ast-parser/core": "^0.2.0",
+    "bun-types": "^0.5.8",
+    "chalk": "^5.2.0",
+    "cmd-ts": "^0.12.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc && node index.js"
+  },
+  "bin": {
+    "type-parser": "./diist/index.js"
+  }
+}

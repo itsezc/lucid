@@ -1,0 +1,397 @@
+{
+  "PoolInfo": {
+    "name": "PoolInfo",
+    "isTable": true,
+    "fields": {
+      "network": {
+        "name": "network",
+        "type": {
+          "type": "string",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "base": {
+        "name": "base",
+        "type": {
+          "type": "Currency",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": false,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "quote": {
+        "name": "quote",
+        "type": {
+          "type": "Currency",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": false,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "quotePrice": {
+        "name": "quotePrice",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "blockHeight": {
+        "name": "blockHeight",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "transactionIndex": {
+        "name": "transactionIndex",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "blockTimestamp": {
+        "name": "blockTimestamp",
+        "type": {
+          "type": "Date",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": false,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": true
+        },
+        "modifer": "public"
+      },
+      "createTimestamp": {
+        "name": "createTimestamp",
+        "type": {
+          "type": "Date",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": false,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": true
+        },
+        "modifer": "public"
+      },
+      "id": {
+        "name": "id",
+        "type": {
+          "type": "string",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      }
+    }
+  },
+  "Trade": {
+    "name": "Trade",
+    "isTable": true,
+    "fields": {
+      "time": {
+        "name": "time",
+        "type": {
+          "type": "Date",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": false,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": true
+        },
+        "modifer": "public"
+      },
+      "type": {
+        "name": "type",
+        "type": {
+          "type": "Side",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": false,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "usd": {
+        "name": "usd",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "price": {
+        "name": "price",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "baseAmount": {
+        "name": "baseAmount",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "quoteAmount": {
+        "name": "quoteAmount",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "pool": {
+        "name": "pool",
+        "type": {
+          "type": "PoolInfo",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": false,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "txFrom": {
+        "name": "txFrom",
+        "type": {
+          "type": "string",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "hash": {
+        "name": "hash",
+        "type": {
+          "type": "string",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "id": {
+        "name": "id",
+        "type": {
+          "type": "string",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      }
+    }
+  },
+  "Bar": {
+    "name": "Bar",
+    "isTable": true,
+    "fields": {
+      "time": {
+        "name": "time",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "low": {
+        "name": "low",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "high": {
+        "name": "high",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "open": {
+        "name": "open",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "close": {
+        "name": "close",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "volume": {
+        "name": "volume",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "ethPrice": {
+        "name": "ethPrice",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "pool": {
+        "name": "pool",
+        "type": {
+          "type": "PoolInfo",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": false,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "interval": {
+        "name": "interval",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      },
+      "id": {
+        "name": "id",
+        "type": {
+          "type": "string",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isRelational": false,
+          "isEnum": false,
+          "isDate": false
+        },
+        "modifer": "public"
+      }
+    }
+  }
+}

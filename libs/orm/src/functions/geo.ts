@@ -1,4 +1,4 @@
-import { type SGeoPoint } from '../utilities/types';
+import { type SGeoPoint } from "../utilities/types.js";
 
 export class TGeo {
 	public static area(geometry: SGeoPoint) {
@@ -28,5 +28,5 @@ export class TGeo {
 }
 
 function toGeoPoint(point: SGeoPoint) {
-	return point.toString().replaceAll('[', '(').replaceAll(']', ')');
+	return point.toString().replaceAll("[", "(").replaceAll("]", ")");
 }

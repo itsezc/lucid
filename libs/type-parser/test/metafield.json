@@ -1,0 +1,62 @@
+{
+  "Test": {
+    "name": "Test",
+    "fields": [
+      {
+        "name": "name",
+        "type": {
+          "type": "string",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isEnum": false
+        },
+        "modifer": "public"
+      },
+      {
+        "name": "age",
+        "type": {
+          "type": "number",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isEnum": false
+        },
+        "modifer": "public"
+      },
+      {
+        "name": "isAlive",
+        "type": {
+          "type": "boolean",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isEnum": false
+        },
+        "modifer": "public"
+      },
+      {
+        "name": "optional",
+        "type": {
+          "type": "string",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": true,
+          "isEnum": false
+        },
+        "modifer": "public"
+      },
+      {
+        "name": "dateAt",
+        "type": {
+          "type": "Date",
+          "isArray": false,
+          "isObject": false,
+          "isPrimitive": false,
+          "isEnum": false
+        },
+        "modifer": "public"
+      }
+    ]
+  }
+}

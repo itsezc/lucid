@@ -1,9 +1,11 @@
-import { IModel, Model, IBasicModel } from '../model';
-import { TSubModelWhere, WhereToSQL } from '../operations/where';
-import { TDIFF, TTimeout } from '../internal';
-import Lucid from '../lucid';
-import { SubsetModel } from './types';
-import { stringifyToSQL } from '../util';
+import { IModel, Model, IBasicModel } from "../model.js";
+import { TSubModelWhere, WhereToSQL } from "../operations/where.js";
+import { WhereFilter, WhereSelector } from "../operations/wherev2.js";
+import { TDIFF, TTimeout } from "../internal.js";
+import Lucid from "../lucid.js";
+import { SubsetModel } from "./types.js";
+import { stringifyToSQL } from "../util.js";
+import { SurrealEvent } from "../event.js";
 
 export interface IBuilderProps<SubModel extends IModel> {
 	model: SubModel;
@@ -15,7 +17,7 @@ export interface IBuilder<SubModel extends IBasicModel> {
 	execute(): Promise<SubModel[]>;
 }
 
-export class Builder<SubModel extends IModel> {
+export class Builder<SubModel extends IModel, Selections = {}> {
 	protected model: SubModel;
 	protected query_from?: string;
 	protected query_where?: string;
@@ -28,10 +30,16 @@ export class Builder<SubModel extends IModel> {
 		this.query_from = Lucid.get(this.model.__tableName(true))?.table.name || this.model.__tableName();
 	}
 
-	public where(condition: string | TSubModelWhere<SubModel>) {
-		if (typeof condition === 'string') this.query_where = condition;
+	public whereOld(condition: string | TSubModelWhere<SubModel & Selections>) {
+		if (typeof condition === "string") this.query_where = condition;
 		else this.query_where = WhereToSQL(this.model.__tableName(true), condition);
 
+		return this;
+	}
+
+	public where(condition: string | WhereSelector<SubModel & Selections>) {
+		if (typeof condition === "string") this.query_where = condition;
+		else this.query_where = WhereFilter(this.model.__tableName(true), condition);
 		return this;
 	}
 
@@ -52,50 +60,71 @@ export class Builder<SubModel extends IModel> {
 }
 
 export class ReturnableBuilder<SubModel extends IModel> extends Builder<SubModel> {
-	protected query_return: TDIFF = 'AFTER';
+	protected query_return: TDIFF = "AFTER";
 
 	public returnDiff() {
-		this.query_return = 'DIFF';
+		this.query_return = "DIFF";
 		return this;
 	}
 
 	public returnBefore() {
-		this.query_return = 'BEFORE';
+		this.query_return = "BEFORE";
 		return this;
 	}
 
 	public returnAfter() {
-		this.query_return = 'AFTER';
+		this.query_return = "AFTER";
 		return this;
 	}
 }
 
-type AppendOperator = '=' | '+=' | '-=';
+type AppendOperator = "=" | "+=" | "-=";
+
+export const isModelType = (value: any): value is IModel => {
+	return value instanceof Model || (typeof value === "object" && "id" in value && "schemafull" in value);
+};
+
 export class InsertableBuilder<SubModel extends IModel> extends ReturnableBuilder<SubModel> {
 	protected query_set?: string;
 
-	// rome-ignore lint/suspicious/noExplicitAny: <explanation>
-	public transformModel<Data>(row: Data): any {
-		if (typeof row !== 'object') return row;
-		if (row instanceof Model) return row.id;
-		if (row instanceof Array) return row.map((item) => this.transformModel(item));
+	public transformModel<Data>(row: Data, deleteEmpty = true): any {
+		Object.keys(row as any).forEach((key) => {
+			if (
+				row[key as keyof typeof row] instanceof Function ||
+				row[key as keyof typeof row] instanceof SurrealEvent ||
+				typeof row[key as keyof typeof row] === "function" ||
+				row[key as keyof typeof row] === undefined
+			) {
+				if (!deleteEmpty && row[key as keyof typeof row] === undefined) {
+					(row[key as keyof typeof row] as any) = null;
+				} else {
+					delete row[key as keyof typeof row];
+				}
+			}
+		});
+
+		if (row instanceof Date) return row;
+		if (typeof row !== "object") return row;
+
+		if (isModelType(row)) return row.id;
+		if (row instanceof Array) return row.map((item) => this.transformModel(item, deleteEmpty));
 
 		// check for nested models, if found, transform them to their id
 		if (row instanceof Object) {
 			Object.keys(row).forEach((key) => {
-				if (row[key as keyof Data] instanceof Model) {
-					const rowItem = row as Data[keyof Data] & { id: string };
-					if (!rowItem.id) return;
-					(row[key as keyof Data] as string) = rowItem.id;
+				if (isModelType(row[key as keyof Data])) {
+					//@ts-ignore
+					if (!row[key].id) return;
+					//@ts-ignore
+					row[key] = row[key].id;
 				}
 
 				// recursively transform nested models
 				if (row[key as keyof Data] instanceof Array) {
-					// rome-ignore lint/suspicious/noExplicitAny: <explanation>
-					(row[key as keyof Data] as any) = (row[key as keyof Data] as Data[keyof Data][]).map((item: Data[keyof Data]) => this.transformModel(item));
+					(row[key as keyof Data] as any) = (row[key as keyof Data] as Data[keyof Data][]).map((item: Data[keyof Data]) => this.transformModel(item, deleteEmpty));
 				}
-				if (typeof row[key as keyof Data] === 'object') {
-					row[key as keyof Data] = this.transformModel(row[key as keyof Data]);
+				if (typeof row[key as keyof Data] === "object") {
+					row[key as keyof Data] = this.transformModel(row[key as keyof Data], deleteEmpty);
 				}
 			});
 		}
@@ -104,14 +133,14 @@ export class InsertableBuilder<SubModel extends IModel> extends ReturnableBuilde
 
 	protected appendToQuerySet<Data>(field: string, data: Data, operation: AppendOperator) {
 		if (data === undefined || data === null) return this as unknown as InsertableBuilder<SubModel>;
-		if (this.query_set) this.query_set += ', ';
-		else this.query_set = '';
+		if (this.query_set) this.query_set += ", ";
+		else this.query_set = "";
 		this.query_set += `${field} ${operation} ${stringifyToSQL(data)}`;
 		return this;
 	}
 
 	public set<K extends keyof SubsetModel<SubModel>, Data extends SubsetModel<SubModel>[K]>(field: K, data: Data) {
-		this.appendToQuerySet(field as string, this.transformModel(data), '=');
+		this.appendToQuerySet(field as string, this.transformModel(data), "=");
 		return this;
 	}
 }

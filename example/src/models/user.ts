@@ -1,9 +1,45 @@
-import { Table, Model, Field, Types, FieldRelation, EdgeModel } from '@lucid-framework/orm';
-import { AdminScope } from './scopes';
+import { Table, Model, Field, Index, SurrealEvent } from "@lucid-framework/orm";
+import { AdminScope } from "./scopes.js";
 
-@Table({ name: "follows", edge: true })
-export class Follows extends EdgeModel<User, User> {
-	createdAt?: Date;
+@Table({ name: "roles" })
+export class Role extends Model {
+	@Field({ index: "unique" }) name!: "admin" | "user" | "whitelist";
+	@Field() description?: string;
+	@Field() hexColor?: string;
+	@Field() global!: boolean;
+	@Field() createdDate!: Date;
+}
+
+@Table({ name: "setting"})
+export class Setting extends Model {
+	@Field({ index: "unique" }) key!: string;
+	@Field() value!: string;
+}
+
+@Table({ name: "session"})
+export class Session extends Model {
+	sessionToken!: string;
+	expires!: Date;
+	user!: User;
+}
+
+@Table({ name: "account" })
+export class Account extends Model {
+	@Field({ index: "unique" }) providerAccountId!: string;
+	@Field() type!: string;
+	@Field() provider!: string;
+	@Field() refreshToken?: string;
+	@Field() accessToken?: string;
+	@Field() expiresAt?: number;
+	@Field() token_type?: string;
+	@Field() scope?: string;
+	@Field() idToken?: string;
+	@Field() sessionState?: Date;
+	@Field() user!: User;
+	@Field() profile?: string;
+
+	@Index<Account>({ columns: ['provider', 'providerAccountId'] })
+	private idx_meta: any;
 }
 
 @Table({ name: 'user',
@@ -11,56 +47,40 @@ export class Follows extends EdgeModel<User, User> {
 	auditable: true,
 })
 export class User extends Model {
-	@Field({ index: 'unique' }) username: string;
+	@Field({ index: 'unique' }) username!: string;
+	@Field({ index: 'unique' }) walletAddress!: string;
+	@Field({ index: 'unique' }) email?: string | null;
 
-	@Field({ assert: 'email', name: 'email_address', index: "unique" }) email?: string;
+	@Field() emailVerified?: Date | null;
 
-	password: string;
-	interests?: string[];
+	@Field() avatar?: string;
+	@Field() bannerPicture?: string;
 
-	@Field({ name: 'posts' }) posts?: Post[];
-	portfolios?: Portfolio[];
+	@Field() bio?: string;
+	@Field() role!: Role;
 
-	nested?: {
-		foo: string;
-		posting?: Post;
-		items?: User[];
-	};
+	@Field() settings?: Setting[];
+	@Field() sessions?: Session[];
+	@Field() accounts?: Account[];
 
-	@Field({ name: "bff" }) bestFriend?: User;
+	@Field() updatedAt?: Date = new Date();
+	@Field() createdDate?: Date = new Date();
 
-	@FieldRelation({ model: Follows, out: User }) followers?: Follows[];
-
-	@FieldRelation({ model: Follows, in: User }) following?: Follows[];
+	private changeUsernameEvent = new SurrealEvent<User>({
+		name: "change_username",
+		when: ({ $after, $before, $event }) => $event === "DELETE",
+		then: ({ $after, $before }) => "",
+	});
 }
 
-@Table({ name: 'portfolio', auditable: true })
-export class Portfolio extends Model {
-	name?: string;
-	owner?: User;
-	trades?: Trade[];
-}
+@Table({ name: 'verificationToken'})
+export class VerificationToken extends Model {
+	@Field({index: "unique"}) token!: string;
+	@Field() expires!: Date;
+	@Field() identifier!: string;
 
-@Table({name: "trade"})
-export class Trade extends Model {
-	portfolio?: Portfolio;
-	asset: string;
-	quantity?: Types.SFloat;
-	avgPrice?: Types.SDecimal;
-	price?: Types.SDecimal;
-	tradeDate?: Types.SDateTime;
-}
-
-@Table({ name: 'post', auditable: true })
-export class Post extends Model {
-	@Field({ index: 'unique' }) title?: string;
-	content?: string;
-	author?: User;
-	comments?: Comment[];
-}
-
-@Table({ name: 'comment', auditable: true })
-export class Comment extends Model {
-	content?: string;
-	children?: Comment[];
+	@Index<VerificationToken>({ 
+		columns: ['identifier', 'token'],
+	})
+	private idx_meta: any;
 }

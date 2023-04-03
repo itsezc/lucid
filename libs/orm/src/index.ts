@@ -1,24 +1,24 @@
-export * from './field';
-export * from './model';
+export * from "./field.js";
+export * from "./model.js";
 
-export * from './table';
-export * from './spec';
+export * from "./table.js";
+export * from "./spec.js";
 
-export * from './indexes';
-export * from './operations';
+export * from "./indexes.js";
+export * from "./operations/index.js";
 
-export * from './event';
-export * from './scope';
+export * from "./event.js";
+export * from "./scope.js";
 
-export * from './sql';
-export * from './builders';
+export * from "./sql.js";
+export * from "./builders/index.js";
 
-export * from './lucid';
-export * from './permissions';
-export * from './migration';
+export * from "./lucid.js";
+export * from "./permissions.js";
+export * from "./migration.js";
 
-export * as Types from './utilities';
-export * as Functions from './functions';
-export * as Constants from './utilities/constants';
+export * as Types from "./utilities/index.js";
+export * as Functions from "./functions/index.js";
+export * as Constants from "./utilities/constants.js";
 
-export { type TModelProperties } from './internal';
+export { type TModelProperties } from "./internal.js";

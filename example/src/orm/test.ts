@@ -1,18 +1,47 @@
-import { Lucid } from '@lucid-framework/orm';
-import { SurrealRest, SurrealWS } from '@lucid-framework/client';
-import { User, Post } from '../models/user';
+import { Lucid } from "@lucid-framework/orm";
+import { SurrealRest } from "@lucid-framework/client";
+import { Session, User, Account } from "../models/user.js";
+import { Hello } from "../models/hello.js";
 
 Lucid.init(
-	new SurrealRest('http://localhost:8000', {
-		NS: 'ttest',
-		DB: 'ttest',
-		user: 'root',
-		pass: 'root',
+	new SurrealRest("http://localhost:8000", {
+		NS: "ttest",
+		DB: "ttest",
+		user: "root",
+		pass: "root",
 	}),
 );
 
-const rele = await User.select(['bestFriend', 'email', { count: 'posts', as: 'post_count_lt2', '<=': 2 }]).execute();
-console.log(rele);
+// const setQ = Hello.set("id", "test2").set("age", 12).set("test", "Two").set("dateAt", new Date()).set("name", "test2").set("isAlive", false).save();
+
+const h = await Hello.select(["age", "dateAt"]).groupBy("age", "dateAt").orderBy("age", "ASC").orderBy("dateAt", "ASC").execute();
+console.log(h);
+
+process.exit(0);
+
+const el = await Account.select(["user", "providerAccountId", "provider"])
+	.where({
+		providerAccountId: undefined,
+		provider: "web3",
+		accessToken: "undefined",
+	})
+	.execute();
+
+console.log(el);
+process.exit(0);
+const relex = await User.select([{ key: "sessions", as: "lol" }])
+	.where({
+		username: {
+			contains: "test",
+		},
+		OR: [
+			{
+				email: "sda",
+			},
+		],
+	})
+	.build();
+
 process.exit(0);
 
 (async () => {

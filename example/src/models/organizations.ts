@@ -1,5 +1,5 @@
-import { Field, Model, Table } from '@lucid-framework/orm';
-import { Account } from './account';
+import { Field, Model, Table } from "@lucid-framework/orm";
+import { Account } from "./account.js";
 
 @Table()
 export class Organization extends Model {

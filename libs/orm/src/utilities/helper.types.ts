@@ -12,9 +12,7 @@ export type OfArray<T> = IsUndefined<T> extends true
 	? { type: U; isReadonly: false; isUndefined: false; isPrimitive: NonNullable<U> extends Primitives ? true : false }
 	: T;
 
-// rome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
-// rome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type UnionToOvlds<U> = UnionToIntersection<U extends any ? (f: U) => void : never>;
 
 export type PopUnion<U> = UnionToOvlds<U> extends (a: infer A) => void ? A : never;
@@ -43,6 +41,9 @@ export type ContainsAllKeys<BaseType, CheckType> = {
 
 export type ArrayToUnion<T> = T extends [infer A, ...infer B] ? A | ArrayToUnion<B> : never;
 
-export type UnionToCommaString<T> = UnionToArray<T> extends [infer A, ...infer B]
-	? `${A}${B extends [] ? '' : `_${UnionToCommaString<ArrayToUnion<B>>}`}`
-	: never;
+//@ts-ignore
+export type UnionToCommaString<T> = UnionToArray<T> extends [infer A, ...infer B] ? `${A}${B extends [] ? "" : `_${UnionToCommaString<ArrayToUnion<B>>}`}` : never;
+
+export type DeepRequired<T> = {
+	[K in keyof T]: Required<DeepRequired<T[K]>>;
+};

@@ -1,5 +1,5 @@
-import { Field, Model, TAssertHandler, TPermissions, SubsetModel } from '@lucid-framework/orm';
-import { Constructor } from 'type-fest';
+import { Field, Model, TAssertHandler, TPermissions, SubsetModel } from "@lucid-framework/orm";
+import { Constructor } from "type-fest";
 
 /**
  * Lucid.Define({
@@ -46,13 +46,13 @@ type LucidDefinitionOptions<T extends Model, Name extends string> = {
 	auditable?: boolean;
 	fields: {
 		[K in keyof Partial<SubsetModel<T>>]: {
-			index?: 'unique' | 'index';
+			index?: "unique" | "index";
 			assert?: TAssertHandler<T>;
 			permissions?: TPermissions<T>;
 			name?: string;
 			relation?: {
 				model: Constructor<Model>;
-				direction: 'IN' | 'OUT';
+				direction: "IN" | "OUT";
 				name?: string;
 			};
 		};
@@ -92,26 +92,25 @@ class User extends Model {
 }
 
 Lucid.Define(User, {
-	name: 'user',
+	name: "user",
 	permissions: ({ username }) => [],
 	fields: {
 		username: {
-			name: 'username',
-			index: 'unique',
+			name: "username",
+			index: "unique",
 		},
 		email: {
-			assert: 'email',
+			assert: "email",
 		},
 		followers: {
 			relation: {
 				model: Follows,
-				direction: 'OUT',
+				direction: "OUT",
 			},
 		},
 	},
 });
 
-console.log(Lucid.definitions);
 // interface User extends Follows {}
 
 // const related = Lucid.Relation("followers", Follows, User, 'OUT');

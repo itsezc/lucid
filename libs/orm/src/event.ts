@@ -1,6 +1,7 @@
-import { Model, TModelProperties } from './';
+import { TModelProperties } from "./index.js";
+import { Model } from "./model.js";
 
-type TSurrealEventType = 'CREATE' | 'DELETE';
+type TSurrealEventType = "CREATE" | "DELETE";
 
 type TSurrealEventAccessors<SubModel extends Model> = {
 	$event: TSurrealEventType;
@@ -15,10 +16,7 @@ export type TSurrealEventProps<SubModel extends Model> = {
 };
 
 export class SurrealEvent<SubModel extends Model> {
-	constructor(
-		public props: TSurrealEventProps<SubModel>,
-		protected table?: SubModel,
-	) {}
+	constructor(public props: TSurrealEventProps<SubModel>, protected table?: SubModel) {}
 }
 
 export class SurrealEventManager<SubModel extends Model> {

@@ -1,8 +1,10 @@
 {
     "name": "example",
     "version": "0.1.0",
+    "type": "module",
     "dependencies": {
-			"@lucid-framework/client":"link:@lucid-framework/client",
-			"@lucid-framework/orm": "link:@lucid-framework/orm"
+		"@lucid-framework/client":"link:@lucid-framework/client",
+		"@lucid-framework/orm": "link:@lucid-framework/orm",
+        "@lucid-framework/type-parser":"link:@lucid-framework/type-parser"
     }
 }

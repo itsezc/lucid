@@ -1,10 +1,22 @@
 import { ISurrealConnector } from "@lucid-framework/client";
-import { IBasicModel, Model } from "./model";
-import { TAssertHandler, TSurrealFieldIndex } from "./field";
-import { TPermissions } from "./permissions";
+import { IBasicModel, Model } from "./model.js";
+import { TAssertHandler, TSurrealFieldIndex } from "./field.js";
+import { TPermissions } from "./permissions.js";
 import { Constructor } from "type-fest";
+import type { TableJson, FieldJson } from "@lucid-framework/type-parser";
+import { IModel } from "./model.js";
+import fs from "fs";
+const projectRoot = import.meta.url.replace("file://", "").replace("/src/lucid.ts", "");
+export const FieldsType = JSON.parse(fs.readFileSync(`${projectRoot}/model_types/model_types.json`, "utf8")) as TableJson;
+
+// export const FieldsType = (await Bun.file(`${projectRoot}/model_types/model_types.json`)
+// 	.json()
+// 	.catch((err) => {
+// 		throw new Error(`Could not load model types: ${err}, please make sure you generate the types first`);
+// 	})) as TableJson;
 
 export type ITable<SubModel extends IBasicModel, Name extends string = string, Edge extends boolean = boolean> = {
+	id?: string;
 	name: Name;
 	edge?: Edge;
 	auditable?: boolean;
@@ -17,7 +29,7 @@ export type IFieldRelationProps<T extends Constructor<Model<true>>, IN extends C
 	out?: OUT;
 };
 
-export interface ITableFieldProps<SubModel extends Model> {
+export interface ITableFieldProps<SubModel extends IModel> {
 	name?: string;
 	index?: TSurrealFieldIndex;
 	flexible?: boolean;
@@ -25,7 +37,7 @@ export interface ITableFieldProps<SubModel extends Model> {
 	permissions?: TPermissions<SubModel>;
 }
 
-type MetadataFields<SubModel extends Model> = ITableFieldProps<SubModel> & {
+export type MetadataFields<SubModel extends IModel> = ITableFieldProps<SubModel> & {
 	from: string;
 	to: string;
 	relation?: {
@@ -35,25 +47,35 @@ type MetadataFields<SubModel extends Model> = ITableFieldProps<SubModel> & {
 		direction: "IN" | "OUT";
 	};
 	props: ITableFieldProps<SubModel> | IFieldRelationProps<Constructor<Model<true>>, Constructor<Model>, Constructor<Model>>;
-};
+} & FieldJson;
 
-export type LucidMetadata<SubModel extends Model> = {
+export type LucidMetadata<SubModel extends Model<any>> = {
 	table: ITable<SubModel>;
 	fields: {
 		[key: string]: MetadataFields<SubModel>;
 	};
 };
 
+type ModelMapArgs<SubModel extends Model, P extends string> = {
+	[K in P]: SubModel;
+};
+
+type ModelMap<T extends { [K in P]: Constructor<Model<any>> }[], P extends string> = T extends object
+	? {
+			[K in P]: T extends { [K2 in K]: Constructor<infer M> } ? M : never;
+	  }
+	: never;
+
 export class LucidInstance {
 	private scope?: string;
 	private surreal_client?: ISurrealConnector;
-	private tableMetadata = new Map<string, LucidMetadata<Model>>();
+	private tableMetadata = new Map<string, LucidMetadata<Model<any>>>();
 
 	public get(name: string) {
 		return this.tableMetadata.get(name);
 	}
 
-	public set<Props extends LucidMetadata<Model>>(name: string, value: Props) {
+	public set<Props extends LucidMetadata<Model<any>>>(name: string, value: Props) {
 		return this.tableMetadata.set(name, value);
 	}
 
@@ -61,8 +83,13 @@ export class LucidInstance {
 		return this.tableMetadata;
 	}
 
+	public get keys() {
+		return this.tableMetadata.keys();
+	}
+
 	public init(surreal_client: ISurrealConnector) {
 		this.surreal_client = surreal_client;
+		return this;
 	}
 
 	public client() {

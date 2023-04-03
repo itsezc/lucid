@@ -1,8 +1,8 @@
-import { Model } from '../model';
-import { TModelContent } from '../internal';
-import { IBuilder, ReturnableBuilder } from './builder';
-import { stringifyToSQL } from '../util';
-import { Constructor } from '../utilities/helper.types';
+import { Model } from "../model.js";
+import { TModelContent } from "../internal.js";
+import { IBuilder, ReturnableBuilder } from "./builder.js";
+import { stringifyToSQL } from "../util.js";
+import { Constructor } from "../utilities/helper.types.js";
 
 export class Relation<Edge extends Model<true> = Model<true>, T1 extends Model = Model, T2 extends Model = Model, EdgeInstance extends Model = InstanceType<Constructor<Edge>>>
 	extends ReturnableBuilder<EdgeInstance>
@@ -19,7 +19,7 @@ export class Relation<Edge extends Model<true> = Model<true>, T1 extends Model =
 	}
 
 	execute(): Promise<EdgeInstance[]> {
-		throw new Error('Method not implemented.');
+		throw new Error("Method not implemented.");
 	}
 
 	public in(model: T1) {
@@ -38,17 +38,17 @@ export class Relation<Edge extends Model<true> = Model<true>, T1 extends Model =
 	}
 
 	public build() {
-		let query = 'RELATE ';
+		let query = "RELATE ";
 
 		query = query.concat(`${this.modelIn?.__tableName()}:${this.modelIn?.id}->${this.query_from}->${this.modelOut?.__tableName()}:${this.modelOut?.id}`);
 
-		if (this.query_content) query = query.concat(' ', 'CONTENT ', stringifyToSQL(this.query_content));
+		if (this.query_content) query = query.concat(" ", "CONTENT ", stringifyToSQL(this.query_content));
 
-		if (this.query_return) query = query.concat(' ', 'RETURN ', this.query_return);
-		if (this.query_timeout) query = query.concat(' ', 'TIMEOUT ', this.query_timeout);
-		if (this.query_parallel) query = query.concat(' ', 'PARALLEL');
+		if (this.query_return) query = query.concat(" ", "RETURN ", this.query_return);
+		if (this.query_timeout) query = query.concat(" ", "TIMEOUT ", this.query_timeout);
+		if (this.query_parallel) query = query.concat(" ", "PARALLEL");
 
-		query = query.concat(';');
+		query = query.concat(";");
 		return query;
 	}
 }

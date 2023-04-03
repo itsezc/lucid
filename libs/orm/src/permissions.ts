@@ -1,11 +1,11 @@
-import { IBasicModel, Model } from './model';
+import { IBasicModel, Model } from "./model.js";
 
 type TPermissionsCallback<SubModel extends IBasicModel = Model> = {
 	$scope: string;
 	$auth: IDefaultContextAuth;
 };
 
-export type TSurrealPermissionOperation = 'CREATE' | 'UPDATE' | 'DELETE' | 'SELECT';
+export type TSurrealPermissionOperation = "CREATE" | "UPDATE" | "DELETE" | "SELECT";
 
 type TPermissionMultiple = [TSurrealPermissionOperation | TSurrealPermissionOperation[], string | boolean | object];
 
