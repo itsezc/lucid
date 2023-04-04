@@ -246,7 +246,8 @@ export class SelectBuilder<SubModel extends IModel, Selections, Alias extends st
 		if (this.query_groupBy && this.query_select_fields_projections) query = query.concat(" ", "GROUP BY ", this.query_select_fields_projections.join(", "));
 
 		// @todo - OrderBy calculation
-		if (this.query_orderBy) query = query.concat(" ", "ORDER BY ", this.query_orderBy.map((field) => field.filter((s) => !!s).join(" ")).join(", "));
+		if (this.query_orderBy && this.query_orderBy?.length > 0)
+			query = query.concat(" ", "ORDER BY ", this.query_orderBy.map((field) => field.filter((s) => !!s).join(" ")).join(", "));
 		if (this.query_orderByRand) query = query.concat(" ", "ORDER BY RAND()");
 
 		if (this.query_limit) query = query.concat(" ", "LIMIT ", this.query_limit.toString());
